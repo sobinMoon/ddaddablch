@@ -8,6 +8,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
+
 
 @Service
 @RequiredArgsConstructor
@@ -17,6 +19,10 @@ public class StudentUserService {
     private final StudentUserRepository studentUserRepository;
     private final PasswordEncoder passwordEncoder;
 
+    public Boolean duplicateNickname(String wantednickname){
+
+        return studentUserRepository.findBysNickname(wantednickname).isPresent();
+    }
 
     public Long create(String sName,String sNickname,
                               String sEmail, String sPassword,
