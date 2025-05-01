@@ -1,8 +1,13 @@
 package com.donation.ddb.Repository;
 
+import com.donation.ddb.Domain.VerificationToken;
+import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-@Repository
-public interface VerificationTokenRepository {
+import java.util.Optional;
 
+@Repository
+public interface VerificationTokenRepository extends JpaRepository<VerificationToken,Long> {
+    Optional<VerificationToken> findByEmail(String email);
+    Optional<VerificationToken> findByToken(String token);
 }
