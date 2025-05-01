@@ -8,7 +8,6 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 public class WalletNonceRequestDTO {
-
  private String email;
  private String walletAddress;
 }

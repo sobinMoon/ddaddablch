@@ -41,6 +41,7 @@ public class AuthEvent {
         String message="Wallet verification for ddb\n"+
                 "Nonce: "+this.nonce+"\n"
                 +"Timestamp"+this.createdAt;
+        //String prefix = "\u0019Ethereum Signed Message:\n" + message.length();
         this.setMessage(message);
         return message;
     }

@@ -8,5 +8,5 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 public class WalletNonceResponseDto {
-    private String nonce;
+    private String message;
 }

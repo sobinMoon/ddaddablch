@@ -24,12 +24,13 @@ public class AuthController {
     @PostMapping("/request-nonce")
     public ResponseEntity<WalletNonceResponseDto> requestNonce(@RequestBody WalletNonceRequestDTO walletNonceRequestDTO){
 
-        String nonce=authService.generateNonce(walletNonceRequestDTO.getEmail(),walletNonceRequestDTO.getWalletAddress());
+        String message=authService.generateNonce(walletNonceRequestDTO.getEmail(),walletNonceRequestDTO.getWalletAddress());
 
         WalletNonceResponseDto walletNonceResponseDto=new WalletNonceResponseDto();
-        walletNonceResponseDto.setNonce(nonce);
+        walletNonceResponseDto.setMessage(message);
         return ResponseEntity.ok(walletNonceResponseDto);
     }
+
 
     @PostMapping("/verify-signature")
     public ResponseEntity<WalletAddressVerifyResponseDto> verify(@RequestBody @Valid WalletAddressVerifyRequestDto walletAddressVerifyDto,
@@ -45,4 +46,6 @@ public class AuthController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
         }
     }
+
+
 }
