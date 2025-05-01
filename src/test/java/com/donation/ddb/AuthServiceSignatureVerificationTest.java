@@ -7,10 +7,4 @@ import org.web3j.crypto.ECKeyPair;
 
 public class AuthServiceSignatureVerificationTest {
 
-    @InjectMocks
-    private AuthService authService;
-
-    private final ECKeyPair keyPair=Keys.createEcKeyPar();
-
-
 }
