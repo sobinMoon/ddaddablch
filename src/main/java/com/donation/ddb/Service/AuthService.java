@@ -34,7 +34,6 @@ public class AuthService {
 
     @Transactional
     public String generateNonce(String email,String walletAddress){
-
         //사용자 찾기
         StudentUser su=studentUserRepository.findBysEmail(email)
                 .orElseThrow(()-> new DataNotFoundException("없는 email입니다."));
@@ -62,7 +61,6 @@ public class AuthService {
 
         return message;
     }
-
 
     @Transactional
     public Boolean verifySignature(WalletAddressVerifyRequestDto requestDto){//주소 지갑의 진짜 주인인지 확인
