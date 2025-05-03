@@ -56,30 +56,29 @@ public class StudentUserController {
     @PostMapping("/student")
     public ResponseEntity<?> signup(@RequestBody @Valid StudentSignUpForm studentSignUpForm,
                                    BindingResult bindingResult){
-        System.out.println("받은 비밀번호: " + studentSignUpForm.getSPassword());
-
         if(bindingResult.hasErrors()){
-
             Map<String, String> errorMap=new HashMap<>();
-
             bindingResult.getFieldErrors().forEach(error->{
                 String fieldName=error.getField();
                 String errorMessage=error.getDefaultMessage();
                 errorMap.put(fieldName,errorMessage);
             });
-
             return ResponseEntity.badRequest().body(errorMap);
         }
 
         try {
-            studentUserService.create(
+            Long id=studentUserService.createUser(
                     studentSignUpForm.getSName(),
-                    studentSignUpForm.getSNickname(),  // 닉네임 따로 있으면 수정
+                    studentSignUpForm.getSNickname(),
                     studentSignUpForm.getSEmail(),
                     studentSignUpForm.getSPassword(),
                     studentSignUpForm.getSConfirmPassword()
             );
-            return ResponseEntity.ok("회원가입 성공");
+            return ResponseEntity.ok(
+              Map.of("success",true,
+                      "message","회원가입 성공했습니다.")
+
+            );
         }catch(IllegalArgumentException e){
             return ResponseEntity.badRequest().body(e.getMessage());
         }

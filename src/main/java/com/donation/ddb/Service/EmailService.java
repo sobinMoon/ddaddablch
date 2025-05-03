@@ -11,6 +11,7 @@ import org.springframework.mail.MailException;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.Optional;
@@ -28,6 +29,7 @@ public class EmailService {
     @Value("${spring.mail.username}")
     private String fromEmail;
 
+    @Transactional
     public void sendVerificationEmail(String toEmail) {
         try{
         //토큰 생성(기존에 있으면 삭제하기)
@@ -53,6 +55,7 @@ public class EmailService {
         }
     }
 
+    @Transactional
     public boolean verifyEmail(String token) {
         Optional<VerificationToken> ot = tokenRepository.findByToken(token);
         if (ot.isPresent()) {
@@ -68,5 +71,4 @@ public class EmailService {
         }
         else throw new EntityNotFoundException("인증 번호가 존재하지 않습니다.");
     }
-    //isEmailVerified필요하면 구현나중에
 }
