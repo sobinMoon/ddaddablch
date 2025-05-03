@@ -3,9 +3,9 @@ package com.donation.ddb.Controller;
 
 import com.donation.ddb.Dto.Request.EmailVerificationRequestDto;
 import com.donation.ddb.Dto.Request.WalletAddressVerifyRequestDto;
-import com.donation.ddb.Dto.Request.WalletNonceRequestDTO;
+import com.donation.ddb.Dto.Request.WalletMessageRequestDTO;
 import com.donation.ddb.Dto.Response.WalletAddressVerifyResponseDto;
-import com.donation.ddb.Dto.Response.WalletNonceResponseDto;
+import com.donation.ddb.Dto.Response.WalletMessageResponseDto;
 import com.donation.ddb.Service.AuthService;
 import com.donation.ddb.Service.EmailService;
 import jakarta.validation.Valid;
@@ -29,14 +29,13 @@ public class AuthController {
     private final AuthService authService;
     private final EmailService emailService;
 
-    @PostMapping("/request-nonce")
-    public ResponseEntity<WalletNonceResponseDto> requestNonce(@RequestBody WalletNonceRequestDTO walletNonceRequestDTO){
+    @PostMapping("/request-message")
+    public ResponseEntity<WalletMessageResponseDto> requestMessage(@RequestBody WalletMessageRequestDTO walletMessageRequestDTO){
 
-        String message=authService.generateNonce(walletNonceRequestDTO.getEmail(),walletNonceRequestDTO.getWalletAddress());
-
-        WalletNonceResponseDto walletNonceResponseDto=new WalletNonceResponseDto();
-        walletNonceResponseDto.setMessage(message);
-        return ResponseEntity.ok(walletNonceResponseDto);
+        String message=authService.generateMessage(walletMessageRequestDTO.getEmail(),walletMessageRequestDTO.getWalletAddress());
+        WalletMessageResponseDto walletMessageResponseDto=new WalletMessageResponseDto();
+        walletMessageResponseDto.setMessage(message);
+        return ResponseEntity.ok(walletMessageResponseDto);
     }
 
 

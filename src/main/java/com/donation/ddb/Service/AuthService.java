@@ -33,7 +33,7 @@ public class AuthService {
     private final AuthEventRepository authEventRepository;
 
     @Transactional
-    public String generateNonce(String email,String walletAddress){
+    public String generateMessage(String email,String walletAddress){
         //사용자 찾기
         StudentUser su=studentUserRepository.findBysEmail(email)
                 .orElseThrow(()-> new DataNotFoundException("없는 email입니다."));
@@ -47,7 +47,7 @@ public class AuthService {
         authEvent.setWalletAddress(walletAddress);
         authEvent.setNonce(nonce);
         authEvent.setCreatedAt(LocalDateTime.now());
-        authEvent.setEventType(WalletAuthStatus.PENDING); // 인증 대기 상태로 설정
+        authEvent.setEventType(WalletAuthStatus.PENDING); //인증 대기 상태로 설정
 
         //인증 메시지 생성
         String message=authEvent.generateAuthMessage();

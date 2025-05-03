@@ -1,6 +1,7 @@
 package com.donation.ddb.Dto.Request;
 
 
+import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -10,9 +11,12 @@ import lombok.Setter;
 @NoArgsConstructor
 public class WalletAddressVerifyRequestDto {
 
+    @NotBlank
     private String walletAddress;
 
+    @NotBlank
     private String message;
 
+    @NotBlank
     private String signature;
 }

@@ -29,6 +29,8 @@ public class StudentUser {
     @Column(nullable = false,length=100,unique=true)
     private String sNickname;
 
+
+    //비밀번호는 저장전에 BCrypt 등의 해시 알고리즘 사용하기
     @Column(nullable = false,length=100)
     private String sPassword;
 
