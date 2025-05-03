@@ -69,6 +69,6 @@ public class EmailService {
             tokenRepository.save(verificationToken);
             return true;
         }
-        else throw new EntityNotFoundException("인증 번호가 존재하지 않습니다.");
+        else return false;
     }
 }

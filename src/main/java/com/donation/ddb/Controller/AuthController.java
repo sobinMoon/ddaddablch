@@ -10,6 +10,7 @@ import com.donation.ddb.Service.AuthService;
 import com.donation.ddb.Service.EmailService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -23,6 +24,7 @@ import java.util.Map;
 @Controller
 @RequestMapping("/auth")
 @RequiredArgsConstructor
+@Slf4j
 public class AuthController {
 
     @Autowired
@@ -56,24 +58,38 @@ public class AuthController {
 
     @PostMapping("/send-verification-email")
     public ResponseEntity<?> sendVerificationEmail(
-            @Valid @RequestBody EmailVerificationRequestDto request){
-        try{
-            emailService.sendVerificationEmail(request.getEmail());
-            return ResponseEntity.ok(
-                    Map.of("success",true,
-                            "message","인증 메일이 전송됐습니다.")
-            );
-        }catch(Exception e){
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
-                    //Map.of("error",e.getMessage())
-                    Map.of("success",false,
-                            "message","인증 메일 전송 실패했습니다.")
-            );
+            @Valid @RequestBody EmailVerificationRequestDto request,BindingResult bindingResult){
+        if(bindingResult.hasErrors()) {
+            Map<String, String> errorMap = new HashMap<>();
+            bindingResult.getFieldErrors().forEach(error -> {
+                String fieldName = error.getField();
+                String errorMessage = error.getDefaultMessage();
+                errorMap.put(fieldName, errorMessage);
+                log.warn("회원가입 유효성 검증 실패 : {} - {}", fieldName, errorMessage
+                );
+            });
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorMap);
         }
-    }
+            try {
+                emailService.sendVerificationEmail(request.getEmail());
+                return ResponseEntity.ok(
+                        Map.of("success", true,
+                                "message", "인증 메일이 전송됐습니다.")
+                );
+            } catch (Exception e) {
+                log.info(e.getMessage());
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+                        //Map.of("error",e.getMessage())
+
+                        Map.of("success", false,
+                                "message", "인증 메일 전송 실패했습니다."
+                        )
+                );
+            }
+        }
 
     @GetMapping("/verify-email")
-    public ResponseEntity<?> verifyEmail(@RequestParam String token ){
+    public ResponseEntity<?> verifyEmail(@RequestParam String token){
         boolean verified=emailService.verifyEmail(token);
 
         if(verified){

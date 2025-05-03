@@ -29,7 +29,7 @@ public class VerificationToken {
     @CreatedDate
     private LocalDateTime createdAt;
 
-    @NotBlank
+    @NotNull
     private LocalDateTime expiryDate; //유효 시간은 만들어진 시간 +12h
 
     //boolean은 notblank필요없
