@@ -60,4 +60,8 @@ public class StudentUser {
     @Column(nullable=false)
     private LocalDateTime updatedAt;
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable=false)
+    private Role role; //ROLE_STUDENT
+
 }

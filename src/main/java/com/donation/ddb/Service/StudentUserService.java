@@ -15,6 +15,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 
+import static com.donation.ddb.Domain.Role.ROLE_STUDENT;
+
 
 @Service
 @RequiredArgsConstructor
@@ -50,6 +52,9 @@ public class StudentUserService {
         else throw new IllegalStateException("인증된 이메일이 아닙니다. ");
 
         user.setSPassword(passwordEncoder.encode(password));
+        //ROLE
+        user.setRole(ROLE_STUDENT);
+
         StudentUser s=studentUserRepository.save(user);
         Long sid=s.getSId();
 

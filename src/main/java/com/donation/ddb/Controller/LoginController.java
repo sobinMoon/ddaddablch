@@ -1,0 +1,85 @@
+package com.donation.ddb.Controller;
+
+import com.donation.ddb.Dto.Request.LoginRequestDto;
+import com.donation.ddb.Service.JwtTokenProvider;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import org.springframework.security.core.AuthenticationException;
+import java.util.HashMap;
+import java.util.Map;
+
+@RestController
+@RequestMapping("/auth/login")
+@RequiredArgsConstructor
+@Slf4j
+public class LoginController {
+
+    private final AuthenticationManager authenticationManager;
+    private final JwtTokenProvider jwtTokenProvider;
+
+    @PostMapping("/student")
+    public ResponseEntity<?> login(@Valid @RequestBody
+                                   LoginRequestDto loginRequestDto,
+                                   BindingResult bindingResult){
+        if(bindingResult.hasErrors()){
+            Map<String,String> errorMap=new HashMap<>();
+            bindingResult.getFieldErrors().forEach(error->{
+                errorMap.put(error.getField(),error.getDefaultMessage());
+                log.warn("로그인 유효성 검증 실패: {} -{} ",error.getField(), error.getDefaultMessage());
+            });
+            return ResponseEntity.badRequest().body(errorMap);
+        }
+
+        //인증
+        try{
+            Authentication authentication=
+                    authenticationManager.authenticate(
+                            new UsernamePasswordAuthenticationToken(
+                                    loginRequestDto.getEmail(),
+                                    loginRequestDto.getPassword()
+                            )
+                    );
+
+            SecurityContextHolder.getContext().setAuthentication(authentication);
+
+            String jwt=jwtTokenProvider.generateToken(authentication);
+
+            return ResponseEntity.ok(
+                    Map.of(
+                            "success",true,
+                            "message","로그인 성공",
+                            "token",jwt
+                    )
+            );
+
+        }catch(AuthenticationException e){
+            //비밀번호 또는 이메일 불일치로 오류 발생
+            log.warn("로그인 인증 실패 : ; + {}",e.getMessage());
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(
+                            Map.of("success",false,
+                                    "message","이메일 또는 비밀번호가 일치하지 않습니다.")
+                    );
+        }
+
+    }
+
+    //@PostMapping("/group")
+
+
+
+
+}

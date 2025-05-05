@@ -1,10 +1,16 @@
 package com.donation.ddb;
 
+import com.donation.ddb.Service.JwtTokenProvider;
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.security.web.header.writers.frameoptions.XFrameOptionsHeaderWriter;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -18,27 +24,40 @@ import java.util.Arrays;
 
 @Configuration
 @EnableWebSecurity
+@RequiredArgsConstructor
 public class SecurityConfig {
+
+    private final JwtTokenProvider jwtTokenProvider;
 
     @Bean
     SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
+                .csrf(csrf -> csrf.disable())  // CSRF 보호 비활성화
+                //세션 사용 안함
+                .sessionManagement(
+                        session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 // CORS 설정 적용
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
 
-                .authorizeHttpRequests((authorizeHttpRequests) -> authorizeHttpRequests
-                        .requestMatchers(new AntPathRequestMatcher("/**")).permitAll())
-                .csrf((csrf) -> csrf
-                        .ignoringRequestMatchers(new AntPathRequestMatcher("/h2-console/**")))
+                //iframe 보안 설정
                 .headers((headers) -> headers
                         .addHeaderWriter(new XFrameOptionsHeaderWriter(
                                 XFrameOptionsHeaderWriter.XFrameOptionsMode.SAMEORIGIN)))
-                .csrf(csrf -> csrf.disable())  // ✅ CSRF 보호 비활성화
-                .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/user/**", "/auth/**").permitAll()  // 회원가입, 로그인, 인증 경로는 허용
-                        .anyRequest().authenticated()             // 그 외는 인증 필요
-                );
 
+                //
+                .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/auth/**","/api/**","/api/v1/user/sign-up/**" , "/wallet/**","/h2-console/**").permitAll()  // 회원가입, 로그인, 인증 경로는 허용
+                        .anyRequest().authenticated()             // 그 외는 인증 필요
+                )
+
+                //JWT 인증 필터 등록
+                .addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider),
+                       UsernamePasswordAuthenticationFilter.class);
+
+
+                //JWT 인증 필터를 Spring Security의 기본 인증 필터 이전에 추가함.
+                //요청 헤더에서 JWT 토큰 추출하고 검증한 후, 인증 정보를 SecurityContext에 설정
+                //다른 Spring Security 필터들이 JWT 토큰으로 인증된 사용자 정보 사용할 수 있음.
         return http.build();
     }
 
@@ -75,6 +94,13 @@ public class SecurityConfig {
         source.registerCorsConfiguration("/**", configuration); // 모든 경로에 CORS 설정 적용
 
         return source;
+    }
+
+    @Bean
+    public AuthenticationManager authenticationManager(
+            AuthenticationConfiguration authenticationConfiguration
+    ) throws Exception {
+        return authenticationConfiguration.getAuthenticationManager();
     }
 
     @Bean
