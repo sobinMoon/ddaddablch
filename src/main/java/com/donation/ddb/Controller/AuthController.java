@@ -30,7 +30,6 @@ public class AuthController {
     @Autowired
     private final AuthService authService;
 
-
     @PostMapping("/request-message")
     public ResponseEntity<WalletMessageResponseDto> requestMessage(@RequestBody WalletMessageRequestDTO walletMessageRequestDTO){
 
@@ -55,7 +54,5 @@ public class AuthController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
         }
     }
-
-
 
 }

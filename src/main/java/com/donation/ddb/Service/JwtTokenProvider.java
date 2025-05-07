@@ -34,7 +34,14 @@ public class JwtTokenProvider {
 
     //인증된 사용자 정보를 기반으로 jwt생성
     public String generateToken(Authentication authentication){
-        UserDetails userDetails=(UserDetails)authentication.getPrincipal();
+        // 안전한 캐스팅 처리
+        UserDetails userDetails;
+        if (authentication.getPrincipal() instanceof UserDetails) {
+            userDetails = (UserDetails) authentication.getPrincipal();
+        } else {
+            // 캐스팅 불가능한 경우 대체 로직
+            throw new RuntimeException("인증 객체에서 UserDetails를 찾을 수 없습니다.");
+        }
 
         Date now = new Date();
         Date expiryDate=new Date(now.getTime()+jwtExpirationMs);
@@ -54,6 +61,7 @@ public class JwtTokenProvider {
                 .compact();
 
     }
+    /*
 
     // Request에서 Authorization 헤더로 토큰 꺼내기
     public String resolveToken(HttpServletRequest request) {
@@ -87,20 +95,25 @@ public class JwtTokenProvider {
 
         String username = claims.getSubject();
 
-        // ✅ JWT에 저장된 roles 클레임에서 권한 정보 꺼내기
+        // JWT에 저장된 roles 클레임에서 권한 정보 꺼내기
         List<String> roles = claims.get("roles", List.class);
 
-        // ✅ 권한 문자열을 Spring Security에서 사용하는 형식으로 변환
+        // 권한 문자열을 Spring Security에서 사용하는 형식으로 변환
         List<GrantedAuthority> authorities = roles.stream()
                 .map(SimpleGrantedAuthority::new)
                 .collect(Collectors.toList());
 
-        // ✅ 인증된 사용자 객체 생성 (비밀번호는 필요 없으니 공란으로)
-        UserDetails userDetails = new User(username, "", authorities);
+        // 인증된 사용자 객체 생성 (비밀번호는 필요 없으니 공란으로)
+        UserDetails userDetails = org.springframework.security.core.userdetails.User
+                .withUsername(username)
+                .password("")
+                .authorities(authorities)
+                .build();
 
-        // ✅ Spring Security에 등록할 인증 객체 반환
+        // Spring Security에 등록할 인증 객체 반환
         return new UsernamePasswordAuthenticationToken(userDetails, "", authorities);
-    }
+    }*/
+
 }
 
 

@@ -44,6 +44,9 @@ public class LoginController {
         }
 
         //인증
+
+        log.info("인증 시도: " + loginRequestDto.getEmail());
+
         try{
             Authentication authentication=
                     authenticationManager.authenticate(
@@ -52,11 +55,14 @@ public class LoginController {
                                     loginRequestDto.getPassword()
                             )
                     );
+            // 인증 성공 후 로그
+            log.info("인증 성공. 인증 객체 클래스: " + authentication.getClass().getName());
+            log.info("Principal 클래스: " + authentication.getPrincipal().getClass().getName());
+
 
             SecurityContextHolder.getContext().setAuthentication(authentication);
 
             String jwt=jwtTokenProvider.generateToken(authentication);
-
             return ResponseEntity.ok(
                     Map.of(
                             "success",true,
@@ -65,9 +71,17 @@ public class LoginController {
                     )
             );
 
-        }catch(AuthenticationException e){
+        } catch(AuthenticationException e){
             //비밀번호 또는 이메일 불일치로 오류 발생
             log.warn("로그인 인증 실패 : ; + {}",e.getMessage());
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(
+                            Map.of("success",false,
+                                    "message","이메일 또는 비밀번호가 일치하지 않습니다.")
+                    );
+        } catch(Exception e){
+            System.out.println("인증 실패 예외: " + e.getClass().getName() + ": " + e.getMessage());
+            e.printStackTrace();
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                     .body(
                             Map.of("success",false,
@@ -76,10 +90,6 @@ public class LoginController {
         }
 
     }
-
-    //@PostMapping("/group")
-
-
 
 
 }

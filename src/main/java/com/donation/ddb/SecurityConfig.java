@@ -5,10 +5,12 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
@@ -27,32 +29,46 @@ import java.util.Arrays;
 @RequiredArgsConstructor
 public class SecurityConfig {
 
-    private final JwtTokenProvider jwtTokenProvider;
+
+    //private final JwtTokenProvider jwtTokenProvider;
 
     @Bean
-    SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+    public DaoAuthenticationProvider authenticationProvider(UserDetailsService userDetailsService) {
+        DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
+        provider.setUserDetailsService(userDetailsService);
+        provider.setPasswordEncoder(passwordEncoder());
+        return provider;
+    }
+
+    @Bean
+    SecurityFilterChain filterChain(HttpSecurity http,DaoAuthenticationProvider authenticationProvider) throws Exception {
         http
+                .authenticationProvider(authenticationProvider) // 추가
                 .csrf(csrf -> csrf.disable())  // CSRF 보호 비활성화
                 //세션 사용 안함
+
                 .sessionManagement(
                         session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 // CORS 설정 적용
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
 
-                //iframe 보안 설정
-                .headers((headers) -> headers
-                        .addHeaderWriter(new XFrameOptionsHeaderWriter(
-                                XFrameOptionsHeaderWriter.XFrameOptionsMode.SAMEORIGIN)))
+//                //iframe 보안 설정
+//                .headers((headers) -> headers
+//                        .addHeaderWriter(new XFrameOptionsHeaderWriter(
+//                                XFrameOptionsHeaderWriter.XFrameOptionsMode.SAMEORIGIN)))
+//
+//                //
+                .headers(headers -> headers
+                        .frameOptions(frame -> frame.sameOrigin()))
 
-                //
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/auth/**","/api/**","/api/v1/user/sign-up/**" , "/wallet/**","/h2-console/**").permitAll()  // 회원가입, 로그인, 인증 경로는 허용
                         .anyRequest().authenticated()             // 그 외는 인증 필요
-                )
+                );
 
                 //JWT 인증 필터 등록
-                .addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider),
-                       UsernamePasswordAuthenticationFilter.class);
+//                .addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider),
+//                       UsernamePasswordAuthenticationFilter.class);
 
 
                 //JWT 인증 필터를 Spring Security의 기본 인증 필터 이전에 추가함.
@@ -72,7 +88,9 @@ public class SecurityConfig {
                 "http://localhost:5500",     // Live Server 기본 포트
                 "http://localhost:8000",     // Python 서버 기본 포트
                 "http://127.0.0.1:5500",
-                "http://127.0.0.1:8000"
+                "http://127.0.0.1:8000",
+                "http://localhost:8082", //h2
+                "http://192.168.1.107:14281"
         ));
 
         // 허용할 HTTP 메서드 설정
@@ -90,7 +108,9 @@ public class SecurityConfig {
         // preflight 요청의 캐시 시간 설정 (초 단위)
         configuration.setMaxAge(3600L);
 
+        //URL별 CORS 정책을 관리하는 관리자 역할
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        // 모든 URL 요청에 대해 이 CORS 설정(configuration)을 사용하도록 등록
         source.registerCorsConfiguration("/**", configuration); // 모든 경로에 CORS 설정 적용
 
         return source;
