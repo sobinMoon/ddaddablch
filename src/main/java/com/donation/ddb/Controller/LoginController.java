@@ -1,7 +1,13 @@
 package com.donation.ddb.Controller;
 
+import com.donation.ddb.Domain.RefreshToken;
 import com.donation.ddb.Dto.Request.LoginRequestDto;
+import com.donation.ddb.Dto.Request.TokenRefreshRequestDto;
+import com.donation.ddb.Dto.Response.TokenRefreshResponseDto;
+import com.donation.ddb.Repository.RefreshTokenRepository;
+import com.donation.ddb.Service.CustomUserDetailsService;
 import com.donation.ddb.Service.JwtTokenProvider;
+import com.donation.ddb.Service.RefreshTokenService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -11,6 +17,8 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -29,6 +37,8 @@ public class LoginController {
 
     private final AuthenticationManager authenticationManager;
     private final JwtTokenProvider jwtTokenProvider;
+    private final RefreshTokenService refreshTokenService;
+    private final CustomUserDetailsService customUserDetailsService;
 
     @PostMapping("/student")
     public ResponseEntity<?> login(@Valid @RequestBody
@@ -62,14 +72,23 @@ public class LoginController {
 
             SecurityContextHolder.getContext().setAuthentication(authentication);
 
+            //Access Token 생성
             String jwt=jwtTokenProvider.generateToken(authentication);
+
+            //Refresh Token 생성 및 저장
+            RefreshToken refreshToken = refreshTokenService.createRefreshToken(authentication.getName());
+
             return ResponseEntity.ok(
                     Map.of(
                             "success",true,
                             "message","로그인 성공",
-                            "token",jwt
+                            "token",jwt,
+                            "refreshToken", refreshToken.getToken()
                     )
             );
+
+
+
 
         } catch(AuthenticationException e){
             //비밀번호 또는 이메일 불일치로 오류 발생
@@ -90,6 +109,26 @@ public class LoginController {
         }
 
     }
+    @PostMapping("/refresh")
+    public ResponseEntity<?> refreshToken(@Valid @RequestBody TokenRefreshRequestDto request) {
+        String requestRefreshToken = request.getRefreshToken();
 
+        return refreshTokenService.findByToken(requestRefreshToken)
+                .map(refreshTokenService::verifyExpiration)
+                .map(RefreshToken::getUsername)
+                .map(username -> {
+                    // 사용자 정보로 UserDetails 생성
+                    UserDetails userDetails = customUserDetailsService.loadUserByUsername(username);
+                    UsernamePasswordAuthenticationToken authentication =
+                            new UsernamePasswordAuthenticationToken(
+                                    userDetails, null, userDetails.getAuthorities());
+
+                    // 새 Access Token 생성
+                    String accessToken = jwtTokenProvider.generateToken(authentication);
+
+                    return ResponseEntity.ok(new TokenRefreshResponseDto(accessToken, requestRefreshToken));
+                })
+                .orElseThrow(() -> new RuntimeException("Refresh 토큰이 db에 없습니다."));
+    }
 
 }

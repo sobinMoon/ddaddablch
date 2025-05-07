@@ -32,7 +32,11 @@ public class JwtTokenProvider {
     @Value("${app.jwt.expiration}")
     private int jwtExpirationMs;
 
+    @Value("${app.jwt.refresh-expiration}")
+    private int refreshTokenExpirationMs;
+
     //인증된 사용자 정보를 기반으로 jwt생성
+    //ACCESS TOKEN생성
     public String generateToken(Authentication authentication){
         // 안전한 캐스팅 처리
         UserDetails userDetails;
@@ -60,6 +64,21 @@ public class JwtTokenProvider {
                 .signWith(Keys.hmacShaKeyFor(jwtSecret.getBytes()), SignatureAlgorithm.HS512)
                 .compact();
 
+    }
+
+    // Refresh Token 생성
+    public String generateRefreshToken(Authentication authentication) {
+        String username = authentication.getName();//여기서 name은 email임
+
+        Date now = new Date();
+        Date expiryDate = new Date(now.getTime() + refreshTokenExpirationMs);
+
+        return Jwts.builder()
+                .setSubject(username)
+                .setIssuedAt(now)
+                .setExpiration(expiryDate)
+                .signWith(Keys.hmacShaKeyFor(jwtSecret.getBytes()), SignatureAlgorithm.HS512)
+                .compact();
     }
 
     // Request에서 Authorization 헤더로 토큰 꺼내기
@@ -113,6 +132,16 @@ public class JwtTokenProvider {
         return new UsernamePasswordAuthenticationToken(userDetails, "", authorities);
     }
 
+    // 토큰에서 사용자 이름 추출
+    public String getUsernameFromToken(String token) {
+        Claims claims = Jwts.parserBuilder()
+                .setSigningKey(Keys.hmacShaKeyFor(jwtSecret.getBytes()))
+                .build()
+                .parseClaimsJws(token)
+                .getBody();
+
+        return claims.getSubject();
+    }
 }
 
 
