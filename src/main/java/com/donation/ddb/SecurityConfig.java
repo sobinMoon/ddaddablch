@@ -30,7 +30,7 @@ import java.util.Arrays;
 public class SecurityConfig {
 
 
-    //private final JwtTokenProvider jwtTokenProvider;
+    private final JwtTokenProvider jwtTokenProvider;
 
     @Bean
     public DaoAuthenticationProvider authenticationProvider(UserDetailsService userDetailsService) {
@@ -63,12 +63,13 @@ public class SecurityConfig {
 
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/auth/**","/api/**","/api/v1/user/sign-up/**" , "/wallet/**","/h2-console/**").permitAll()  // 회원가입, 로그인, 인증 경로는 허용
+                        .requestMatchers("/api/test/protected").authenticated()
                         .anyRequest().authenticated()             // 그 외는 인증 필요
-                );
+                )
 
                 //JWT 인증 필터 등록
-//                .addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider),
-//                       UsernamePasswordAuthenticationFilter.class);
+                .addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider),
+                      UsernamePasswordAuthenticationFilter.class);
 
 
                 //JWT 인증 필터를 Spring Security의 기본 인증 필터 이전에 추가함.

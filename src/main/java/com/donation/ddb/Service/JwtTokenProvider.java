@@ -61,7 +61,6 @@ public class JwtTokenProvider {
                 .compact();
 
     }
-    /*
 
     // Request에서 Authorization 헤더로 토큰 꺼내기
     public String resolveToken(HttpServletRequest request) {
@@ -112,7 +111,7 @@ public class JwtTokenProvider {
 
         // Spring Security에 등록할 인증 객체 반환
         return new UsernamePasswordAuthenticationToken(userDetails, "", authorities);
-    }*/
+    }
 
 }
 
