@@ -59,6 +59,7 @@ public class Campaign extends BaseEntity {
 
     @Column(name = "c_status_flag", nullable = false)
     @Builder.Default
+    @Enumerated(EnumType.STRING)
     private CampaignStatusFlag cStatusFlag = CampaignStatusFlag.NOT_STARTED;
 
     @OneToMany(mappedBy = "campaign", cascade = CascadeType.ALL, orphanRemoval = true)

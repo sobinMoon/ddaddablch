@@ -1,19 +1,20 @@
 package com.donation.ddb.Repository.CampaignRepository;
 
-import com.donation.ddb.Domain.Campaign;
 import com.donation.ddb.Domain.CampaignCategory;
 import com.donation.ddb.Domain.CampaignSortType;
+import com.donation.ddb.Domain.CampaignStatusFlag;
 import com.donation.ddb.Domain.QCampaign;
+import com.donation.ddb.Dto.Response.CampaignResponseDto;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.jpa.impl.JPAQuery;
-import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 
-import java.time.LocalDate;
 import java.util.List;
+
+import static com.querydsl.core.types.Projections.constructor;
 
 @Repository
 @RequiredArgsConstructor
@@ -23,9 +24,10 @@ public class CampaignRepositoryImpl implements CampaignRepositoryCustom {
 
 
     @Override
-    public List<Campaign> dynamicQueryWithBooleanBuilder(
+    public List<CampaignResponseDto> dynamicQueryWithBooleanBuilder(
             String keyword,
             CampaignCategory category,
+            CampaignStatusFlag statusFlag,
             CampaignSortType sortType,
             Pageable pageable
     ) {
@@ -39,12 +41,41 @@ public class CampaignRepositoryImpl implements CampaignRepositoryCustom {
                     .or(qCampaign.cDescription.containsIgnoreCase(keyword)));
         }
 
+        System.out.println("category: " + category);
+
+        if (category != null && category != CampaignCategory.ALL) {
+            predicate.and(qCampaign.cCategory.eq(category));
+        }
+
+        if (statusFlag != null) {
+            predicate.and(qCampaign.cStatusFlag.eq(statusFlag));
+        }
+
         System.out.println("Predicate after keyword check: " + predicate);
 
         System.out.println("jpaQueryFactory: " + jpaQueryFactory);
 
-        JPAQuery<Campaign> query = jpaQueryFactory
-                .selectFrom(qCampaign)
+        JPAQuery<CampaignResponseDto> query = jpaQueryFactory
+                .select(constructor(
+                        CampaignResponseDto.class,
+                        qCampaign.cId,
+                        qCampaign.cName,
+                        qCampaign.cImageUrl,
+                        qCampaign.cDescription,
+                        qCampaign.cGoal,
+                        qCampaign.cCurrentAmount,
+                        qCampaign.cCategory,
+                        qCampaign.donateCount,
+                        qCampaign.donateStart,
+                        qCampaign.donateEnd,
+                        qCampaign.businessStart,
+                        qCampaign.businessEnd,
+                        qCampaign.cStatusFlag,
+                        qCampaign.createdAt,
+                        qCampaign.updatedAt
+                        )
+                )
+                .from(qCampaign)
                 .where(predicate);
 
         System.out.println("Query after applying predicate: " + query);
@@ -80,6 +111,7 @@ public class CampaignRepositoryImpl implements CampaignRepositoryCustom {
 //                .selectFrom(qCampaign)
 //                .where(predicate)
 //                .fetch();
+
 
         return query.fetch();
     }
