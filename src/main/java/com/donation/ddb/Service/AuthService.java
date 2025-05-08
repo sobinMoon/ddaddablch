@@ -1,6 +1,7 @@
 package com.donation.ddb.Service;
 
 
+import ch.qos.logback.core.net.SyslogOutputStream;
 import com.donation.ddb.Domain.AuthEvent;
 import com.donation.ddb.Domain.DataNotFoundException;
 import com.donation.ddb.Domain.StudentUser;
@@ -82,7 +83,7 @@ public class AuthService {
 
             //nonce일치하는지 확인
             String prefix = "\u0019Ethereum Signed Message:\n" + message.length();
-            AuthEvent authEvent=authEventRepository.findByUser(user.getSId())
+            AuthEvent authEvent=authEventRepository.findByUser(user)
                     .orElseThrow(()->new DataNotFoundException("발급받은 nonce가 존재하지 않습니다. "));
 
             authEvent.setSignature(signature);
