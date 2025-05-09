@@ -1,7 +1,6 @@
 package com.donation.ddb.Service;
 
 
-import ch.qos.logback.core.net.SyslogOutputStream;
 import com.donation.ddb.Domain.AuthEvent;
 import com.donation.ddb.Domain.DataNotFoundException;
 import com.donation.ddb.Domain.StudentUser;
@@ -34,75 +33,84 @@ public class AuthService {
     private final AuthEventRepository authEventRepository;
 
     @Transactional
-    public String generateNonce(String email,String walletAddress){
-
+    public String generateMessage(String email,String walletAddress){
         //사용자 찾기
         StudentUser su=studentUserRepository.findBysEmail(email)
                 .orElseThrow(()-> new DataNotFoundException("없는 email입니다."));
 
-        //nonce 생성하기 ,UUID: 36자 고유 문자열이어서 충돌 가능성 거의 없음.
+        //nonce 생성하기 , UUID: 36자 고유 문자열이어서 충돌 가능성 거의 없음.
         String nonce= UUID.randomUUID().toString();
-
-        //현재 시간과 만료시간 설정하기
-        LocalDateTime now=LocalDateTime.now();
 
         //AuthEvent 생성하기
         AuthEvent authEvent=new AuthEvent();
         authEvent.setUser(su);
         authEvent.setWalletAddress(walletAddress);
         authEvent.setNonce(nonce);
-        authEvent.setCreatedAt(now);
-        authEvent.setEventType(WalletAuthStatus.PENDING); // 인증 대기 상태로 설정
+        authEvent.setCreatedAt(LocalDateTime.now());
+        authEvent.setEventType(WalletAuthStatus.PENDING); //인증 대기 상태로 설정
 
         //인증 메시지 생성
         String message=authEvent.generateAuthMessage();
 
         //사용자 지갑 주소 업데이트
-        if(su.getSWalletAddress()==null || su.getSWalletAddress().equals(walletAddress)){
+        if(su.getSWalletAddress()==null || !su.getSWalletAddress().equals(walletAddress)){
             su.setSWalletAddress(walletAddress);
         }
 
         authEventRepository.save(authEvent);
 
-        return nonce;
+        return message;
     }
 
     @Transactional
-    //주소 지갑의 진짜 주인인지 확인
-    public Boolean verifySignature(WalletAddressVerifyRequestDto requestDto){
+    public Boolean verifySignature(WalletAddressVerifyRequestDto requestDto){//주소 지갑의 진짜 주인인지 확인
         try{
+
             String walletAddress=requestDto.getWalletAddress();
-            //metamask가 생성한 서명값(0x+130자리 hex 문자열)
-            String signature = requestDto.getSignature();
+            String signature = requestDto.getSignature();//metamask가 생성한 서명값(0x+130자리 hex 문자열)
             String message=requestDto.getMessage();
 
-            //지갑 주소에 대한 nonce조회해서 일치하는지 확인하기
+            //지갑 주소로 사용자 조회하기
             StudentUser user=studentUserRepository.findBysWalletAddress(walletAddress)
                     .orElseThrow(()-> new DataNotFoundException("해당 지갑 주소를 가진 사용자를 찾을 수 없습니다"));
 
+            //사용자의 최신 인증 이벤트 조회하기
+            AuthEvent authEvent=authEventRepository
+                    .findByUser(user)
+                    .orElseThrow(()->new DataNotFoundException("해당 지갑 주소의 인증 이벤트 없습니다"));
 
-            //nonce일치하는지 확인
-            String prefix = "\u0019Ethereum Signed Message:\n" + message.length();
-            AuthEvent authEvent=authEventRepository.findByUser(user)
-                    .orElseThrow(()->new DataNotFoundException("발급받은 nonce가 존재하지 않습니다. "));
-
+            //서명 정보 authevent에 저장하기
             authEvent.setSignature(signature);
-            //이더리움에서 사용하는 표준 메시지 서명 포맷 적용
-            String fullMessage=prefix+message;
-            String checkingMessage=authEvent.getMessage();
 
-            if(!fullMessage.equals(checkingMessage)) {
+            //이더리움에서 사용하는 표준 메시지 서명 포맷 적용
+
+            String requiredMessage=authEvent.getMessage();
+
+            if(!requiredMessage.equals(message)) {
                 throw new DataNotFoundException("발급받은 message와 일치하지 않습니다.");
             }
 
             //메시지 전체에 대한 Keccak-256 해시 적용 (Ethereum 서명 알고리즘에서 쓰이는거)
-            byte[] msgHash=Hash.sha3(fullMessage.getBytes(StandardCharsets.UTF_8));
+            String prefix = "\u0019Ethereum Signed Message:\n" + message.length();
+            String prefixedMessage = prefix + message;
 
+            // 메시지 정확히 비교하기 (공백 포함)
+            System.out.println("DB 메시지: '" + requiredMessage + "'");
+            System.out.println("요청 메시지: '" + message + "'");
+
+            //byte[] msgHash=Hash.sha3(prefixedMessage.getBytes(StandardCharsets.UTF_8));
+            byte[] msgHash = Sign.getEthereumMessageHash(message.getBytes(StandardCharsets.UTF_8));
             //signature 문자열을 바이트 배열로 변환
+            //서명이 "0x"로 시작하면 제거해야함.
+            if(signature.startsWith("0x")){
+                signature=signature.substring(2);
+            }
             byte[] signatureBytes=Numeric.hexStringToByteArray(signature);
 
             // 서명 길이는 65바이트여야 함 (r:32 + s:32 + v:1)
-            if (signatureBytes.length != 65) return false;
+
+            if (signatureBytes.length != 65){
+                throw new IllegalArgumentException("Signature length is invalid: expected 65 bytes, but got " + signatureBytes.length);}
 
             // v값은 마지막 바이트 (65번째 바이트)이며, v < 27이면 +27 보정이 필요함
             byte v = signatureBytes[64];
@@ -116,10 +124,14 @@ public class AuthService {
             );
 
             //해시 + 서명 데이터 ->  공개키 복원
-            BigInteger publicKey=Sign.signedMessageToKey(msgHash,sigData);
+            //BigInteger publicKey=Sign.signedMessageToKey(msgHash,sigData);
+            BigInteger publicKey = Sign.signedMessageHashToKey(msgHash, sigData);
+
+
             //복원된 퍼블릭 키로부터 Ethereum지갑 주소 생성
             String recoveredAddress="0x"+Keys.getAddress(publicKey);
-
+            System.out.println("원본 주소: " + walletAddress);
+            System.out.println("복원된 주소: " + recoveredAddress);
             //대소문자 구분않고 문자열비교함. 이더리움 주소 16진수인데 대소문자 혼용될 수 있어서.
             Boolean isverified= walletAddress.equalsIgnoreCase(recoveredAddress);
             if(isverified){

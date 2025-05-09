@@ -19,6 +19,8 @@ public class QStudentUser extends EntityPathBase<StudentUser> {
 
     public static final QStudentUser studentUser = new QStudentUser("studentUser");
 
+    public final DateTimePath<java.time.LocalDateTime> createdAt = createDateTime("createdAt", java.time.LocalDateTime.class);
+
     public final StringPath sEmail = createString("sEmail");
 
     public final NumberPath<Long> sId = createNumber("sId", Long.class);
@@ -36,6 +38,8 @@ public class QStudentUser extends EntityPathBase<StudentUser> {
     public final StringPath sWalletAddress = createString("sWalletAddress");
 
     public final EnumPath<WalletAuthStatus> sWalletAuthStatus = createEnum("sWalletAuthStatus", WalletAuthStatus.class);
+
+    public final DateTimePath<java.time.LocalDateTime> updatedAt = createDateTime("updatedAt", java.time.LocalDateTime.class);
 
     public QStudentUser(String variable) {
         super(StudentUser.class, forVariable(variable));

@@ -9,14 +9,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @NoArgsConstructor
-public class WalletAddressVerifyRequestDto {
-
+public class DuplicateNicknameRequestDto {
     @NotBlank
-    private String walletAddress;
-
-    @NotBlank
-    private String message;
-
-    @NotBlank
-    private String signature;
+    String nickname;
 }

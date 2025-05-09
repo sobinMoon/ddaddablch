@@ -5,6 +5,7 @@ import com.donation.ddb.Domain.CampaignSortType;
 import com.donation.ddb.Domain.CampaignStatusFlag;
 import com.donation.ddb.Domain.QCampaign;
 import com.donation.ddb.Dto.Response.CampaignResponseDto;
+import com.donation.ddb.apiPayload.ApiResponse;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.jpa.impl.JPAQuery;
 import lombok.RequiredArgsConstructor;
@@ -12,6 +13,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 
+import java.time.LocalDate;
 import java.util.List;
 
 import static com.querydsl.core.types.Projections.constructor;
@@ -107,12 +109,14 @@ public class CampaignRepositoryImpl implements CampaignRepositoryCustom {
             query.limit(pageable.getPageSize());
         }
 
-//        return jpaQueryFactory
-//                .selectFrom(qCampaign)
-//                .where(predicate)
-//                .fetch();
-
-
         return query.fetch();
+    }
+
+    @Override
+    public CampaignResponseDto addCampaign(Long oId, String cName, String CImageUrl, String cDescription, Integer cGoal, CampaignCategory cCategory, LocalDate donateStart, LocalDate donateEnd, LocalDate businessStart, LocalDate businessEnd) {
+
+
+
+        return null;
     }
 }
