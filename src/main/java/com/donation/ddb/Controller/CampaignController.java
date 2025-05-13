@@ -1,7 +1,10 @@
 package com.donation.ddb.Controller;
 
-import com.donation.ddb.Dto.Response.CampaignResponseDto;
+import com.donation.ddb.Domain.Campaign;
+import com.donation.ddb.Dto.Request.CampaignRequestDto;
+import com.donation.ddb.Dto.Response.CampaignResponse;
 import com.donation.ddb.Service.CampaignService.CampaignQueryService;
+import com.donation.ddb.apiPayload.ApiResponse;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,13 +12,12 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Map;
+
+import static com.querydsl.core.types.Projections.constructor;
 
 @RestController
 @NoArgsConstructor
@@ -29,26 +31,26 @@ public class CampaignController {
     @GetMapping("home")
     public ResponseEntity<?> campaignList() {
         Pageable pageable = PageRequest.of(0, 3);
-        List<CampaignResponseDto> popular = campaignService.findAllCampaigns(
+        List<CampaignResponse.CampaignListDto> popular = campaignService.findAllCampaigns(
                 null,
                 null,
-                "IN_PROGRESS",
+                "FUNDRAISING",
                 "POPULAR",
                 pageable);
-        List<CampaignResponseDto> latest = campaignService.findAllCampaigns(
+        List<CampaignResponse.CampaignListDto> latest = campaignService.findAllCampaigns(
                 null,
                 null,
-                "IN_PROGRESS",
+                "FUNDRAISING",
                 "LATEST",
                 pageable);
-        List<CampaignResponseDto> endingSoon = campaignService.findAllCampaigns(
+        List<CampaignResponse.CampaignListDto> endingSoon = campaignService.findAllCampaigns(
                 null,
                 null,
-                "IN_PROGRESS",
+                "FUNDRAISING",
                 "ENDING_SOON",
                 pageable);
 
-        Map<String, List<CampaignResponseDto>> campaignResponseDtoList = Map.of(
+        Map<String, List<CampaignResponse.CampaignListDto>> campaignResponseDtoList = Map.of(
                 "popular", popular,
                 "latest", latest,
                 "endingSoon", endingSoon
@@ -58,7 +60,7 @@ public class CampaignController {
     }
 
     // 진행 중 캠페인 리스트
-    @GetMapping("in-progress")
+    @GetMapping("fundraising")
     public ResponseEntity<?> inProgressCampaignList(
             @RequestParam(value = "category", required = false) String category,
             @RequestParam(value = "sortType", required = false) String sortType,
@@ -67,16 +69,16 @@ public class CampaignController {
     ) {
         Pageable pageable = PageRequest.of(page, size);
 
-        List<CampaignResponseDto> campaignResponseDtoList = campaignService.findAllCampaigns(
+        List<CampaignResponse.CampaignListDto> campaignResponseDtoList = campaignService.findAllCampaigns(
                 null,
                 category,
-                "IN_PROGRESS",
+                "FUNDRAISING",
                 sortType,
                 pageable
         );
 
         Map<String, Object> resMap = Map.of(
-                "inProgress", campaignResponseDtoList,
+                "campaigns", campaignResponseDtoList,
                 "pageable", pageable,
                 "totalElements", campaignResponseDtoList.size()
         );
@@ -85,7 +87,7 @@ public class CampaignController {
     }
 
     // 완료된 캠페인 리스트
-    @GetMapping("ended")
+    @GetMapping("completed")
     public ResponseEntity<?> endedCampaignList(
             @RequestParam(value = "category", required = false) String category,
             @RequestParam(value = "sortType", required = false) String sortType,
@@ -94,16 +96,16 @@ public class CampaignController {
     ) {
         Pageable pageable = PageRequest.of(page, size);
 
-        List<CampaignResponseDto> campaignResponseDtoList = campaignService.findAllCampaigns(
+        List<CampaignResponse.CampaignListDto> campaignResponseDtoList = campaignService.findAllCampaigns(
                 null,
                 category,
-                "ENDED",
+                "COMPLETED",
                 sortType,
                 pageable
         );
 
         Map<String, Object> resMap = Map.of(
-                "inProgress", campaignResponseDtoList,
+                "campaigns", campaignResponseDtoList,
                 "pageable", pageable,
                 "totalElements", campaignResponseDtoList.size()
         );
@@ -129,7 +131,7 @@ public class CampaignController {
 
         // CampaignSortType으로 변환
 
-        List<CampaignResponseDto> campaignResponseDtoList = campaignService.findAllCampaigns(
+        List<CampaignResponse.CampaignListDto> campaignResponseDtoList = campaignService.findAllCampaigns(
                 keyword,
                 category,
                 statusFlag,
@@ -138,11 +140,55 @@ public class CampaignController {
         );
 
         Map<String, Object> resMap = Map.of(
-                "result", campaignResponseDtoList,
+                "campaigns", campaignResponseDtoList,
                 "pageable", pageable,
                 "totalElements", campaignResponseDtoList.size()
         );
 
         return ResponseEntity.ok(resMap);
+    }
+
+    @PostMapping
+    public ApiResponse<?> addCampaign(
+            @RequestBody CampaignRequestDto campaignRequestDto
+    ) {
+        // 캠페인 추가 로직
+
+        System.out.println("CampaignRequestDto: " + campaignRequestDto);
+
+        Campaign campaign = campaignService.addCampaign(
+                campaignRequestDto.getOId(),
+                campaignRequestDto.getCName(),
+                campaignRequestDto.getCImageUrl(),
+                campaignRequestDto.getCDescription(),
+                campaignRequestDto.getCGoal(),
+                campaignRequestDto.getCCategory(),
+                campaignRequestDto.getDonateStart(),
+                campaignRequestDto.getDonateEnd(),
+                campaignRequestDto.getBusinessStart(),
+                campaignRequestDto.getBusinessEnd()
+        );
+
+        return ApiResponse.onSuccess(convertToListDto(campaign));
+    }
+
+    public CampaignResponse.CampaignListDto convertToListDto(Campaign campaign) {
+        return CampaignResponse.CampaignListDto.builder()
+                .cId(campaign.getCId())
+                .cName(campaign.getCName())
+                .cImageUrl(campaign.getCImageUrl())
+                .cDescription(campaign.getCDescription())
+                .cGoal(campaign.getCGoal())
+                .cCurrentAmount(campaign.getCCurrentAmount())
+                .cCategory(campaign.getCCategory())
+                .donateCount(campaign.getDonateCount())
+                .donateStart(campaign.getDonateStart())
+                .donateEnd(campaign.getDonateEnd())
+                .businessStart(campaign.getBusinessStart())
+                .businessEnd(campaign.getBusinessEnd())
+                .cStatusFlag(campaign.getCStatusFlag())
+                .createdAt(campaign.getCreatedAt())
+                .updatedAt(campaign.getUpdatedAt())
+                .build();
     }
 }

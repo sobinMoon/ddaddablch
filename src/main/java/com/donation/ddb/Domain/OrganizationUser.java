@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 
 @Entity
@@ -12,7 +14,7 @@ import java.time.LocalDateTime;
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor
-public class OrganizationUser {
+public class OrganizationUser extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy= GenerationType.IDENTITY)
@@ -22,7 +24,7 @@ public class OrganizationUser {
     private String oName;
 
     @Column(nullable = false,unique=true)
-    private String sEmail;
+    private String oEmail;
 
     @Column(nullable = false,length=100)
     private String oPassword;
@@ -42,6 +44,9 @@ public class OrganizationUser {
     private Boolean oIsActive=true; //기본값 설정
 
     @Column(length=255)
-    private String sProfileImage;
+    private String oProfileImage;
+
+    @OneToMany(mappedBy = "organizationUser", cascade = CascadeType.ALL)
+    private List<Campaign> campaigns = new ArrayList<>();
 
 }

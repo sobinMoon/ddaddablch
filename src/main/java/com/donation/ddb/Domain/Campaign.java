@@ -29,21 +29,21 @@ public class Campaign extends BaseEntity {
     private String cDescription;
 
     @Column(name = "c_goal", nullable = false)
-    private int cGoal;
+    private Integer cGoal;
 
     @Column(name = "c_current_amount", nullable = false)
     @Builder.Default
-    private int cCurrentAmount = 0;
+    private Integer cCurrentAmount = 0;
 
     @Enumerated(EnumType.STRING)
     @Builder.Default
     @Column(name = "c_category", nullable = false)
-    private CampaignCategory cCategory = CampaignCategory.NAME1;
+    private CampaignCategory cCategory = CampaignCategory.아동청소년;
 
     // default value = 0
     @Column(name = "donate_count", nullable = false)
     @Builder.Default
-    private long donateCount = 0;
+    private Long donateCount = 0L;
 
     @Column(name = "donate_start", nullable = false)
     private LocalDate donateStart;
@@ -60,13 +60,17 @@ public class Campaign extends BaseEntity {
     @Column(name = "c_status_flag", nullable = false)
     @Builder.Default
     @Enumerated(EnumType.STRING)
-    private CampaignStatusFlag cStatusFlag = CampaignStatusFlag.NOT_STARTED;
+    private CampaignStatusFlag cStatusFlag = CampaignStatusFlag.FUNDRAISING;
 
     @OneToMany(mappedBy = "campaign", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<CampaignPlan> campaignPlanList = new ArrayList<>();
 
     @OneToMany(mappedBy = "campaign", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<CampaignSpending> campaignSpendingList = new ArrayList<>();
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "o_id")
+    private OrganizationUser organizationUser;
 
     @Override
     public String toString() {

@@ -1,13 +1,10 @@
 package com.donation.ddb.Repository.CampaignRepository;
 
-import com.donation.ddb.Domain.CampaignCategory;
-import com.donation.ddb.Domain.CampaignSortType;
-import com.donation.ddb.Domain.CampaignStatusFlag;
-import com.donation.ddb.Domain.QCampaign;
-import com.donation.ddb.Dto.Response.CampaignResponseDto;
-import com.donation.ddb.apiPayload.ApiResponse;
+import com.donation.ddb.Domain.*;
+import com.donation.ddb.Dto.Response.CampaignResponse;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.jpa.impl.JPAQuery;
+import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
@@ -24,9 +21,10 @@ public class CampaignRepositoryImpl implements CampaignRepositoryCustom {
     private final JPAQueryFactory jpaQueryFactory;
     private final QCampaign qCampaign = QCampaign.campaign;
 
+    private final EntityManager em;
 
     @Override
-    public List<CampaignResponseDto> dynamicQueryWithBooleanBuilder(
+    public List<CampaignResponse.CampaignListDto> dynamicQueryWithBooleanBuilder(
             String keyword,
             CampaignCategory category,
             CampaignStatusFlag statusFlag,
@@ -57,9 +55,9 @@ public class CampaignRepositoryImpl implements CampaignRepositoryCustom {
 
         System.out.println("jpaQueryFactory: " + jpaQueryFactory);
 
-        JPAQuery<CampaignResponseDto> query = jpaQueryFactory
+        JPAQuery<CampaignResponse.CampaignListDto> query = jpaQueryFactory
                 .select(constructor(
-                        CampaignResponseDto.class,
+                        CampaignResponse.CampaignListDto.class,
                         qCampaign.cId,
                         qCampaign.cName,
                         qCampaign.cImageUrl,
@@ -113,10 +111,27 @@ public class CampaignRepositoryImpl implements CampaignRepositoryCustom {
     }
 
     @Override
-    public CampaignResponseDto addCampaign(Long oId, String cName, String CImageUrl, String cDescription, Integer cGoal, CampaignCategory cCategory, LocalDate donateStart, LocalDate donateEnd, LocalDate businessStart, LocalDate businessEnd) {
+    public Campaign addCampaign(Long oId, String cName, String CImageUrl, String cDescription, Integer cGoal, CampaignCategory cCategory, LocalDate donateStart, LocalDate donateEnd, LocalDate businessStart, LocalDate businessEnd) {
 
+        System.out.println("addCampaign called with oId: " + oId + ", cName: " + cName + ", CImageUrl: " + CImageUrl + ", cDescription: " + cDescription + ", cGoal: " + cGoal + ", cCategory: " + cCategory + ", donateStart: " + donateStart + ", donateEnd: " + donateEnd + ", businessStart: " + businessStart + ", businessEnd: " + businessEnd);
 
+        OrganizationUser organizationUser = em.getReference(OrganizationUser.class, oId);
 
-        return null;
+        Campaign campaign = Campaign.builder()
+                .cName(cName)
+                .cImageUrl(CImageUrl)
+                .cDescription(cDescription)
+                .cGoal(cGoal)
+                .cCategory(cCategory)
+                .donateStart(donateStart)
+                .donateEnd(donateEnd)
+                .businessStart(businessStart)
+                .businessEnd(businessEnd)
+                .organizationUser(organizationUser)
+                .build();
+
+        em.persist(campaign);
+
+        return campaign;
     }
 }
