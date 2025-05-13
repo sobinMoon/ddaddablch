@@ -1,0 +1,59 @@
+package com.donation.ddb.Dto.Response;
+
+import com.donation.ddb.Domain.CampaignCategory;
+import com.donation.ddb.Domain.CampaignStatusFlag;
+import lombok.*;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+
+//@Getter
+//@Builder
+//@NoArgsConstructor
+//@AllArgsConstructor
+public class CampaignResponse {
+    @Getter
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class CampaignListDto {
+        private Long cId;
+        private String cName;
+        private String cImageUrl;
+        private String cDescription;
+        private Integer cGoal;
+        private Integer cCurrentAmount;
+        private CampaignCategory cCategory;
+        private Long donateCount;
+        private LocalDate donateStart;
+        private LocalDate donateEnd;
+        private LocalDate businessStart;
+        private LocalDate businessEnd;
+        private CampaignStatusFlag cStatusFlag;
+        private LocalDateTime createdAt;
+        private LocalDateTime updatedAt;
+    }
+
+    @Getter
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class CampaignDetailDto {
+        private Long cId;
+        private String cName;
+        private String cImageUrl;
+        private String cDescription;
+        private Integer cGoal;
+        private Integer cCurrentAmount;
+        private CampaignCategory cCategory;
+        private Long donateCount;
+        private LocalDate donateStart;
+        private LocalDate donateEnd;
+        private LocalDate businessStart;
+        private LocalDate businessEnd;
+        private CampaignStatusFlag cStatusFlag;
+        private LocalDateTime createdAt;
+        private LocalDateTime updatedAt;
+        private OrganizationResponse.OrganizationDetailDto orgDetailDto;
+    }
+}
