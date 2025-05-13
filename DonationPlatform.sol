@@ -49,7 +49,7 @@ contract DonationPlatform is Ownable, DonationAdmin, DonationCore, DonationQuery
      * @dev 컨트랙트 생성자
      */
      //상속받은 Ownable에서 owner 변수 설정
-    constructor() Ownable(msg.sender) DonationAdmin() {  //배포될 때 한 번 실행됨. 
+    constructor() DonationAdmin() {  //배포될 때 한 번 실행됨. 
         totalDonations = 0;
         projectCount = 0;
         withdrawalRequestCount = 0;
@@ -104,10 +104,12 @@ contract DonationPlatform is Ownable, DonationAdmin, DonationCore, DonationQuery
         address payable _recipient,
         uint256 _targetAmount,
         uint256 _deadline
-    ) public onlyOwner returns (uint256) {
+    ) public onlyOwner returns (uint256) { //관리자만 호출 가능
         projectCount++;
+        //플젝 생성하는 내부 함수 호출
         _createProject(projects, projectCount, _name, _description, _recipient, _targetAmount, _deadline);
         
+        //이벤트 발생,블록체인에 기록 남김.ui나 블록탐색기에서 새 플젝 생성 이력 확인 가능
         emit ProjectCreated(projectCount, _name, _recipient, _targetAmount, _deadline);
         return projectCount;
     }
@@ -118,16 +120,17 @@ contract DonationPlatform is Ownable, DonationAdmin, DonationCore, DonationQuery
      * @param _isAnonymous 익명 기부 여부
      */
     function donate(uint256 _projectId, bool _isAnonymous) public payable {
-        require(_projectId > 0 && _projectId <= projectCount, "Invalid project ID");
-        require(projects[_projectId].isActive, "Project is not active");
-        require(block.timestamp <= projects[_projectId].deadline, "Project deadline has passed");
-        require(msg.value > 0, "Donation amount must be greater than 0");
+        require(_projectId > 0 && _projectId <= projectCount,  unicode"존재하지 않는 projectId입니다.");
+        require(projects[_projectId].isActive, unicode"현재 캠페인이 비활성상태입니다.");
+        require(block.timestamp <= projects[_projectId].deadline,unicode"캠페인이 이미 만려되었습니다.");
+        require(msg.value > 0, unicode"기부금은 0eth보다 커야 합니다.");
         
         // 수수료 계산
         uint256 fee = (msg.value * platformFeePercent) / 100;
         uint256 donationAmount = msg.value - fee;
         
         // 기부 처리
+        // DonationCore 컨트랙트 내부에 정의되어있음
         _processDonation(
             projects,
             donors,
@@ -140,25 +143,34 @@ contract DonationPlatform is Ownable, DonationAdmin, DonationCore, DonationQuery
             fee
         );
         
-        totalDonations += donationAmount;
+        totalDonations += donationAmount; //총 기부금 누적
         
+
+        //블록체인 로그에 남김 -> 이더스캔 / 프론트에서 조회 가능함.
         emit DonationReceived(_projectId, msg.sender, donationAmount, _isAnonymous);
         
-        // 리워드 토큰 발급 (설정된 경우)
+        // 리워드 토큰(ERC20) 발급함 (설정된 경우) 
         if (address(donationToken) != address(0)) {
-            // 예: 1 ETH당 100 토큰 발급
+            //  1 ETH당 100 토큰 발급 -> 이거는 수정 가능함함
             uint256 tokenAmount = donationAmount * 100 / 1 ether;
+
+            //앞에서 설정한 외부 ERC20 컨트랙트 호출출
             donationToken.mint(msg.sender, tokenAmount);
         }
         
-        // NFT 인증서 발급 (금액이 일정 이상인 경우 & 설정된 경우)
-        if (donationAmount >= 1 ether && address(donationCertificate) != address(0)) {
+        // NFT 인증서 발급 (금액이 0이더보다 많을 경우 & 인증서 발급용 nft컨트랙트가 설정된 경우)
+        if (donationAmount >= 0 ether && address(donationCertificate) != address(0)) {
+            
+            //nft 메타데이터 주소(url)을 동적으로 생성함
+            //"https://donation-platform.example/certificate/3/1715600973"
             string memory tokenURI = string(abi.encodePacked(
                 "https://donation-platform.example/certificate/", 
                 DonationUtils.toString(_projectId),
                 "/",
                 DonationUtils.toString(block.timestamp)
             ));
+
+            //기부자에게 NFT 한 장 발급, 메타데이터는 tokenURI로 링크되어있음.
             donationCertificate.mintCertificate(msg.sender, tokenURI);
         }
     }
@@ -169,12 +181,15 @@ contract DonationPlatform is Ownable, DonationAdmin, DonationCore, DonationQuery
      * @param _amount 인출 금액
      */
     function requestWithdrawal(uint256 _projectId, uint256 _amount) public {
-        require(_projectId > 0 && _projectId <= projectCount, "Invalid project ID");
-        require(msg.sender == projects[_projectId].recipient || msg.sender == owner(), "Not authorized");
+        require(_projectId > 0 && _projectId <= projectCount, unicode"projectID를 바르게 입력하세요.");
+        require(msg.sender == projects[_projectId].recipient || msg.sender == owner(), unicode"인출 권한이 없습니다.");
         
         withdrawalRequestCount++;
         _requestWithdrawal(projects, withdrawalRequests, withdrawalRequestCount, _projectId, _amount);
         
+        //누가 어떤 프로젝트에서 얼마를 요청했는지로그로 남겨서
+        //프론트에서 대기 중인 요청 목록 표시하거나 이더스캔에서 확인 가능함.
+        //실제 송금은 24시간 후에 가능함. 
         emit WithdrawalRequested(withdrawalRequestCount, _projectId, _amount);
     }
     
@@ -182,6 +197,9 @@ contract DonationPlatform is Ownable, DonationAdmin, DonationCore, DonationQuery
      * @dev 기부금 인출 실행
      * @param _requestId 인출 요청 ID
      */
+
+     //기부금 인출 요청은 바로 실행되ㅣㅈ 않고
+     //requestWithdrawal()함수는 쵸어만 기록하고, 실제 이더 받으려면 이 함수를 호출해야함. 
     function executeWithdrawal(uint256 _requestId) public {
         require(_requestId > 0 && _requestId <= withdrawalRequestCount, "Invalid request ID");
         
@@ -225,7 +243,15 @@ contract DonationPlatform is Ownable, DonationAdmin, DonationCore, DonationQuery
     /**
      * @dev 프로젝트 정보 조회
      * @param _projectId 프로젝트 ID
-     * @return 프로젝트 상세 정보
+     * @return name 프로젝트 이름
+     * @return description 프로젝트 설명
+     * @return recipient 수혜자 주소
+     * @return targetAmount 목표 금액
+     * @return raisedAmount 현재까지 모금된 금액
+     * @return isActive 프로젝트 활성화 여부
+     * @return deadline 마감일 (타임스탬프)
+     * @return createTime 생성일 (타임스탬프)
+     * @return uniqueDonorCount 고유 기부자 수
      */
     function getProjectDetails(uint256 _projectId) public view returns (
         string memory name,
@@ -247,7 +273,10 @@ contract DonationPlatform is Ownable, DonationAdmin, DonationCore, DonationQuery
      * @param _projectId 프로젝트 ID
      * @param _offset 시작 인덱스
      * @param _limit 조회할 항목 수
-     * @return 기부 내역 목록
+        * @return donors 기부자 주소 목록
+        * @return amounts 기부 금액 목록
+        * @return timestamps 기부 시간 목록
+        * @return anonymousFlags 익명 기부 여부 목록
      */
     function getProjectDonations(uint256 _projectId, uint256 _offset, uint256 _limit) public view returns (
         address[] memory donors,
@@ -262,7 +291,10 @@ contract DonationPlatform is Ownable, DonationAdmin, DonationCore, DonationQuery
     /**
      * @dev 기부자 정보 조회
      * @param _donor 기부자 주소
-     * @return 기부자 정보
+     * @return name 기부자 이름
+    * @return totalDonated 총 기부 금액
+    * @return donatedProjects 기부자가 참여한 프로젝트 ID 목록
+    * @return hasSetName 이름을 설정했는지 여부
      */
     function getDonorInfo(address _donor) public view returns (
         string memory name,
@@ -277,7 +309,11 @@ contract DonationPlatform is Ownable, DonationAdmin, DonationCore, DonationQuery
      * @dev 활성화된 프로젝트 목록 조회
      * @param _offset 시작 인덱스
      * @param _limit 조회할 항목 수
-     * @return 활성화된 프로젝트 목록
+     * @return projectIds 프로젝트 ID 목록
+     * @return names 프로젝트 이름 목록
+     * @return targetAmounts 목표 금액 목록
+     * @return raisedAmounts 현재까지 모금된 금액 목록
+     * @return deadlines 프로젝트 마감일 목록
      */
     function getActiveProjects(uint256 _offset, uint256 _limit) public view returns (
         uint256[] memory projectIds,

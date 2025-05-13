@@ -1,8 +1,10 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-contract DonationPlatform {
-    address public owner; //이 컨트랙트 배포자
+import "@openzeppelin/contracts/access/Ownable.sol";
+
+contract DonationPlatform is Ownable {
+    //address public _owner; //이 컨트랙트 배포자
     uint256 public totalDonations; //이 컨트랙트로 기부된 금액 최종 
 
     // 기부 프로젝트(수혜자) 구조체
@@ -49,14 +51,14 @@ contract DonationPlatform {
     // 컨트랙트 소유자만 접근 가능한 함수 제어
     // modifier : 함수 실행 전에 특정 조건을 검사하거나 로직 추가하는 문법
     //오직 owner만 호출할 수 있는 함수에 붙이는 제한자.
-    modifier onlyOwner() {
-        require(msg.sender == owner, unicode"contract owner만 호출할 수 있는 함수입니다.");
-        _;
-    }
+    //modifier onlyOwner() {
+    //    require(msg.sender == owner, unicode"contract owner만 호출할 수 있는 함수입니다.");
+    //    _;
+    //}
 
     // 컨트랙트 초기화
-    constructor() {
-        owner = msg.sender;
+    constructor() Ownable(msg.sender) {
+        //owner = msg.sender;
         totalDonations = 0;
 
         projectCount = 0;
@@ -127,7 +129,7 @@ contract DonationPlatform {
         //기부금 인출(캠페인 수혜자 or 플랫폼 소유자만 가능)
         function withdrawFunds(uint256 _projectId) public{
             Project storage project=projects[_projectId];
-            require(msg.sender == project.recipient || msg.sender == owner, unicode"수혜자/관리자가 아닙니다.");
+            require(msg.sender == project.recipient || msg.sender == owner(), unicode"수혜자/관리자가 아닙니다.");
             require(project.raisedAmount>0,unicode"인출할 금액이 없습니다.");
 
             uint256 amount=project.raisedAmount;
@@ -183,7 +185,7 @@ contract DonationPlatform {
 
     // 비상 상황 시 자금 회수 (보안 목적, 선택적)
     function emergencyWithdraw() public onlyOwner {
-        payable(owner).transfer(address(this).balance);
+        payable(owner()).transfer(address(this).balance);
     }
 
     function cancelProjectAndRefund(uint256 _projectId) public onlyOwner{
