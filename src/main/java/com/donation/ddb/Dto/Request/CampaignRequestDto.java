@@ -13,23 +13,23 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 public class CampaignRequestDto {
-    @JsonProperty("oId")
-    private Long oId;
+    @JsonProperty("id")
+    private Long id;
 
-    @JsonProperty("cName")
-    private String cName;
+    @JsonProperty("name")
+    private String name;
 
-    @JsonProperty("cImageUrl")
-    private String cImageUrl;
+    @JsonProperty("imageUrl")
+    private String imageUrl;
 
-    @JsonProperty("cDescription")
-    private String cDescription;
+    @JsonProperty("description")
+    private String description;
 
-    @JsonProperty("cGoal")
-    private Integer cGoal;
+    @JsonProperty("goal")
+    private Integer goal;
 
-    @JsonProperty("cCategory")
-    private CampaignCategory cCategory;
+    @JsonProperty("category")
+    private CampaignCategory category;
 
     @JsonProperty("donateStart")
     private LocalDate donateStart;

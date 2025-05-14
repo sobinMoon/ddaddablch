@@ -23,10 +23,10 @@ public class OrganizationUserQueryServiceImpl implements OrganizationUserQuerySe
 
     public OrganizationResponse.OrganizationDetailDto convertToDetailDto(OrganizationUser user) {
         return OrganizationResponse.OrganizationDetailDto.builder()
-                .oId(user.getOId())
-                .oName(user.getOName())
-                .oProfileImage(user.getOProfileImage())
-                .oDescription(user.getODescription())
+                .id(user.getOId())
+                .name(user.getOName())
+                .profileImage(user.getOProfileImage())
+                .description(user.getODescription())
                 .build();
     }
 }

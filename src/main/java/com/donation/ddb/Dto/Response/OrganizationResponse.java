@@ -12,9 +12,9 @@ public class OrganizationResponse {
     @NoArgsConstructor
     @AllArgsConstructor
     public static class OrganizationDetailDto {
-        private Long oId;
-        private String oName;
-        private String oProfileImage;
-        private String oDescription;
+        private Long id;
+        private String name;
+        private String profileImage;
+        private String description;
     }
 }

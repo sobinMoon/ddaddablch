@@ -172,12 +172,12 @@ public class CampaignController {
         System.out.println("CampaignRequestDto: " + campaignRequestDto);
 
         Campaign campaign = campaignService.addCampaign(
-                campaignRequestDto.getOId(),
-                campaignRequestDto.getCName(),
-                campaignRequestDto.getCImageUrl(),
-                campaignRequestDto.getCDescription(),
-                campaignRequestDto.getCGoal(),
-                campaignRequestDto.getCCategory(),
+                campaignRequestDto.getId(),
+                campaignRequestDto.getName(),
+                campaignRequestDto.getImageUrl(),
+                campaignRequestDto.getDescription(),
+                campaignRequestDto.getGoal(),
+                campaignRequestDto.getCategory(),
                 campaignRequestDto.getDonateStart(),
                 campaignRequestDto.getDonateEnd(),
                 campaignRequestDto.getBusinessStart(),
