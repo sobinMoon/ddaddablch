@@ -8,6 +8,7 @@ import com.donation.ddb.Domain.CampaignStatusFlag;
 import com.donation.ddb.Dto.Response.CampaignResponse;
 import com.donation.ddb.apiPayload.ApiResponse;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.time.LocalDate;
 import java.util.List;

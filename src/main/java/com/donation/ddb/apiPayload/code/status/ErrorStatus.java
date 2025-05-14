@@ -20,7 +20,11 @@ public enum ErrorStatus implements BaseErrorCode {
     CAMPAIGN_NOT_FOUND(HttpStatus.NOT_FOUND, "CAMPAIGN4001", "캠페인이 없습니다."),
     CAMPAIGN_INVALID_CATEGORY(HttpStatus.BAD_REQUEST, "CAMPAIGN4002", "유효하지 않은 캠페인 카테고리입니다."),
     CAMPAIGN_INVALID_STATUS_FLAG(HttpStatus.BAD_REQUEST, "CAMPAIGN4003", "유효하지 않은 캠페인 상태입니다."),
-    CAMPAIGN_INVALID_SORT_TYPE(HttpStatus.BAD_REQUEST, "CAMPAIGN4004", "유효하지 않은 캠페인 정렬 타입입니다.");
+    CAMPAIGN_INVALID_SORT_TYPE(HttpStatus.BAD_REQUEST, "CAMPAIGN4004", "유효하지 않은 캠페인 정렬 타입입니다."),
+
+    CAMPAIGN_PLAN_NOT_FOUND(HttpStatus.NOT_FOUND, "CAMPAIGN_PLAN4001", "캠페인 플랜이 없습니다."),
+
+    ORGANIZATION_USER_NOT_FOUND(HttpStatus.NOT_FOUND, "ORGANIZATION_USER4001", "단체 사용자가 없습니다.");
 
 
     // 예시,,,

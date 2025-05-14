@@ -1,11 +1,13 @@
 package com.donation.ddb.Dto.Response;
 
 import com.donation.ddb.Domain.CampaignCategory;
+import com.donation.ddb.Domain.CampaignPlan;
 import com.donation.ddb.Domain.CampaignStatusFlag;
 import lombok.*;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 
 //@Getter
 //@Builder
@@ -39,13 +41,13 @@ public class CampaignResponse {
     @NoArgsConstructor
     @AllArgsConstructor
     public static class CampaignDetailDto {
-        private Long cId;
-        private String cName;
-        private String cImageUrl;
-        private String cDescription;
-        private Integer cGoal;
-        private Integer cCurrentAmount;
-        private CampaignCategory cCategory;
+        private Long id;
+        private String name;
+        private String imageUrl;
+        private String description;
+        private Integer goal;
+        private Integer currentAmount;
+        private CampaignCategory category;
         private Long donateCount;
         private LocalDate donateStart;
         private LocalDate donateEnd;
@@ -54,6 +56,8 @@ public class CampaignResponse {
         private CampaignStatusFlag cStatusFlag;
         private LocalDateTime createdAt;
         private LocalDateTime updatedAt;
-        private OrganizationResponse.OrganizationDetailDto orgDetailDto;
+        private OrganizationResponse.OrganizationDetailDto organization;
+        private List<CampaignPlanResponseDto> campaignPlans;
+        private List<CampaignSpendingResponseDto> campaignSpendings;
     }
 }
