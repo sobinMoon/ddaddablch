@@ -1,11 +1,14 @@
 package com.donation.ddb.Controller;
 
+import com.donation.ddb.CustomUserDetails;
 import com.donation.ddb.Domain.Campaign;
 import com.donation.ddb.Dto.Request.CampaignRequestDto;
 import com.donation.ddb.Dto.Response.CampaignResponse;
+import com.donation.ddb.Service.CampaignCommentQueryService.CampaignCommentQueryService;
 import com.donation.ddb.Service.CampaignPlansQueryService.CampaignPlansQueryService;
 import com.donation.ddb.Service.CampaignService.CampaignQueryService;
 import com.donation.ddb.Service.CampaignSpendingQueryService.CampaignSpendingQueryService;
+import com.donation.ddb.Service.CustomUserDetailsService;
 import com.donation.ddb.Service.OrganizationUserService.OrganizationUserQueryService;
 import com.donation.ddb.apiPayload.ApiResponse;
 import com.donation.ddb.apiPayload.code.status.ErrorStatus;
@@ -17,6 +20,8 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
@@ -42,6 +47,9 @@ public class CampaignController {
 
     @Autowired
     private CampaignSpendingQueryService campaignSpendingQueryService;
+
+    @Autowired
+    private CampaignCommentQueryService campaignCommentQueryService;
 
     @GetMapping("home")
     public ResponseEntity<?> campaignList() {
@@ -196,21 +204,66 @@ public class CampaignController {
         return ApiResponse.onSuccess(convertToDetailDto(campaign));
     }
 
+    @GetMapping("{cId}/comments")
+    public ApiResponse<?> getCampaignComments(
+            @PathVariable(value = "cId") Long cId,
+            @RequestParam(value = "page", defaultValue = "0") int page,
+            @RequestParam(value = "size", defaultValue = "10") int size) {
+
+        if (page < 0) {
+            throw new CampaignHandler(ErrorStatus.PAGE_NUMBER_INVALID);
+        }
+        if (size <= 0) {
+            throw new CampaignHandler(ErrorStatus.PAGE_SIZE_INVALID);
+        }
+
+        Pageable pageable = PageRequest.of(page, size);
+
+        return ApiResponse.onSuccess(campaignCommentQueryService.findCommentByCampaignId(cId, pageable));
+    }
+
+//    @PostMapping("{cId}/comments")
+//    public ApiResponse<?> addCampaignComment(
+//            @PathVariable(value = "cId") Long cId,
+//            @RequestBody CampaignRequestDto campaignRequestDto
+//    ) {
+//        // 캠페인 댓글 추가 로직
+//    }
+
+    @GetMapping("temp")
+    public ApiResponse<?> getCampaignTemp(
+            @AuthenticationPrincipal CustomUserDetails userDetails
+    ) {
+
+        if (userDetails == null) {
+            throw new CampaignHandler(ErrorStatus._UNAUTHORIZED);
+        }
+
+        String email = userDetails.getUsername();
+        Long sId = userDetails.getId();
+        log.info("User email: {}", email);
+
+        return ApiResponse.onSuccess(Map.of(
+                "email", email,
+                "sId", sId
+        ));
+    }
+
     public CampaignResponse.CampaignListDto convertToListDto(Campaign campaign) {
         return CampaignResponse.CampaignListDto.builder()
-                .cId(campaign.getCId())
-                .cName(campaign.getCName())
-                .cImageUrl(campaign.getCImageUrl())
-                .cDescription(campaign.getCDescription())
-                .cGoal(campaign.getCGoal())
-                .cCurrentAmount(campaign.getCCurrentAmount())
-                .cCategory(campaign.getCCategory())
+                .id(campaign.getCId())
+                .name(campaign.getCName())
+                .imageUrl(campaign.getCImageUrl())
+                .description(campaign.getCDescription())
+                .goal(campaign.getCGoal())
+                .currentAmount(campaign.getCCurrentAmount())
+                .category(campaign.getCCategory())
                 .donateCount(campaign.getDonateCount())
                 .donateStart(campaign.getDonateStart())
                 .donateEnd(campaign.getDonateEnd())
                 .businessStart(campaign.getBusinessStart())
                 .businessEnd(campaign.getBusinessEnd())
-                .cStatusFlag(campaign.getCStatusFlag())
+                .statusFlag(campaign.getCStatusFlag())
                 .createdAt(campaign.getCreatedAt())
                 .updatedAt(campaign.getUpdatedAt())
                 .build();
@@ -230,7 +283,7 @@ public class CampaignController {
                 .donateEnd(campaign.getDonateEnd())
                 .businessStart(campaign.getBusinessStart())
                 .businessEnd(campaign.getBusinessEnd())
-                .cStatusFlag(campaign.getCStatusFlag())
+                .statusFlag(campaign.getCStatusFlag())
                 .createdAt(campaign.getCreatedAt())
                 .updatedAt(campaign.getUpdatedAt())
                 .organization(organizationUserQueryService.convertToDetailDto(campaign.getOrganizationUser()))
