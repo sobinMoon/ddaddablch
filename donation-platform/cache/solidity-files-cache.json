@@ -41,7 +41,7 @@
     },
     "D:\\SmartContract\\donation-platform\\contracts\\DonationPlatform.sol": {
       "lastModificationDate": 1240428288000,
-      "contentHash": "ebb4928faee6da9a8718e4a6e476d2fb",
+      "contentHash": "7d10b087dd7ea03a969968f6f55aeefe",
       "sourceName": "contracts/DonationPlatform.sol",
       "solcConfig": {
         "version": "0.8.20",

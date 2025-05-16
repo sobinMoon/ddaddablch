@@ -122,7 +122,7 @@ contract DonationPlatform is Ownable, DonationAdmin, DonationCore, DonationQuery
     function donate(uint256 _projectId, bool _isAnonymous) public payable {
         require(_projectId > 0 && _projectId <= projectCount,  unicode"존재하지 않는 projectId입니다.");
         require(projects[_projectId].isActive, unicode"현재 캠페인이 비활성상태입니다.");
-        require(block.timestamp <= projects[_projectId].deadline,unicode"캠페인이 이미 만려되었습니다.");
+        require(block.timestamp <= projects[_projectId].deadline,unicode"캠페인이 이미 만료료되었습니다.");
         require(msg.value > 0, unicode"기부금은 0eth보다 커야 합니다.");
         
         // 수수료 계산
@@ -149,30 +149,30 @@ contract DonationPlatform is Ownable, DonationAdmin, DonationCore, DonationQuery
         //블록체인 로그에 남김 -> 이더스캔 / 프론트에서 조회 가능함.
         emit DonationReceived(_projectId, msg.sender, donationAmount, _isAnonymous);
         
-        // 리워드 토큰(ERC20) 발급함 (설정된 경우) 
-        if (address(donationToken) != address(0)) {
-            //  1 ETH당 100 토큰 발급 -> 이거는 수정 가능함함
-            uint256 tokenAmount = donationAmount * 100 / 1 ether;
+        // // 리워드 토큰(ERC20) 발급함 (설정된 경우) 
+        // if (address(donationToken) != address(0)) {
+        //     //  1 ETH당 100 토큰 발급 -> 이거는 수정 가능함함
+        //     uint256 tokenAmount = donationAmount * 100 / 1 ether;
 
-            //앞에서 설정한 외부 ERC20 컨트랙트 호출출
-            donationToken.mint(msg.sender, tokenAmount);
-        }
+        //     //앞에서 설정한 외부 ERC20 컨트랙트 호출출
+        //     donationToken.mint(msg.sender, tokenAmount);
+        // }
         
-        // NFT 인증서 발급 (금액이 0이더보다 많을 경우 & 인증서 발급용 nft컨트랙트가 설정된 경우)
-        if (donationAmount >= 0 ether && address(donationCertificate) != address(0)) {
+        // // NFT 인증서 발급 (금액이 0이더보다 많을 경우 & 인증서 발급용 nft컨트랙트가 설정된 경우)
+        // if (donationAmount >= 0 ether && address(donationCertificate) != address(0)) {
             
-            //nft 메타데이터 주소(url)을 동적으로 생성함
-            //"https://donation-platform.example/certificate/3/1715600973"
-            string memory tokenURI = string(abi.encodePacked(
-                "https://donation-platform.example/certificate/", 
-                DonationUtils.toString(_projectId),
-                "/",
-                DonationUtils.toString(block.timestamp)
-            ));
+        //     //nft 메타데이터 주소(url)을 동적으로 생성함
+        //     //"https://donation-platform.example/certificate/3/1715600973"
+        //     string memory tokenURI = string(abi.encodePacked(
+        //         "https://donation-platform.example/certificate/", 
+        //         DonationUtils.toString(_projectId),
+        //         "/",
+        //         DonationUtils.toString(block.timestamp)
+        //     ));
 
-            //기부자에게 NFT 한 장 발급, 메타데이터는 tokenURI로 링크되어있음.
-            donationCertificate.mintCertificate(msg.sender, tokenURI);
-        }
+        //     //기부자에게 NFT 한 장 발급, 메타데이터는 tokenURI로 링크되어있음.
+        //     donationCertificate.mintCertificate(msg.sender, tokenURI);
+        // }
     }
     
     /**

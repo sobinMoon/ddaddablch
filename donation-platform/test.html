@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>기부 플랫폼 테스트</title>
+    <!-- ethers.js 라이브러리 로드 방법 수정 -->
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/ethers/5.7.2/ethers.umd.min.js"
+      integrity="sha512-FDcVY+g7vc5CXANbrYhKqE/VPeV5kPXpSPBNkbXEWkXSNXDLUnT2wqzRrR5TQsHHzuIAX6HzQTTpKnqOcPRdnA=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    ></script>
+    <style>
+      body {
+        font-family: "Arial", sans-serif;
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 20px;
+      }
+
+      h1,
+      h2 {
+        color: #333;
+      }
+
+      input,
+      button {
+        padding: 8px;
+        margin: 5px 0;
+      }
+
+      button {
+        background-color: #4caf50;
+        color: white;
+        border: none;
+        cursor: pointer;
+      }
+
+      button:hover {
+        background-color: #45a049;
+      }
+
+      .result {
+        margin-top: 10px;
+        padding: 10px;
+        background-color: #f0f0f0;
+        border-radius: 5px;
+      }
+
+      hr {
+        margin: 20px 0;
+        border: 0;
+        border-top: 1px solid #eee;
+      }
+
+      #connectButton {
+        background-color: #f6851b; /* MetaMask 색상 */
+        font-weight: bold;
+      }
+
+      #connectButton:hover {
+        background-color: #e2761b;
+      }
+
+      .network-error {
+        background-color: #ffebee;
+        border-left: 4px solid #f44336;
+        padding: 10px;
+        margin: 10px 0;
+        display: none;
+      }
+
+      /* 로딩 표시기 */
+      .loader {
+        border: 4px solid #f3f3f3;
+        border-top: 4px solid #3498db;
+        border-radius: 50%;
+        width: 20px;
+        height: 20px;
+        animation: spin 2s linear infinite;
+        display: inline-block;
+        margin-left: 10px;
+        vertical-align: middle;
+      }
+
+      @keyframes spin {
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <h1>기부 플랫폼 테스트</h1>
+
+    <div id="ethersStatus"></div>
+    <button id="connectButton">MetaMask 연결</button>
+    <div id="networkWarning" class="network-error">
+      현재 로컬 Ganache 네트워크에 연결되어 있지 않습니다. 네트워크를
+      확인해주세요.
+    </div>
+    <div id="accountInfo" class="result"></div>
+
+    <hr />
+
+    <h2>수혜자 등록</h2>
+    <input
+      id="beneficiaryAddress"
+      placeholder="수혜자 주소"
+      style="width: 400px"
+    />
+    <br />
+    <input
+      id="beneficiaryDescription"
+      placeholder="설명"
+      style="width: 400px"
+    />
+    <br />
+    <button id="registerButton">수혜자 등록</button>
+    <div id="registerResult" class="result"></div>
+
+    <hr />
+
+    <h2>기부하기</h2>
+    <input
+      id="donationBeneficiary"
+      placeholder="수혜자 주소"
+      style="width: 400px"
+    />
+    <br />
+    <input
+      id="donationAmount"
+      type="number"
+      placeholder="금액 (ETH)"
+      value="0.1"
+      min="0.01"
+      step="0.01"
+      style="width: 200px"
+    />
+    <br />
+    <button id="donateButton">기부하기</button>
+    <div id="donateResult" class="result"></div>
+
+    <hr />
+
+    <h2>상태 확인</h2>
+    <input id="checkAddress" placeholder="주소" style="width: 400px" />
+    <br />
+    <button id="checkButton">확인</button>
+    <div id="checkResult" class="result"></div>
+
+    <script>
+      // 페이지 로드 시 ethers 라이브러리 로딩 확인 (타이밍 이슈 방지)
+      document.addEventListener("DOMContentLoaded", function () {
+        // ethers 로딩 상태 표시
+        const ethersStatus = document.getElementById("ethersStatus");
+        ethersStatus.innerHTML =
+          '<span class="loader"></span> ethers.js 라이브러리 로딩 중...';
+
+        // 라이브러리 로딩 확인을 위한 타이머 설정
+        let checkCount = 0;
+        const maxChecks = 10;
+
+        function checkEthersLoaded() {
+          if (typeof ethers !== "undefined") {
+            console.log("ethers.js 라이브러리 로드 완료!");
+            ethersStatus.innerHTML = "✅ ethers.js 라이브러리 로드 완료";
+            ethersStatus.style.color = "green";
+            initializeApp();
+          } else {
+            checkCount++;
+            if (checkCount < maxChecks) {
+              console.log("ethers.js 로드 중... 시도 횟수:", checkCount);
+              setTimeout(checkEthersLoaded, 500);
+            } else {
+              console.error("ethers.js 라이브러리를 로드할 수 없습니다.");
+              ethersStatus.innerHTML =
+                "❌ ethers.js 라이브러리 로드 실패. 대체 라이브러리 시도 중...";
+              ethersStatus.style.color = "red";
+              loadFallbackEthers();
+            }
+          }
+        }
+
+        // 대체 CDN에서 ethers.js 로딩 시도
+        function loadFallbackEthers() {
+          const script = document.createElement("script");
+          script.src =
+            "https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js";
+          script.onload = function () {
+            console.log("대체 CDN에서 ethers.js 로드 성공!");
+            ethersStatus.innerHTML = "✅ 대체 CDN에서 ethers.js 로드 성공";
+            ethersStatus.style.color = "green";
+            initializeApp();
+          };
+          script.onerror = function () {
+            console.error("모든 ethers.js 로딩 시도 실패");
+            ethersStatus.innerHTML =
+              "❌ ethers.js 로딩 실패. 페이지를 새로고침하거나 다른 브라우저에서 시도해주세요.";
+            document.getElementById("connectButton").disabled = true;
+          };
+          document.head.appendChild(script);
+        }
+
+        // 초기 확인 시작
+        setTimeout(checkEthersLoaded, 500);
+      });
+
+      // 컨트랙트 ABI 직접 정의
+      const platformABI = [
+        "function registerBeneficiary(address beneficiary, string memory description) public",
+        "function donate(address beneficiary) public payable",
+        "function beneficiaries(address) public view returns (bool isRegistered, string memory description)",
+      ];
+
+      const tokenABI = [
+        "function balanceOf(address account) public view returns (uint256)",
+      ];
+
+      const certificateABI = [
+        "function balanceOf(address owner) public view returns (uint256)",
+        "function tokenOfOwnerByIndex(address owner, uint256 index) public view returns (uint256)",
+      ];
+
+      // 컨트랙트 주소
+      const platformAddress = "0x8D7Dfa50861d0B813A7f3A207E05557D3dfc8311";
+      const tokenAddress = "0x21E29c6cd7b66859afD1A98F81E34BAa609BaCe1";
+      const certificateAddress = "0xDba5B84a13020B974c17666048DFe3F0670294b9";
+
+      let provider;
+      let signer;
+      let platformContract;
+      let tokenContract;
+      let certificateContract;
+      let userAddress;
+
+      // 앱 초기화 함수
+      function initializeApp() {
+        checkEthereum();
+
+        // MetaMask의 네트워크 변경 이벤트 리스너 추가
+        if (window.ethereum) {
+          window.ethereum.on("chainChanged", () => window.location.reload());
+          window.ethereum.on("accountsChanged", handleAccountsChanged);
+        }
+
+        // 버튼 이벤트 리스너 설정
+        document
+          .getElementById("connectButton")
+          .addEventListener("click", connectMetaMask);
+        document
+          .getElementById("registerButton")
+          .addEventListener("click", registerBeneficiary);
+        document
+          .getElementById("donateButton")
+          .addEventListener("click", donate);
+        document
+          .getElementById("checkButton")
+          .addEventListener("click", checkStatus);
+      }
+
+      // 계정 변경 처리
+      function handleAccountsChanged(accounts) {
+        if (accounts.length === 0) {
+          // 계정 연결 해제됨
+          document.getElementById("accountInfo").innerHTML =
+            "연결 해제됨. 다시 연결해주세요.";
+        } else if (accounts[0] !== userAddress) {
+          // 계정이 변경됨
+          userAddress = accounts[0];
+          if (provider) {
+            signer = provider.getSigner();
+            updateAccountInfo();
+          }
+        }
+      }
+
+      // 이더리움 환경 체크
+      function checkEthereum() {
+        try {
+          if (window.ethereum) {
+            console.log("MetaMask 감지됨!");
+            document.getElementById("connectButton").disabled = false;
+            document.getElementById("networkWarning").style.display = "none";
+
+            // 이미 연결된 계정이 있는지 확인
+            window.ethereum
+              .request({ method: "eth_accounts" })
+              .then((accounts) => {
+                if (accounts.length > 0) {
+                  console.log("이미 연결된 계정:", accounts[0]);
+                  connectMetaMask(); // 자동 연결 시도
+                }
+              })
+              .catch((err) => console.error("계정 확인 오류:", err));
+          } else {
+            console.log("MetaMask가 설치되어 있지 않습니다.");
+            document.getElementById("accountInfo").innerHTML =
+              "MetaMask가 설치되어 있지 않습니다. <a href='https://metamask.io/download.html' target='_blank'>여기서 설치하세요</a>";
+            document.getElementById("connectButton").disabled = true;
+          }
+        } catch (error) {
+          console.error("이더리움 환경 체크 오류:", error);
+          document.getElementById("accountInfo").innerHTML =
+            "MetaMask 체크 오류: " + error.message;
+        }
+      }
+
+      // 계정 정보 업데이트
+      async function updateAccountInfo() {
+        try {
+          if (!provider || !userAddress) return;
+
+          const network = await provider.getNetwork();
+          const balance = await provider.getBalance(userAddress);
+
+          document.getElementById("accountInfo").innerHTML = `
+            <p><strong>연결된 계정:</strong> ${userAddress}</p>
+            <p><strong>네트워크:</strong> ${network.name} (Chain ID: ${
+            network.chainId
+          })</p>
+            <p><strong>잔액:</strong> ${ethers.utils.formatEther(
+              balance
+            )} ETH</p>
+          `;
+
+          // 필드에 주소 자동 입력
+          document.getElementById("beneficiaryAddress").value = userAddress;
+          document.getElementById("checkAddress").value = userAddress;
+        } catch (error) {
+          console.error("계정 정보 업데이트 오류:", error);
+          document.getElementById("accountInfo").innerHTML =
+            "계정 정보 업데이트 오류: " + error.message;
+        }
+      }
+
+      // MetaMask 연결
+      async function connectMetaMask() {
+        try {
+          if (!window.ethereum) {
+            alert("MetaMask가 설치되어 있지 않습니다!");
+            return;
+          }
+
+          console.log("MetaMask 연결 시도...");
+          provider = new ethers.providers.Web3Provider(window.ethereum);
+
+          // 계정 접근 요청
+          const accounts = await window.ethereum.request({
+            method: "eth_requestAccounts",
+          });
+
+          console.log("연결된 계정:", accounts);
+          if (accounts.length > 0) {
+            userAddress = accounts[0];
+
+            // 서명자 가져오기
+            signer = provider.getSigner();
+
+            // 컨트랙트 인스턴스 생성
+            platformContract = new ethers.Contract(
+              platformAddress,
+              platformABI,
+              signer
+            );
+
+            tokenContract = new ethers.Contract(tokenAddress, tokenABI, signer);
+
+            certificateContract = new ethers.Contract(
+              certificateAddress,
+              certificateABI,
+              signer
+            );
+
+            // 계정 정보 업데이트
+            await updateAccountInfo();
+
+            console.log("MetaMask 연결 완료!");
+          }
+        } catch (error) {
+          console.error("MetaMask 연결 오류:", error);
+
+          // 사용자가 거부한 경우
+          if (error.code === 4001) {
+            document.getElementById("accountInfo").innerHTML =
+              "연결 요청을 거부했습니다.";
+          } else {
+            document.getElementById("accountInfo").innerHTML =
+              "연결 오류: " + error.message;
+          }
+        }
+      }
+
+      // 수혜자 등록
+      async function registerBeneficiary() {
+        try {
+          if (!platformContract) {
+            alert("먼저 MetaMask를 연결해주세요.");
+            return;
+          }
+
+          const beneficiaryAddress =
+            document.getElementById("beneficiaryAddress").value;
+          const description = document.getElementById(
+            "beneficiaryDescription"
+          ).value;
+
+          if (!ethers.utils.isAddress(beneficiaryAddress)) {
+            alert("유효한 이더리움 주소를 입력해주세요.");
+            return;
+          }
+
+          if (!description) {
+            alert("설명을 입력해주세요.");
+            return;
+          }
+
+          document.getElementById("registerResult").innerText =
+            "트랜잭션 전송 중...";
+
+          const tx = await platformContract.registerBeneficiary(
+            beneficiaryAddress,
+            description
+          );
+
+          document.getElementById("registerResult").innerHTML = `
+          트랜잭션이 전송되었습니다.<br>
+          트랜잭션 해시: ${tx.hash}<br>
+          트랜잭션 확인 중...
+        `;
+
+          await tx.wait();
+          document.getElementById("registerResult").innerHTML = `
+          <p>✅ 수혜자 등록 완료!</p>
+          <p>트랜잭션 해시: ${tx.hash}</p>
+        `;
+
+          // 수혜자 등록 후 자동으로 기부 주소 필드에도 입력
+          document.getElementById("donationBeneficiary").value =
+            beneficiaryAddress;
+        } catch (error) {
+          console.error(error);
+          document.getElementById("registerResult").innerHTML = `
+          <p>❌ 오류 발생</p>
+          <p>${error.message}</p>
+        `;
+        }
+      }
+
+      // 기부하기
+      async function donate() {
+        try {
+          if (!platformContract) {
+            alert("먼저 MetaMask를 연결해주세요.");
+            return;
+          }
+
+          const beneficiaryAddress = document.getElementById(
+            "donationBeneficiary"
+          ).value;
+          const amount = document.getElementById("donationAmount").value;
+
+          if (!ethers.utils.isAddress(beneficiaryAddress)) {
+            alert("유효한 이더리움 주소를 입력해주세요.");
+            return;
+          }
+
+          if (amount <= 0) {
+            alert("유효한 금액을 입력해주세요.");
+            return;
+          }
+
+          document.getElementById("donateResult").innerText =
+            "트랜잭션 전송 중...";
+
+          const amountWei = ethers.utils.parseEther(amount);
+          const tx = await platformContract.donate(beneficiaryAddress, {
+            value: amountWei,
+          });
+
+          document.getElementById("donateResult").innerHTML = `
+          트랜잭션이 전송되었습니다.<br>
+          트랜잭션 해시: ${tx.hash}<br>
+          트랜잭션 확인 중...
+        `;
+
+          await tx.wait();
+          document.getElementById("donateResult").innerHTML = `
+          <p>✅ ${amount} ETH 기부 완료!</p>
+          <p>트랜잭션 해시: ${tx.hash}</p>
+        `;
+
+          // 기부 후 자동으로 상태 확인
+          document.getElementById("checkButton").click();
+        } catch (error) {
+          console.error(error);
+          document.getElementById("donateResult").innerHTML = `
+          <p>❌ 오류 발생</p>
+          <p>${error.message}</p>
+        `;
+        }
+      }
+
+      // 상태 확인
+      async function checkStatus() {
+        try {
+          if (!provider) {
+            alert("먼저 MetaMask를 연결해주세요.");
+            return;
+          }
+
+          const address = document.getElementById("checkAddress").value;
+
+          if (!ethers.utils.isAddress(address)) {
+            alert("유효한 이더리움 주소를 입력해주세요.");
+            return;
+          }
+
+          document.getElementById("checkResult").innerHTML = "정보 로딩 중...";
+
+          // 각 컨트랙트 인스턴스 재확인 (연결 문제 예방)
+          if (!platformContract) {
+            platformContract = new ethers.Contract(
+              platformAddress,
+              platformABI,
+              provider
+            );
+          }
+          if (!tokenContract) {
+            tokenContract = new ethers.Contract(
+              tokenAddress,
+              tokenABI,
+              provider
+            );
+          }
+          if (!certificateContract) {
+            certificateContract = new ethers.Contract(
+              certificateAddress,
+              certificateABI,
+              provider
+            );
+          }
+
+          // 병렬로 모든 정보 가져오기
+          const [beneficiaryInfo, tokenBalance, certificateCount, balance] =
+            await Promise.all([
+              platformContract.beneficiaries(address).catch((e) => ({
+                isRegistered: false,
+                description: "정보 없음",
+              })),
+              tokenContract
+                .balanceOf(address)
+                .catch((e) => ethers.BigNumber.from(0)),
+              certificateContract
+                .balanceOf(address)
+                .catch((e) => ethers.BigNumber.from(0)),
+              provider.getBalance(address),
+            ]);
+
+          // 결과 표시
+          let resultHTML = `
+          <h3>${address.substring(0, 6)}...${address.substring(
+            address.length - 4
+          )} 정보</h3>
+          <p><strong>ETH 잔액:</strong> ${ethers.utils.formatEther(
+            balance
+          )} ETH</p>
+          <p><strong>토큰 잔액:</strong> ${ethers.utils.formatEther(
+            tokenBalance
+          )}</p>
+          <p><strong>증명서 개수:</strong> ${certificateCount.toString()}</p>
+          <p><strong>수혜자 여부:</strong> ${
+            beneficiaryInfo.isRegistered ? "✅ 등록됨" : "❌ 미등록"
+          }</p>
+          <p><strong>설명:</strong> ${beneficiaryInfo.description}</p>
+        `;
+
+          // 증명서가 있는 경우 증명서 ID 표시
+          if (certificateCount.gt(0)) {
+            resultHTML += `<p><strong>소유한 증명서 ID:</strong> `;
+            const ids = [];
+            for (let i = 0; i < Math.min(certificateCount.toNumber(), 5); i++) {
+              try {
+                const tokenId = await certificateContract.tokenOfOwnerByIndex(
+                  address,
+                  i
+                );
+                ids.push(tokenId.toString());
+              } catch (e) {
+                console.error("증명서 ID 조회 오류:", e);
+              }
+            }
+            resultHTML += ids.join(", ");
+            if (certificateCount.toNumber() > 5) {
+              resultHTML += ` 외 ${certificateCount.toNumber() - 5}개`;
+            }
+            resultHTML += `</p>`;
+          }
+
+          document.getElementById("checkResult").innerHTML = resultHTML;
+        } catch (error) {
+          console.error(error);
+          document.getElementById("checkResult").innerHTML = `
+          <p>❌ 오류 발생</p>
+          <p>${error.message}</p>
+        `;
+        }
+      }
+    </script>
+  </body>
+</html>
