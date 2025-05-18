@@ -27,6 +27,7 @@ import java.util.Arrays;
 @Configuration
 @EnableWebSecurity
 @RequiredArgsConstructor
+
 public class SecurityConfig {
 
 
@@ -62,7 +63,7 @@ public class SecurityConfig {
                         .frameOptions(frame -> frame.sameOrigin()))
 
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/auth/**","/api/**","/api/v1/user/sign-up/**" , "/wallet/**","/h2-console/**").permitAll()  // 회원가입, 로그인, 인증 경로는 허용
+                        .requestMatchers("/auth/**","/auth/logout","/api/**","/api/v1/user/sign-up/**" , "/wallet/**","/h2-console/**").permitAll()  // 회원가입, 로그인, 인증 경로는 허용
                         .requestMatchers("/api/test/protected").authenticated()
                         .anyRequest().authenticated()             // 그 외는 인증 필요
                 )

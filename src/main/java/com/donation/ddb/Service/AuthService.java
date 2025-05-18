@@ -1,6 +1,5 @@
 package com.donation.ddb.Service;
 
-
 import com.donation.ddb.Domain.AuthEvent;
 import com.donation.ddb.Domain.DataNotFoundException;
 import com.donation.ddb.Domain.StudentUser;

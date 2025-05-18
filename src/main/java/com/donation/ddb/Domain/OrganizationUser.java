@@ -32,6 +32,9 @@ public class OrganizationUser extends BaseEntity {
     @Column(unique=true)
     private String oWalletAddress;
 
+    @Column(unique=true)
+    private String oBusinessNumber;
+
     @Column(length=100)
     private String oDescription;
 
@@ -45,6 +48,10 @@ public class OrganizationUser extends BaseEntity {
 
     @Column(length=255)
     private String oProfileImage;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable=false)
+    private Role role; //ROLE_ORGANIZATION
 
     @OneToMany(mappedBy = "organizationUser", cascade = CascadeType.ALL)
     private List<Campaign> campaigns = new ArrayList<>();
