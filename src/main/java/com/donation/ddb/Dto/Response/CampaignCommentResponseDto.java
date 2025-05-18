@@ -17,15 +17,17 @@ public class CampaignCommentResponseDto {
     private String content;
     private StudentUserResponse.StudentUserCommentDto studentUser;
     private Long likes;
+    private boolean isLiked;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
-    public static CampaignCommentResponseDto from(CampaignComment campaignComment, Long likes) {
+    public static CampaignCommentResponseDto from(CampaignComment campaignComment, Long likes, boolean isLiked) {
         return CampaignCommentResponseDto.builder()
                 .id(campaignComment.getCcId())
                 .content(campaignComment.getCcContent())
                 .studentUser(StudentUserResponse.StudentUserCommentDto.from(campaignComment.getStudentUser()))
                 .likes(likes)
+                .isLiked(isLiked)
                 .createdAt(campaignComment.getCreatedAt())
                 .updatedAt(campaignComment.getUpdatedAt())
                 .build();

@@ -1,14 +1,17 @@
 package com.donation.ddb.Controller;
 
-import com.donation.ddb.CustomUserDetails;
+import com.donation.ddb.Converter.CampaignCommentLikeConverter;
 import com.donation.ddb.Domain.Campaign;
+import com.donation.ddb.Domain.CampaignComment;
+import com.donation.ddb.Domain.CampaignCommentLike;
+import com.donation.ddb.Dto.Request.CampaignCommentRequestDto;
 import com.donation.ddb.Dto.Request.CampaignRequestDto;
 import com.donation.ddb.Dto.Response.CampaignResponse;
+import com.donation.ddb.Service.CampaignCommentLikeService.CampaignCommentLikeService;
 import com.donation.ddb.Service.CampaignCommentQueryService.CampaignCommentQueryService;
 import com.donation.ddb.Service.CampaignPlansQueryService.CampaignPlansQueryService;
 import com.donation.ddb.Service.CampaignService.CampaignQueryService;
 import com.donation.ddb.Service.CampaignSpendingQueryService.CampaignSpendingQueryService;
-import com.donation.ddb.Service.CustomUserDetailsService;
 import com.donation.ddb.Service.OrganizationUserService.OrganizationUserQueryService;
 import com.donation.ddb.apiPayload.ApiResponse;
 import com.donation.ddb.apiPayload.code.status.ErrorStatus;
@@ -18,15 +21,14 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import static com.querydsl.core.types.Projections.constructor;
 
@@ -50,6 +52,12 @@ public class CampaignController {
 
     @Autowired
     private CampaignCommentQueryService campaignCommentQueryService;
+
+    @Autowired
+    private CampaignCommentQueryService campaignCommentService;
+
+    @Autowired
+    private CampaignCommentLikeService campaignCommentLikeService;;
 
     @GetMapping("home")
     public ResponseEntity<?> campaignList() {
@@ -206,9 +214,16 @@ public class CampaignController {
 
     @GetMapping("{cId}/comments")
     public ApiResponse<?> getCampaignComments(
+            @AuthenticationPrincipal UserDetails userDetails,
             @PathVariable(value = "cId") Long cId,
             @RequestParam(value = "page", defaultValue = "0") int page,
             @RequestParam(value = "size", defaultValue = "10") int size) {
+
+        String userEmail = null;
+
+        if (userDetails != null) {
+            userEmail = userDetails.getUsername();
+        }
 
         if (page < 0) {
             throw new CampaignHandler(ErrorStatus.PAGE_NUMBER_INVALID);
@@ -219,34 +234,52 @@ public class CampaignController {
 
         Pageable pageable = PageRequest.of(page, size);
 
-        return ApiResponse.onSuccess(campaignCommentQueryService.findCommentByCampaignId(cId, pageable));
+        return ApiResponse.onSuccess(campaignCommentQueryService.findCommentByCampaignId(cId, pageable, userEmail));
     }
 
-//    @PostMapping("{cId}/comments")
-//    public ApiResponse<?> addCampaignComment(
-//            @PathVariable(value = "cId") Long cId,
-//            @RequestBody CampaignRequestDto campaignRequestDto
-//    ) {
-//        // 캠페인 댓글 추가 로직
-//    }
-
-    @GetMapping("temp")
-    public ApiResponse<?> getCampaignTemp(
-            @AuthenticationPrincipal CustomUserDetails userDetails
+    @PostMapping("{cId}/comments")
+    public ApiResponse<?> addCampaignComment(
+            @PathVariable(value = "cId") Long cId,
+            @RequestBody CampaignCommentRequestDto campaignCommentRequestDto,
+            @AuthenticationPrincipal UserDetails userDetails
     ) {
-
+        // 캠페인 댓글 추가 로직
         if (userDetails == null) {
             throw new CampaignHandler(ErrorStatus._UNAUTHORIZED);
         }
 
         String email = userDetails.getUsername();
-        Long sId = userDetails.getId();
-        log.info("User email: {}", email);
 
-        return ApiResponse.onSuccess(Map.of(
-                "email", email,
-                "sId", sId
-        ));
+        CampaignComment newComment = campaignCommentService.addComment(
+                campaignCommentRequestDto.getContent(),
+                cId,
+                email
+        );
+
+        return ApiResponse.onSuccess(
+                Map.of(
+                        "commentId", newComment.getCcId(),
+                        "content", newComment.getCcContent(),
+                        "createdAt", newComment.getCreatedAt()
+                )
+        );
+    }
+
+    @PostMapping("{cId}/comments/{ccId}/likes")
+    public ApiResponse<?> addCommentLike(
+            @PathVariable(value = "ccId") Long ccId,
+            @AuthenticationPrincipal UserDetails userDetails
+    ) {
+        if (userDetails == null) {
+            throw new CampaignHandler(ErrorStatus._UNAUTHORIZED);
+        }
+
+        String email = userDetails.getUsername();
+
+        CampaignCommentLike campaignCommentLike = campaignCommentLikeService.toggleCommentLike(ccId, email);
+
+        return ApiResponse.onSuccess(CampaignCommentLikeConverter.toDto(campaignCommentLike));
+
     }
 
     public CampaignResponse.CampaignListDto convertToListDto(Campaign campaign) {
