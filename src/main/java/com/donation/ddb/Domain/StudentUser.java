@@ -8,6 +8,7 @@ import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 
 @Entity
@@ -64,4 +65,15 @@ public class StudentUser {
     @Column(nullable=false)
     private Role role; //ROLE_STUDENT
 
+    @OneToMany(mappedBy = "studentUser", cascade = CascadeType.ALL)
+    private List<Post> postList;
+
+    @OneToMany(mappedBy = "studentUser", cascade = CascadeType.ALL)
+    private List<PostComment> postCommentList;
+
+    @OneToMany(mappedBy = "studentUser", cascade = CascadeType.ALL)
+    private List<PostLike> postLikeList;
+
+    @OneToMany(mappedBy = "studentUser", cascade = CascadeType.ALL)
+    private List<PostCommentLike> postCommentLikeList;
 }

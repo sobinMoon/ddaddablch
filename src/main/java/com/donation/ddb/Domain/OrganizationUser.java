@@ -50,8 +50,9 @@ public class OrganizationUser extends BaseEntity {
     private String oProfileImage;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable=false)
-    private Role role; //ROLE_ORGANIZATION
+    @Column(nullable = false)
+    @Builder.Default
+    private Role role = Role.ROLE_ORGANIZATION; //ROLE_ORGANIZATION
 
     @OneToMany(mappedBy = "organizationUser", cascade = CascadeType.ALL)
     private List<Campaign> campaigns = new ArrayList<>();

@@ -2,7 +2,7 @@ package com.donation.ddb.Service.OrganizationUserService;
 
 import com.donation.ddb.Domain.OrganizationUser;
 import com.donation.ddb.Dto.Response.OrganizationResponse;
-import com.donation.ddb.Repository.OrganizationUserRepository.OrganizationUserRepository;
+import com.donation.ddb.Repository.OrganizationUserRepository;
 import com.donation.ddb.apiPayload.code.status.ErrorStatus;
 import com.donation.ddb.apiPayload.exception.handler.OrganizationUserHandler;
 import lombok.RequiredArgsConstructor;
