@@ -38,7 +38,7 @@ public class CampaignQueryServiceImpl implements CampaignQueryService {
 
         CampaignStatusFlag status;
         if (statusFlag == null) {
-            status = CampaignStatusFlag.IN_PROGRESS;
+            status = CampaignStatusFlag.FUNDRAISING;
         } else {
             try {
                 status = CampaignStatusFlag.valueOf(statusFlag);
