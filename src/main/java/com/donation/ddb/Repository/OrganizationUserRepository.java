@@ -11,4 +11,6 @@ import java.util.Optional;
 public interface OrganizationUserRepository extends JpaRepository<OrganizationUser,Long> {
  Optional<OrganizationUser> findByoEmail(String email);
  Optional<OrganizationUser> findByoWalletAddress(String address);
+ Optional<OrganizationUser> findByoId(Long aLong);
+
 }
