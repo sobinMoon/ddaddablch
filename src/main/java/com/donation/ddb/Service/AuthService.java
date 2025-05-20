@@ -1,14 +1,12 @@
 package com.donation.ddb.Service;
 
-
-import com.donation.ddb.Domain.AuthEvent;
-import com.donation.ddb.Domain.DataNotFoundException;
-import com.donation.ddb.Domain.StudentUser;
-import com.donation.ddb.Domain.WalletAuthStatus;
+import com.donation.ddb.Domain.*;
 import com.donation.ddb.Dto.Request.WalletAddressVerifyRequestDto;
 import com.donation.ddb.Repository.AuthEventRepository;
+import com.donation.ddb.Repository.RefreshTokenRepository;
 import com.donation.ddb.Repository.StudentUserRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,11 +24,14 @@ import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class AuthService {
 
     @Autowired
     private final StudentUserRepository studentUserRepository;
     private final AuthEventRepository authEventRepository;
+    private final RefreshTokenRepository refreshTokenRepository;
+
 
     @Transactional
     public String generateMessage(String email,String walletAddress){
@@ -149,4 +150,17 @@ public class AuthService {
         }
     }
 
+    @Transactional
+    public void deleteToken(String token){
+       try{
+            RefreshToken refreshToken=refreshTokenRepository.findByToken(token)
+                    .orElseThrow(()-> new DataNotFoundException("토큰이 존재하지 않습니다."));
+            // DB에서 해당 리프레시 토큰 삭제
+            refreshTokenRepository.deleteByToken(token);
+           log.info("RefreshToken 삭제 완료: {}", refreshToken);
+       } catch (Exception e) {
+           log.error("RefreshToken 삭제 중 오류 발생: {}", e.getMessage(), e);
+           throw e;
+       }
+    }
 }

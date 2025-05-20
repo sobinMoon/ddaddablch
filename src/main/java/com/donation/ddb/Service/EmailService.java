@@ -64,7 +64,7 @@ public class EmailService {
             //토큰 만료되었으면 false 반환
             if (verificationToken.isExpired())
                 throw new TokenExpiredException("인증 번호가 만료되었습니다.");
-            //토큰 verified ture로 바꾸기
+            //토큰 verified true로 바꾸기
             verificationToken.setVerified(true);
             tokenRepository.save(verificationToken);
             return true;

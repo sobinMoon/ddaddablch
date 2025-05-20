@@ -27,6 +27,7 @@ import java.util.Arrays;
 @Configuration
 @EnableWebSecurity
 @RequiredArgsConstructor
+
 public class SecurityConfig {
 
 
@@ -62,7 +63,7 @@ public class SecurityConfig {
                         .frameOptions(frame -> frame.sameOrigin()))
 
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/auth/**","/api/**","/api/v1/user/sign-up/**" , "/wallet/**","/h2-console/**").permitAll()  // 회원가입, 로그인, 인증 경로는 허용
+                        .requestMatchers("/auth/**","/auth/logout","/api/**","/api/v1/user/sign-up/**" , "/wallet/**","/h2-console/**").permitAll()  // 회원가입, 로그인, 인증 경로는 허용
                         .requestMatchers("/api/test/protected").authenticated()
                         .anyRequest().authenticated()             // 그 외는 인증 필요
                 )
@@ -89,9 +90,18 @@ public class SecurityConfig {
                 "http://localhost:5500",     // Live Server 기본 포트
                 "http://localhost:8000",     // Python 서버 기본 포트
                 "http://127.0.0.1:5500",
+                "http://172.20.10.9:5500",
+                "http://172.20.10.9:3000",
+                "http://172.20.10.9:8080",
+                "http://172.20.10.9:8000",
+                "http://172.20.10.9:5173",
                 "http://127.0.0.1:8000",
                 "http://localhost:8082", //h2
                 "http://192.168.1.107:14281",
+                "http://192.168.0.11:8080",
+                "http://192.168.0.11:5500",
+                "http://192.168.0.11:3000",
+                "http://192.168.0.11:5173",
                 "http://192.168.56.1:5173"
                 ,"http://192.168.56.1:3000",
                 "http://192.168.56.1:8000",
@@ -99,7 +109,21 @@ public class SecurityConfig {
                 "http://10.101.48.92:5500",   // ✅ 필요시 추가
                 "http://10.101.48.92:8080" ,   // ✅ 필요시 추가,
                 "http://10.101.48.92:5173",
+                "http://10.101.48.199:3000",   // ✅ 여기에 추가
+                "http://10.101.48.199:5500",   // ✅ 필요시 추가
+                "http://10.101.48.199:8080" ,   // ✅ 필요시 추가,
+                "http://10.101.48.199:5173",
+                "http://10.101.32.65:3000",   // ✅ 여기에 추가
+                "http://10.101.32.65:5500",   // ✅ 필요시 추가
+                "http://10.101.32.65:8080" ,   // ✅ 필요시 추가,
+                "http://10.101.32.65:5173",
+                "http://10.101.32.1:3000",   // ✅ 여기에 추가
+                "http://10.101.32.1:5500",   // ✅ 필요시 추가
+                "http://10.101.32.1:8080" ,   // ✅ 필요시 추가,
+                "http://10.101.32.1:5173",
+
                 "http://localhost:5173"
+
         ));
 
         // 허용할 HTTP 메서드 설정
