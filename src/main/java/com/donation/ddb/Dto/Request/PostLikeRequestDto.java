@@ -1,5 +1,6 @@
 package com.donation.ddb.Dto.Request;
 
+import com.donation.ddb.validation.ExistPost;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -12,7 +13,7 @@ public class PostLikeRequestDto {
     @AllArgsConstructor
     public static class JoinDto {
         @JsonProperty("postId")
-
+        @ExistPost
         private Long postId;
 
         @JsonProperty("studentId")
