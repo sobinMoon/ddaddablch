@@ -104,7 +104,7 @@ public class LoginController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                     .body(
                             Map.of("success",false,
-                                    "message","이메일 또는 비밀번호가 일치하지 않습니다.")
+                                    "message","서버 오류가 발생했습니다.")
                     );
         }
 
@@ -131,4 +131,73 @@ public class LoginController {
                 .orElseThrow(() -> new RuntimeException("Refresh 토큰이 db에 없습니다."));
     }
 
+    /*@PostMapping("/organization")
+    public ResponseEntity<?> login(@Valid @RequestBody
+                                   LoginRequestDto loginRequestDto,
+                                   BindingResult bindingResult){
+        if(bindingResult.hasErrors()){
+            Map<String,String> errorMap=new HashMap<>();
+            bindingResult.getFieldErrors().forEach(error->{
+                errorMap.put(error.getField(),error.getDefaultMessage());
+                log.warn("로그인 유효성 검증 실패: {} -{} ",error.getField(), error.getDefaultMessage());
+            });
+            return ResponseEntity.badRequest().body(errorMap);
+        }
+
+        //인증
+
+        log.info("인증 시도: " + loginRequestDto.getEmail());
+
+        try{
+            Authentication authentication=
+                    authenticationManager.authenticate(
+                            new UsernamePasswordAuthenticationToken(
+                                    loginRequestDto.getEmail(),
+                                    loginRequestDto.getPassword()
+                            )
+                    );
+            // 인증 성공 후 로그
+            log.info("인증 성공. 인증 객체 클래스: " + authentication.getClass().getName());
+            log.info("Principal 클래스: " + authentication.getPrincipal().getClass().getName());
+
+
+            SecurityContextHolder.getContext().setAuthentication(authentication);
+
+            //Access Token 생성
+            String jwt=jwtTokenProvider.generateToken(authentication);
+
+            //Refresh Token 생성 및 저장
+            RefreshToken refreshToken = refreshTokenService.createRefreshToken(authentication.getName());
+
+            return ResponseEntity.ok(
+                    Map.of(
+                            "success",true,
+                            "message","로그인 성공",
+                            "token",jwt,
+                            "refreshToken", refreshToken.getToken()
+                    )
+            );
+
+
+
+
+        } catch(AuthenticationException e){
+            //비밀번호 또는 이메일 불일치로 오류 발생
+            log.warn("로그인 인증 실패 : ; + {}",e.getMessage());
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(
+                            Map.of("success",false,
+                                    "message","이메일 또는 비밀번호가 일치하지 않습니다.")
+                    );
+        } catch(Exception e){
+            System.out.println("인증 실패 예외: " + e.getClass().getName() + ": " + e.getMessage());
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(
+                            Map.of("success",false,
+                                    "message","이메일 또는 비밀번호가 일치하지 않습니다.")
+                    );
+        }
+
+    }*/
 }

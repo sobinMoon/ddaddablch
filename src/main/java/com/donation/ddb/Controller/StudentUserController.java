@@ -4,10 +4,12 @@ package com.donation.ddb.Controller;
 import com.donation.ddb.Domain.DataNotFoundException;
 import com.donation.ddb.Dto.Request.DuplicateNicknameRequestDto;
 import com.donation.ddb.Dto.Request.EmailVerificationRequestDto;
+import com.donation.ddb.Dto.Request.OrgSignUpForm;
 import com.donation.ddb.Dto.Request.StudentSignUpForm;
 import com.donation.ddb.Dto.Response.DuplicateNicknameResponseDto;
 import com.donation.ddb.Service.EmailService;
 import com.donation.ddb.Service.JwtTokenProvider;
+import com.donation.ddb.Service.OrgUserService;
 import com.donation.ddb.Service.StudentUserService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
@@ -172,7 +174,7 @@ public class StudentUserController {
     }
 
     @GetMapping("/verify-email")
-    public ResponseEntity<?> verifyEmail(@RequestParam("token") String token){
+    public ResponseEntity<?> verifyEmail(@RequestParam String token){
         boolean verified=emailService.verifyEmail(token);
 
         if(verified){
