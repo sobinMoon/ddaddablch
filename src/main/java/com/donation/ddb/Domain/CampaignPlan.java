@@ -24,6 +24,6 @@ public class CampaignPlan {
     private String cpTitle;
 
     @Column(name = "cp_amount", nullable = false)
-    private int cpAmount;
+    private Integer cpAmount;
 
 }

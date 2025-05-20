@@ -15,5 +15,5 @@ public interface CampaignRepository extends JpaRepository<Campaign, Long>, Campa
     // optional은 단일 엔티티 조회 시 사용, null일 수 있음
 //    List<Campaign> findCampaignBycStatusFlag(CampaignStatusFlag cStatusFlag);
 
-
+    Campaign findBycId(Long cId);
 }

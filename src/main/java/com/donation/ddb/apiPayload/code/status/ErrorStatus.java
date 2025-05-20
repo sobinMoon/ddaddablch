@@ -16,11 +16,22 @@ public enum ErrorStatus implements BaseErrorCode {
     _UNAUTHORIZED(HttpStatus.UNAUTHORIZED,"COMMON401","인증이 필요합니다."),
     _FORBIDDEN(HttpStatus.FORBIDDEN, "COMMON403", "금지된 요청입니다."),
 
+    PAGE_SIZE_INVALID(HttpStatus.BAD_REQUEST, "PAGE4001", "페이지 사이즈는 0보다 커야합니다."),
+    PAGE_NUMBER_INVALID(HttpStatus.BAD_REQUEST, "PAGE4002", "페이지 번호는 0보다 커야합니다."),
 
     CAMPAIGN_NOT_FOUND(HttpStatus.NOT_FOUND, "CAMPAIGN4001", "캠페인이 없습니다."),
     CAMPAIGN_INVALID_CATEGORY(HttpStatus.BAD_REQUEST, "CAMPAIGN4002", "유효하지 않은 캠페인 카테고리입니다."),
     CAMPAIGN_INVALID_STATUS_FLAG(HttpStatus.BAD_REQUEST, "CAMPAIGN4003", "유효하지 않은 캠페인 상태입니다."),
-    CAMPAIGN_INVALID_SORT_TYPE(HttpStatus.BAD_REQUEST, "CAMPAIGN4004", "유효하지 않은 캠페인 정렬 타입입니다.");
+    CAMPAIGN_INVALID_SORT_TYPE(HttpStatus.BAD_REQUEST, "CAMPAIGN4004", "유효하지 않은 캠페인 정렬 타입입니다."),
+
+    CAMPAIGN_PLAN_NOT_FOUND(HttpStatus.NOT_FOUND, "CAMPAIGN_PLAN4001", "캠페인 플랜이 없습니다."),
+
+    CAMPAIGN_COMMENT_NOT_FOUND(HttpStatus.NOT_FOUND, "CAMPAIGN_COMMENT4001", "캠페인 댓글이 없습니다."),
+    CAMPAIGN_COMMENT_LIKE_SELF(HttpStatus.BAD_REQUEST, "CAMPAIGN_COMMENT4002", "본인 댓글에는 좋아요할 수 없습니다."),
+
+    STUDENT_USER_NOT_FOUND(HttpStatus.NOT_FOUND, "STUDENT_USER4001", "학생 사용자가 없습니다."),
+
+    ORGANIZATION_USER_NOT_FOUND(HttpStatus.NOT_FOUND, "ORGANIZATION_USER4001", "단체 사용자가 없습니다.");
 
 
     // 예시,,,

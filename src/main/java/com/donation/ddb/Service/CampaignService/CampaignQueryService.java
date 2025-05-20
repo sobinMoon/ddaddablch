@@ -32,5 +32,7 @@ public interface CampaignQueryService {
             LocalDate businessEnd
     );
 
+    Campaign findBycId(Long cId);
+
 
 }
