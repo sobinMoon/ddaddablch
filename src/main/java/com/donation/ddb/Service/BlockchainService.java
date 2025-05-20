@@ -121,7 +121,7 @@ public class BlockchainService {
         }
     }
 
-    //수혜자에게 기부
+    // 수혜자에게 기부
     public CompletableFuture<TransactionReceipt> donate(String beneficiaryAddress, BigInteger amount) {
         log.info("Donating " + amount + " wei to " + beneficiaryAddress);
 
@@ -210,49 +210,46 @@ public class BlockchainService {
         throw new RuntimeException("Transaction receipt not available after " + attempts + " attempts");
     }
 
-//    /**
-//     * 수혜자의 잔액을 조회하는 함수
-//     */
-//    public BigInteger getBeneficiaryBalance(String beneficiaryAddress) throws Exception {
-//        System.out.println("Checking balance for " + beneficiaryAddress);
-//
-//        Function function = new Function(
-//                "getBeneficiaryBalance",
-//                Collections.singletonList(new Address(beneficiaryAddress)),
-//                Collections.singletonList(new TypeReference<Uint256>() {})
-//        );
-//
-//        String encodedFunction = FunctionEncoder.encode(function);
-//
-//        // 컨트랙트 함수 호출 (읽기 전용)
-//        EthCall ethCall = web3j.ethCall(
-//                Transaction.createEthCallTransaction(
-//                        credentials.getAddress(),
-//                        contractAddress,
-//                        encodedFunction
-//                ),
-//                DefaultBlockParameterName.LATEST
-//        ).send();
-//
-//        if (ethCall.hasError()) {
-//            throw new RuntimeException("Error calling contract: " + ethCall.getError().getMessage());
-//        }
-//
-//        List<Type> result = FunctionReturnDecoder.decode(
-//                ethCall.getValue(),
-//                function.getOutputParameters()
-//        );
-//
-//        BigInteger balance = ((Uint256) result.get(0)).getValue();
-//        System.out.println("Balance: " + balance + " wei");
-//        return balance;
-//    }
-//
-//    /**
-//     * 수혜자가 자금을 인출하는 함수
-//     */
-//    public CompletableFuture<TransactionReceipt> withdraw() {
-//        System.out.println("Withdrawing funds for " + credentials.getAddress());
+    // 잔액조회
+    public BigInteger getBalance(String address) throws Exception {
+        log.info("Checking balance for " + address);
+
+        Function function = new Function(
+                "getBeneficiaryBalance",//호출할 컨트랙트 함수 이름
+                Collections.singletonList(new Address(address)), //입력
+                Collections.singletonList(new TypeReference<Uint256>() {}) //반환
+        );
+
+        String encodedFunction = FunctionEncoder.encode(function);
+
+        // 컨트랙트 함수 호출 (읽기 전용)
+        EthCall ethCall = web3j.ethCall( //읽기 전용 함수 호출 -> 블록체인 기록 x
+                Transaction.createEthCallTransaction(
+                        credentials.getAddress(),
+                        contractAddress,
+                        encodedFunction
+                ),
+                DefaultBlockParameterName.LATEST //가장 최근 블록 기준
+        ).send();
+
+        if (ethCall.hasError()) {
+            throw new RuntimeException("Error calling contract: " + ethCall.getError().getMessage());
+        }
+
+        List<Type> result = FunctionReturnDecoder.decode(
+                ethCall.getValue(), //hex문자열로 컨트랙트로부터 받음
+                function.getOutputParameters() //반환값 타입 정보
+        );
+
+        BigInteger balance = ((Uint256) result.get(0)).getValue(); //디코딩된 첫번째값 꺼내기
+        log.info("Balance: " + balance + " wei");
+
+        return balance;
+    }
+
+//    //수혜자 기부금 인출
+//    public CompletableFuture<TransactionReceipt> withdrawFunds() {
+//        log.info("Withdrawing funds for " + credentials.getAddress());
 //
 //        Function function = new Function(
 //                "withdraw",

@@ -5,6 +5,7 @@ import com.donation.ddb.Domain.DataNotFoundException;
 import com.donation.ddb.Dto.Request.EmailVerificationRequestDto;
 import com.donation.ddb.Dto.Request.OrgEmailVerificationRequestDto;
 import com.donation.ddb.Dto.Request.OrgSignUpForm;
+import com.donation.ddb.Repository.OrganizationUserRepository;
 import com.donation.ddb.Service.EmailService;
 import com.donation.ddb.Service.JwtTokenProvider;
 import com.donation.ddb.Service.OrgUserService;
@@ -30,12 +31,15 @@ public class OrgUserController {
 
     @Autowired
     private final OrgUserService orgUserService;
+    private final OrganizationUserRepository organizationUserRepository;
     private final EmailService emailService;
     private final JwtTokenProvider jwtTokenProvider;
 
     @PostMapping("/send-verification-email")
     public ResponseEntity<?> sendVerificationEmail(
-            @Valid @RequestBody OrgEmailVerificationRequestDto request, BindingResult bindingResult){
+            @Valid @RequestBody OrgEmailVerificationRequestDto request,
+            BindingResult bindingResult){
+
         if(bindingResult.hasErrors()) {
             Map<String, String> errorMap = new HashMap<>();
             bindingResult.getFieldErrors().forEach(error -> {
@@ -47,6 +51,7 @@ public class OrgUserController {
             });
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorMap);
         }
+
         try {
             emailService.sendVerificationEmail(request.getEmail());
             return ResponseEntity.ok(
@@ -113,12 +118,13 @@ public class OrgUserController {
                     orgSignUpForm.getName(),
                     orgSignUpForm.getEmail(),
                     orgSignUpForm.getPassword(),
-
                     orgSignUpForm.getConfirmPassword(),
-
                     orgSignUpForm.getBusinessNumber(),
-                    orgSignUpForm.getOWalletAddress()
+                    orgSignUpForm.getWalletAddress(),
+                    orgSignUpForm.getDescription(),
+                    orgSignUpForm.getProfileImage()
             );
+
             log.info("회원가입 성공 : 사용자 ID {} ",userId);
 
 
@@ -139,7 +145,7 @@ public class OrgUserController {
 //
 //            //JWT 토큰 생성
 //            String jwt=jwtTokenProvider.generateToken(auth);
-
+            //log.info("==> 저장 직전 oWalletAddress: " + organizationUserRepository.findByoWalletAddress());
             return ResponseEntity.status(HttpStatus.CREATED).body(
                     Map.of("success",true,
                             "message","단체 회원가입이 완료됐습니다.")
