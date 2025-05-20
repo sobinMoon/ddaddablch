@@ -38,7 +38,7 @@ public class OrgUserController {
     @PostMapping("/send-verification-email")
     public ResponseEntity<?> sendVerificationEmail(
             @Valid @RequestBody OrgEmailVerificationRequestDto request,
-            BindingResult bindingResult){
+            BindingResult bindingResult) {
 
         if(bindingResult.hasErrors()) {
             Map<String, String> errorMap = new HashMap<>();
@@ -46,26 +46,32 @@ public class OrgUserController {
                 String fieldName = error.getField();
                 String errorMessage = error.getDefaultMessage();
                 errorMap.put(fieldName, errorMessage);
-                log.warn("회원가입 유효성 검증 실패 : {} - {}", fieldName, errorMessage
-                );
+                log.warn("회원가입 유효성 검증 실패 : {} - {}", fieldName, errorMessage);
             });
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorMap);
         }
 
         try {
+            log.info("이메일 인증 요청: {}", request.getEmail());
             emailService.sendVerificationEmail(request.getEmail());
+            log.info("이메일 인증 성공: {}", request.getEmail());
             return ResponseEntity.ok(
                     Map.of("success", true,
                             "message", "인증 메일이 전송됐습니다.")
             );
         } catch (Exception e) {
-            log.info(e.getMessage());
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
-                    //Map.of("error",e.getMessage())
+            // 예외의 전체 스택 트레이스를 로그에 기록
+            log.error("이메일 전송 실패: {} - {}", request.getEmail(), e.getMessage(), e);
 
+            // 원인 예외(cause)가 있다면 함께 로그에 기록
+            Throwable cause = e.getCause();
+            if (cause != null) {
+                log.error("원인 예외: {}", cause.getMessage(), cause);
+            }
+
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
                     Map.of("success", false,
-                            "message", "인증 메일 전송 실패했습니다."
-                    )
+                            "message", "인증 메일 전송에 실패했습니다. 관리자에게 문의해주세요.")
             );
         }
     }

@@ -6,6 +6,7 @@ import com.donation.ddb.Repository.AuthEventRepository;
 import com.donation.ddb.Repository.RefreshTokenRepository;
 import com.donation.ddb.Repository.StudentUserRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,6 +24,7 @@ import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class AuthService {
 
     @Autowired
@@ -150,10 +152,15 @@ public class AuthService {
 
     @Transactional
     public void deleteToken(String token){
+       try{
             RefreshToken refreshToken=refreshTokenRepository.findByToken(token)
                     .orElseThrow(()-> new DataNotFoundException("토큰이 존재하지 않습니다."));
             // DB에서 해당 리프레시 토큰 삭제
-            refreshTokenRepository.deleteByToken(refreshToken.toString());
-
+            refreshTokenRepository.deleteByToken(token);
+           log.info("RefreshToken 삭제 완료: {}", refreshToken);
+       } catch (Exception e) {
+           log.error("RefreshToken 삭제 중 오류 발생: {}", e.getMessage(), e);
+           throw e;
+       }
     }
 }

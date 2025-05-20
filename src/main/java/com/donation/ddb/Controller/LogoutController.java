@@ -1,6 +1,7 @@
 package com.donation.ddb.Controller;
 
 
+import com.donation.ddb.Domain.DataNotFoundException;
 import com.donation.ddb.Dto.Request.LogoutRequest;
 import com.donation.ddb.Repository.RefreshTokenRepository;
 import com.donation.ddb.Service.AuthService;
@@ -38,6 +39,11 @@ public class LogoutController {
             return ResponseEntity.status(HttpStatus.OK).body(
                     Map.of("success", true,
                             "message", "로그아웃 성공")
+            );
+        }catch(DataNotFoundException e){
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
+                    Map.of("success", false,
+                            "message", "로그아웃 실패 - 토큰 없음")
             );
         }catch(Exception e){
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
