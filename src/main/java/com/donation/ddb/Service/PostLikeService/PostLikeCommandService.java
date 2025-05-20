@@ -24,10 +24,10 @@ public class PostLikeCommandService {
     private final StudentUserRepository studentUserRepository;
 
     public PostLike joinPostLike(Long pId, String sEmail) {
-        Post post = postRepository.findPostByPId(pId);
+        Post post = postRepository.findPostBypId(pId);
         StudentUser studentUser = studentUserRepository.findBysEmail(sEmail)
                 .orElseThrow(() -> new PostHandler(ErrorStatus.STUDENT_USER_NOT_FOUND));
-        Optional<PostLike> existPostLike = postLikeRepository.findByPost_PIdAndStudentUser_SEmail(pId, sEmail);
+        Optional<PostLike> existPostLike = postLikeRepository.findByPost_pIdAndStudentUser_sEmail(pId, sEmail);
 
         if (existPostLike.isPresent()) {
             postLikeRepository.delete(existPostLike.get());

@@ -19,7 +19,7 @@ public class PostQueryService {
     }
 
     public Post findPostByPId(Long postId) {
-        return postRepository.findPostByPId(postId);
+        return postRepository.findPostBypId(postId);
     }
 
 }

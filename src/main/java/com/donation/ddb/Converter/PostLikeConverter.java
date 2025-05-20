@@ -16,6 +16,7 @@ public class PostLikeConverter {
     public static PostLikeResponseDto.JoinResultDto toJoinResultDto(PostLike postLike) {
         return PostLikeResponseDto.JoinResultDto.builder()
                 .postLikeId(postLike.getPlId())
+                .createdAt(postLike.getCreatedAt())
                 .build();
     }
 

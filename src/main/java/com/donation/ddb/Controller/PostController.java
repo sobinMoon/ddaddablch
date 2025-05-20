@@ -29,6 +29,8 @@ public class PostController {
 
     @Autowired
     private PostCommandService postCommandService;
+
+    @Autowired
     private PostLikeCommandService postLikeCommandService;
 
     @PostMapping("")
@@ -50,7 +52,7 @@ public class PostController {
 
     @PostMapping("/{postId}/likes")
     public ApiResponse<?> addPostLike(
-            @PathVariable @ExistPost Long postId,
+            @PathVariable(value="postId") @ExistPost Long postId,
             @AuthenticationPrincipal UserDetails userDetails
     ) {
         if (userDetails == null) {
