@@ -1,9 +1,9 @@
 package com.donation.ddb.Service.PostCommentService;
 
 import com.donation.ddb.Converter.PostCommentConverter;
-import com.donation.ddb.Converter.PostConverter;
 import com.donation.ddb.Domain.Post;
 import com.donation.ddb.Domain.PostComment;
+import com.donation.ddb.Domain.PostCommentLike;
 import com.donation.ddb.Domain.StudentUser;
 import com.donation.ddb.Dto.Request.PostCommentRequestDto;
 import com.donation.ddb.Repository.PostCommentRepository;
@@ -13,6 +13,8 @@ import com.donation.ddb.apiPayload.code.status.ErrorStatus;
 import com.donation.ddb.apiPayload.exception.handler.PostHandler;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -25,6 +27,7 @@ public class PostCommentCommandService {
 
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new PostHandler(ErrorStatus.POST_NOT_FOUND));
+
         StudentUser user = studentUserRepository.findBysEmail(userEmail)
                 .orElseThrow(() -> new PostHandler(ErrorStatus.STUDENT_USER_NOT_FOUND));
 
