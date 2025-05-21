@@ -30,6 +30,10 @@ public enum ErrorStatus implements BaseErrorCode {
     CAMPAIGN_COMMENT_LIKE_SELF(HttpStatus.BAD_REQUEST, "CAMPAIGN_COMMENT4002", "본인 댓글에는 좋아요할 수 없습니다."),
 
     POST_NOT_FOUND(HttpStatus.NOT_FOUND, "POST4001", "게시글이 없습니다."),
+    POST_LIKE_SELF(HttpStatus.BAD_REQUEST, "POST4002", "본인 게시글에는 좋아요할 수 없습니다."),
+
+    POST_COMMENT_NOT_FOUND(HttpStatus.NOT_FOUND, "POST_COMMENT4001", "게시글 댓글이 없습니다."),
+    POST_COMMENT_LIKE_SELF(HttpStatus.BAD_REQUEST, "POST_COMMENT4002", "본인 댓글에는 좋아요할 수 없습니다."),
 
     STUDENT_USER_NOT_FOUND(HttpStatus.NOT_FOUND, "STUDENT_USER4001", "학생 사용자가 없습니다."),
 

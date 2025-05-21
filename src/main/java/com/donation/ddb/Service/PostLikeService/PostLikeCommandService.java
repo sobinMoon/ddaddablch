@@ -29,6 +29,10 @@ public class PostLikeCommandService {
                 .orElseThrow(() -> new PostHandler(ErrorStatus.STUDENT_USER_NOT_FOUND));
         Optional<PostLike> existPostLike = postLikeRepository.findByPost_pIdAndStudentUser_sEmail(pId, sEmail);
 
+        if (post.getStudentUser().getSEmail().equals(studentUser.getSEmail())) {
+            throw new PostHandler(ErrorStatus.POST_LIKE_SELF);
+        }
+
         if (existPostLike.isPresent()) {
             postLikeRepository.delete(existPostLike.get());
             return existPostLike.get();
