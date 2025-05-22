@@ -1,10 +1,10 @@
 package com.donation.ddb.Controller;
 
 import com.donation.ddb.Domain.RefreshToken;
-import com.donation.ddb.Dto.Request.LoginRequestDto;
+import com.donation.ddb.Dto.Request.OrgLoginRequest;
+import com.donation.ddb.Dto.Request.StudentLoginRequestDto;
 import com.donation.ddb.Dto.Request.TokenRefreshRequestDto;
 import com.donation.ddb.Dto.Response.TokenRefreshResponseDto;
-import com.donation.ddb.Repository.RefreshTokenRepository;
 import com.donation.ddb.Service.CustomUserDetailsService;
 import com.donation.ddb.Service.JwtTokenProvider;
 import com.donation.ddb.Service.RefreshTokenService;
@@ -18,7 +18,6 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -42,7 +41,7 @@ public class LoginController {
 
     @PostMapping("/student")
     public ResponseEntity<?> login(@Valid @RequestBody
-                                   LoginRequestDto loginRequestDto,
+                                       StudentLoginRequestDto loginRequestDto,
                                    BindingResult bindingResult){
         if(bindingResult.hasErrors()){
             Map<String,String> errorMap=new HashMap<>();
@@ -131,9 +130,9 @@ public class LoginController {
                 .orElseThrow(() -> new RuntimeException("Refresh 토큰이 db에 없습니다."));
     }
 
-    /*@PostMapping("/organization")
+    @PostMapping("/org")
     public ResponseEntity<?> login(@Valid @RequestBody
-                                   LoginRequestDto loginRequestDto,
+                                       OrgLoginRequest loginRequestDto,
                                    BindingResult bindingResult){
         if(bindingResult.hasErrors()){
             Map<String,String> errorMap=new HashMap<>();
@@ -145,7 +144,6 @@ public class LoginController {
         }
 
         //인증
-
         log.info("인증 시도: " + loginRequestDto.getEmail());
 
         try{
@@ -177,10 +175,6 @@ public class LoginController {
                             "refreshToken", refreshToken.getToken()
                     )
             );
-
-
-
-
         } catch(AuthenticationException e){
             //비밀번호 또는 이메일 불일치로 오류 발생
             log.warn("로그인 인증 실패 : ; + {}",e.getMessage());
@@ -192,10 +186,10 @@ public class LoginController {
         } catch(Exception e){
             System.out.println("인증 실패 예외: " + e.getClass().getName() + ": " + e.getMessage());
             e.printStackTrace();
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(
                             Map.of("success",false,
-                                    "message","이메일 또는 비밀번호가 일치하지 않습니다.")
+                                    "message","서버 에러입니다.")
                     );
         }
 

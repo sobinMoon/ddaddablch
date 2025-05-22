@@ -8,7 +8,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class LoginRequestDto {
+public class StudentLoginRequestDto {
     @NotBlank(message="이메일을 입력해주세요")
     @Email(regexp="^[A-Za-z0-9._%+-]+@sookmyung\\.ac\\.kr$",message="유효한 이메일 형식이 아닙니다.")
     private String email;
