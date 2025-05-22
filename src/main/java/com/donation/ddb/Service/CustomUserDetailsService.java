@@ -49,6 +49,7 @@ public class CustomUserDetailsService implements UserDetailsService {
             return CustomUserDetails.builder()
                     .id(organization.getOId())
                     .email(organization.getOEmail())
+                    .password(organization.getOPassword())
                     .role(organization.getRole().name()) // "ORGANIZATION"
                     .build();
         }

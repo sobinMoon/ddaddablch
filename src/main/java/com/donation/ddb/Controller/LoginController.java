@@ -285,7 +285,7 @@ public class LoginController {
             userInfo.put("email", userDetails.getEmail());
             userInfo.put("role", userDetails.getRole());
             userInfo.put("userType", "ORGANIZATION");
-            responseData.put("user", userInfo);
+            //responseData.put("user", userInfo);
 
             log.info("단체 로그인 성공: ID={}, Email={}", userDetails.getId(), userDetails.getEmail());
 
