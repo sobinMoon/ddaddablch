@@ -174,7 +174,7 @@ public class StudentUserController {
     }
 
     @GetMapping("/verify-email")
-    public ResponseEntity<?> verifyEmail(@RequestParam String token){
+    public ResponseEntity<?> verifyEmail(@RequestParam("token") String token){
         boolean verified=emailService.verifyEmail(token);
 
         if(verified){

@@ -2,7 +2,7 @@ package com.donation.ddb.Service;
 
 
 import com.donation.ddb.Domain.*;
-import com.donation.ddb.Repository.OrganizationUserRepository;
+import com.donation.ddb.Repository.OrganizationUserRepository.OrganizationUserRepository;
 import com.donation.ddb.Repository.VerificationTokenRepository;
 import io.micrometer.common.util.StringUtils;
 import lombok.RequiredArgsConstructor;
