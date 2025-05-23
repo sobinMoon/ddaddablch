@@ -2,6 +2,7 @@ package com.donation.ddb.Service;
 
 
 import com.donation.ddb.Domain.DataNotFoundException;
+import com.donation.ddb.Domain.EmailAlreadyExistsException;
 import com.donation.ddb.Domain.StudentUser;
 import com.donation.ddb.Domain.VerificationToken;
 import com.donation.ddb.Repository.StudentUserRepository;
@@ -27,10 +28,12 @@ public class StudentUserService {
     private final PasswordEncoder passwordEncoder;
     private final VerificationTokenRepository tokenRepository;
 
+
     public Boolean duplicateNickname(String wantednickname){
 
         return studentUserRepository.findBysNickname(wantednickname).isPresent();
     }
+
     @Transactional
     public Long createUser(String name,String nickname,
                               String email, String password,
@@ -46,6 +49,10 @@ public class StudentUserService {
 
         VerificationToken foundToken=tokenRepository.findByEmail(email)
                 .orElseThrow(()-> new DataNotFoundException("이메일 인증을 먼저 해주세요."));
+
+        if(studentUserRepository.existsBysEmail(email)) {
+            throw new EmailAlreadyExistsException(email);
+        }
 
         //이메일 verificationtoken 찾아서 verified가 true인지 false이지 확인하기
         if(foundToken.isVerified()) user.setSEmail(email);

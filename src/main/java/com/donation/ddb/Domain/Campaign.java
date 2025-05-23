@@ -22,7 +22,7 @@ public class Campaign extends BaseEntity {
     @Column(name = "c_name", nullable = false, length = 50)
     private String cName;
 
-    @Column(name = "c_image_url", nullable = false, length = 100)
+    @Column(name = "c_image_url", nullable = false, length = 500)
     private String cImageUrl;
 
     @Column(name = "c_description", nullable = false, length = 5000)

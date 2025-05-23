@@ -2,6 +2,7 @@ package com.donation.ddb.Controller;
 
 
 import com.donation.ddb.Domain.DataNotFoundException;
+import com.donation.ddb.Domain.EmailAlreadyExistsException;
 import com.donation.ddb.Dto.Request.DuplicateNicknameRequestDto;
 import com.donation.ddb.Dto.Request.EmailVerificationRequestDto;
 import com.donation.ddb.Dto.Request.OrgSignUpForm;
@@ -135,6 +136,14 @@ public class StudentUserController {
             log.error("회원가입 처리 중 데이터 관련 오류 : {}",e.getMessage());
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body(e.getMessage());
+        }catch(EmailAlreadyExistsException e){
+            log.error("이미 존재하는 이메일로 회원가입 요청 오류 : {}",e.getMessage());
+
+            return ResponseEntity.status(HttpStatus.CONFLICT)
+                    .body(
+                            Map.of("success",false,
+                                    "message",e.getMessage())
+                    );
         }catch(Exception e){
             log.error("회원가입 처리 중 오류 : {}",e.getMessage(),e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
