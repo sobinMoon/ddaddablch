@@ -15,4 +15,15 @@ public class PostCommentResponseDto {
         private Long postCommentId;
         private LocalDateTime createdAt;
     }
+
+    @Getter
+    @Builder
+    @AllArgsConstructor
+    public static class ListDto {
+        private Long postCommentId;
+        private String content;
+        private StudentUserResponse.StudentUserCommentDto studentUser;
+        private Long likeCount;
+        private LocalDateTime createdAt;
+    }
 }

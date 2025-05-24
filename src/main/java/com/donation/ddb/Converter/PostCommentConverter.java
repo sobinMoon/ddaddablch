@@ -5,6 +5,9 @@ import com.donation.ddb.Domain.PostComment;
 import com.donation.ddb.Domain.StudentUser;
 import com.donation.ddb.Dto.Request.PostCommentRequestDto;
 import com.donation.ddb.Dto.Response.PostCommentResponseDto;
+import com.donation.ddb.Repository.projection.PostCommentWithUser;
+
+import java.util.List;
 
 public class PostCommentConverter {
 
@@ -25,5 +28,21 @@ public class PostCommentConverter {
                 .studentUser(user)
                 .pcContent(postCommentRequestDto.getContent())
                 .build();
+    }
+
+    public static PostCommentResponseDto.ListDto toListItemDto(PostCommentWithUser postComment) {
+        return PostCommentResponseDto.ListDto.builder()
+                .postCommentId(postComment.getPostComment().getPcId())
+                .content(postComment.getPostComment().getPcContent())
+                .studentUser(StudentUserConverter.toCommentDto(postComment.getStudentUser()))
+                .likeCount(postComment.getLikeCount())
+                .createdAt(postComment.getPostComment().getCreatedAt())
+                .build();
+    }
+
+    public static List<PostCommentResponseDto.ListDto> toListDto(List<PostCommentWithUser> postComments) {
+        return postComments.stream()
+                .map(PostCommentConverter::toListItemDto)
+                .toList();
     }
 }

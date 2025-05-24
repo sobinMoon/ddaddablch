@@ -62,6 +62,9 @@ public class Campaign extends BaseEntity {
     @Enumerated(EnumType.STRING)
     private CampaignStatusFlag cStatusFlag = CampaignStatusFlag.FUNDRAISING;
 
+    @Column(name = "c_wallet_address", nullable = false)
+    private String cWalletAddress;
+
     @OneToMany(mappedBy = "campaign", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<CampaignPlan> campaignPlanList = new ArrayList<>();
 

@@ -54,6 +54,7 @@ public class CampaignResponse {
         private LocalDate businessStart;
         private LocalDate businessEnd;
         private CampaignStatusFlag statusFlag;
+        private String walletAddress;
         private LocalDateTime createdAt;
         private LocalDateTime updatedAt;
         private OrganizationResponse.OrganizationDetailDto organization;
