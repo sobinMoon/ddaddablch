@@ -43,6 +43,7 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
                                 .select(postComment.count())
                                 .from(postComment)
                                 .where(postComment.post.eq(post)),
+                        post.studentUser,
                         post.createdAt
                 ))
                 .from(post)
@@ -79,6 +80,7 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
                                 .select(postComment.count())
                                 .from(postComment)
                                 .where(postComment.post.eq(post)),
+                        post.studentUser,
                         post.createdAt
                 ))
                 .from(post)

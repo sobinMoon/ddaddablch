@@ -1,5 +1,6 @@
 package com.donation.ddb.Repository.projection;
 
+import com.donation.ddb.Domain.StudentUser;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
@@ -14,5 +15,6 @@ public class PostWithCount {
     private String nft;
     private Long likeCount;
     private Long commentCount;
+    private StudentUser studentUser;
     private LocalDateTime createdAt;
 }

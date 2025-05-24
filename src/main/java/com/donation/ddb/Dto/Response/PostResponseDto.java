@@ -32,6 +32,7 @@ public class PostResponseDto {
         private String nft;
         private Long likeCount;
         private Long commentCount;
+        private StudentUserResponse.StudentUserCommentDto studentUser;
         private LocalDateTime createdAt;
     }
 
@@ -59,6 +60,7 @@ public class PostResponseDto {
         private String nft;
         private Long likeCount;
         private Long commentCount;
+        private StudentUserResponse.StudentUserCommentDto studentUser;
         private LocalDateTime createdAt;
     }
 }

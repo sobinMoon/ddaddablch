@@ -12,11 +12,4 @@ import org.springframework.stereotype.Repository;
 public interface PostRepository extends JpaRepository<Post, Long>, PostRepositoryCustom {
 
     Post findPostBypId(Long postId);
-
-    @Query("SELECT new com.donation.ddb.Repository.projection.PostWithCount(p.pId, p.pTitle, p.pContent, p.pNft, " +
-            "(SELECT CAST(COUNT(l) AS long) FROM PostLike l WHERE l.post.pId = p.pId), " +
-            "(SELECT CAST(COUNT(c) AS long) FROM PostComment c WHERE c.post.pId = p.pId), " +
-            "p.createdAt) " +
-            "FROM Post p ORDER BY p.createdAt DESC")
-    Page<PostWithCount> findPostList(Pageable pageable);
 }

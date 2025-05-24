@@ -37,6 +37,7 @@ public class PostConverter {
                 .nft(post.getNft())
                 .likeCount(post.getLikeCount())
                 .commentCount(post.getCommentCount())
+                .studentUser(StudentUserConverter.toCommentDto(post.getStudentUser()))
                 .createdAt(post.getCreatedAt())
                 .build();
     }
@@ -64,6 +65,7 @@ public class PostConverter {
                 .nft(post.getNft())
                 .likeCount(post.getLikeCount())
                 .commentCount(post.getCommentCount())
+                .studentUser(StudentUserConverter.toCommentDto(post.getStudentUser()))
                 .createdAt(post.getCreatedAt())
                 .build();
     }
