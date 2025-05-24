@@ -6,4 +6,5 @@ import org.springframework.data.domain.Pageable;
 
 public interface PostRepositoryCustom {
     Page<PostWithCount> findPostListCustom(Pageable pageable);
+    PostWithCount findPostWithCountByPId(Long postId);
 }

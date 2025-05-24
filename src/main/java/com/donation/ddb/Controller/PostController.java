@@ -10,10 +10,13 @@ import com.donation.ddb.Domain.PostCommentLike;
 import com.donation.ddb.Domain.PostLike;
 import com.donation.ddb.Dto.Request.PostCommentRequestDto;
 import com.donation.ddb.Dto.Request.PostRequestDto;
+import com.donation.ddb.Dto.Response.PostCommentResponseDto;
 import com.donation.ddb.Dto.Response.PostResponseDto;
+import com.donation.ddb.Repository.projection.PostCommentWithUser;
 import com.donation.ddb.Repository.projection.PostWithCount;
 import com.donation.ddb.Service.PostCommentLikeService.PostCommentLikeCommandService;
 import com.donation.ddb.Service.PostCommentService.PostCommentCommandService;
+import com.donation.ddb.Service.PostCommentService.PostCommentQueryService;
 import com.donation.ddb.Service.PostLikeService.PostLikeCommandService;
 import com.donation.ddb.Service.PostService.PostCommandService;
 import com.donation.ddb.Service.PostService.PostQueryService;
@@ -30,6 +33,8 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/posts")
@@ -49,6 +54,8 @@ public class PostController {
     private PostCommentLikeCommandService postCommentLikeCommandService;
     @Autowired
     private PostQueryService postQueryService;
+    @Autowired
+    private PostCommentQueryService postCommentQueryService;
 
     @PostMapping("")
     public ApiResponse<?> addPost(
@@ -135,9 +142,17 @@ public class PostController {
     public ApiResponse<PostResponseDto.DetailDto> getPostDetail(
             @PathVariable(value="postId") @ExistPost Long postId
     ) {
-        Post post = postQueryService.findPostByPId(postId);
+        PostWithCount post = postQueryService.findPostWithCountByPId(postId);
 
-//        return ApiResponse.onSuccess(PostConverter.toDetailDto(post));
-        return null;
+        return ApiResponse.onSuccess(PostConverter.toDetailDto(post));
+    }
+
+    @GetMapping("/{postId}/comments")
+    public ApiResponse<List<PostCommentResponseDto.ListDto>> getPostCommentList(
+            @PathVariable(value="postId") @ExistPost Long postId
+    ) {
+        List<PostCommentWithUser> postCommentList = postCommentQueryService.getPostCommentList(postId);
+
+        return ApiResponse.onSuccess(PostCommentConverter.toListDto(postCommentList));
     }
 }

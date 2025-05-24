@@ -19,12 +19,11 @@ public class PostQueryService {
         return postRepository.existsById(postId);
     }
 
-    public Post findPostByPId(Long postId) {
-        return postRepository.findPostBypId(postId);
+    public PostWithCount findPostWithCountByPId(Long postId) {
+        return postRepository.findPostWithCountByPId(postId);
     }
 
     public Page<PostWithCount> getPostList(Integer page) {
-//        return postRepository.findPostList(PageRequest.of(page, 8));
         return postRepository.findPostListCustom(PageRequest.of(page, 8));
     }
 

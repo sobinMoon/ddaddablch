@@ -23,6 +23,7 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
     private final JPAQueryFactory jpaQueryFactory;
     private final QPost post = QPost.post;
 
+    @Override
     public Page<PostWithCount> findPostListCustom(Pageable pageable) {
         QPostLike postLike = QPostLike.postLike;
         QPostComment postComment = QPostComment.postComment;
@@ -56,8 +57,33 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
                 .fetchOne();
 
         return new PageImpl<>(results, pageable, Objects.requireNonNullElse(total, 0L));
+    }
 
+    @Override
+    public PostWithCount findPostWithCountByPId(Long postId) {
+        QPostLike postLike = QPostLike.postLike;
+        QPostComment postComment = QPostComment.postComment;
 
+        return jpaQueryFactory
+                .select(Projections.constructor(
+                        PostWithCount.class,
+                        post.pId,
+                        post.pTitle,
+                        post.pContent,
+                        post.pNft,
+                        JPAExpressions
+                                .select(postLike.count())
+                                .from(postLike)
+                                .where(postLike.post.eq(post)),
+                        JPAExpressions
+                                .select(postComment.count())
+                                .from(postComment)
+                                .where(postComment.post.eq(post)),
+                        post.createdAt
+                ))
+                .from(post)
+                .where(post.pId.eq(postId))
+                .fetchOne();
     }
 
 }
