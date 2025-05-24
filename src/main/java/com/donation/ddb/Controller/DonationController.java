@@ -81,21 +81,21 @@ public class DonationController {
 
     }
 
-//    //수혜자가 기부금 인출
-//    @PostMapping("/withdraw/{beneficiaryAddress}")
-//    public ResponseEntity<?> withdrawFunds(@PathVariable("beneficiaryAddress") String beneficiaryAddress) {
-//        try {
-//            String txHash=blockchainService.withdrawFunds(beneficiaryAddress);
-//
-//            Map<String, Object> result = new HashMap<>();
-//            result.put("transactionHash", txHash);
-//            result.put("status", "success");
-//
-//            return ResponseEntity.ok(result);
-//        } catch(Exception e){
-//            return ResponseEntity.badRequest().body("인출 실패: " + e.getMessage());
-//
-//        }
-//    }
+////    //수혜자가 기부금 인출
+////    @PostMapping("/withdraw/{beneficiaryAddress}")
+////    public ResponseEntity<?> withdrawFunds(@PathVariable("beneficiaryAddress") String beneficiaryAddress) {
+////        try {
+////            String txHash=blockchainService.withdrawFunds(beneficiaryAddress);
+////
+////            Map<String, Object> result = new HashMap<>();
+////            result.put("transactionHash", txHash);
+////            result.put("status", "success");
+////
+////            return ResponseEntity.ok(result);
+////        } catch(Exception e){
+////            return ResponseEntity.badRequest().body("인출 실패: " + e.getMessage());
+////
+////        }
+////    }
 
 }

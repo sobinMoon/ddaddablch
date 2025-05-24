@@ -1,4 +1,4 @@
-package com.donation.ddb.Domain;
+package com.donation.ddb.Domain.Exception;
 
 
 public class DataNotFoundException extends RuntimeException{

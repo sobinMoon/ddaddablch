@@ -1,31 +1,29 @@
 package com.donation.ddb.Controller;
 
 
-import com.donation.ddb.Domain.DataNotFoundException;
-import com.donation.ddb.Dto.Request.EmailVerificationRequestDto;
+import com.donation.ddb.Domain.Exception.DataNotFoundException;
+import com.donation.ddb.Domain.Exception.EmailAlreadyExistsException;
 import com.donation.ddb.Dto.Request.OrgEmailVerificationRequestDto;
 import com.donation.ddb.Dto.Request.OrgSignUpForm;
 import com.donation.ddb.Repository.OrganizationUserRepository;
 import com.donation.ddb.Service.EmailService;
 import com.donation.ddb.Service.JwtTokenProvider;
 import com.donation.ddb.Service.OrgUserService;
-import com.donation.ddb.Service.StudentUserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
+import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.HashMap;
 import java.util.Map;
 
-@Controller
+@RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/v1/org")
+@RequestMapping("/api/org")
 @Slf4j //로깅
 public class OrgUserController {
 
@@ -36,44 +34,43 @@ public class OrgUserController {
     private final JwtTokenProvider jwtTokenProvider;
 
     @PostMapping("/send-verification-email")
-    public ResponseEntity<?> sendVerificationEmail(
+    public ResponseEntity<Map<String, Object>> sendVerificationEmail(
             @Valid @RequestBody OrgEmailVerificationRequestDto request,
             BindingResult bindingResult) {
 
-        if(bindingResult.hasErrors()) {
-            Map<String, String> errorMap = new HashMap<>();
-            bindingResult.getFieldErrors().forEach(error -> {
-                String fieldName = error.getField();
-                String errorMessage = error.getDefaultMessage();
-                errorMap.put(fieldName, errorMessage);
-                log.warn("회원가입 유효성 검증 실패 : {} - {}", fieldName, errorMessage);
-            });
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorMap);
+        if (bindingResult.hasErrors()) {
+            Map<String, Object> errorMap = new HashMap<>();
+            for (FieldError error : bindingResult.getFieldErrors()) {
+                log.warn("유효성 검증 실패 : {} - {}", error.getField(), error.getDefaultMessage());
+                errorMap.put(error.getField(), error.getDefaultMessage());
+            }
+            errorMap.put("success", false);
+            errorMap.put("message", "입력한 값에 문제가 있습니다.");
+            return ResponseEntity.badRequest().body(errorMap);
         }
 
         try {
             log.info("이메일 인증 요청: {}", request.getEmail());
             emailService.sendVerificationEmail(request.getEmail());
             log.info("이메일 인증 성공: {}", request.getEmail());
+
             return ResponseEntity.ok(
                     Map.of("success", true,
                             "message", "인증 메일이 전송됐습니다.")
             );
         } catch (Exception e) {
-            // 예외의 전체 스택 트레이스를 로그에 기록
             log.error("이메일 전송 실패: {} - {}", request.getEmail(), e.getMessage(), e);
-
-            // 원인 예외(cause)가 있다면 함께 로그에 기록
             Throwable cause = e.getCause();
             if (cause != null) {
                 log.error("원인 예외: {}", cause.getMessage(), cause);
             }
 
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+            return ResponseEntity.badRequest().body(
                     Map.of("success", false,
                             "message", "인증 메일 전송에 실패했습니다. 관리자에게 문의해주세요.")
             );
         }
+
     }
 
     @GetMapping("/verify-email")
@@ -159,7 +156,17 @@ public class OrgUserController {
         }catch(IllegalArgumentException | IllegalStateException e){
             log.error("회원가입 처리 중 오류 발생 ",e.getMessage());
             return ResponseEntity.badRequest().body(e.getMessage());
-        }catch(DataNotFoundException e){
+        }catch(EmailAlreadyExistsException e){
+            log.error("이미 회원 가입 되어있는 경우 오류 발생 : {}",e.getMessage());
+            return ResponseEntity.status(HttpStatus.CONFLICT)
+                    .body(
+                            Map.of("success",false,
+                                    "message",e.getMessage())
+
+
+                    );
+        }
+        catch(DataNotFoundException e){
             log.error("회원가입 처리 중 데이터 관련 오류 : {}",e.getMessage());
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body(e.getMessage());

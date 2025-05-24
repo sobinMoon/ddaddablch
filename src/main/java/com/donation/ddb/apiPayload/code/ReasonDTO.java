@@ -15,5 +15,4 @@ public class ReasonDTO {
     private final String message;
 
     public boolean getIsSuccess(){return isSuccess;}
-
 }

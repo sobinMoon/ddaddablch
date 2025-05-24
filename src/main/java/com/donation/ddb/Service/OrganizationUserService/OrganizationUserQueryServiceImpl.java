@@ -21,6 +21,7 @@ public class OrganizationUserQueryServiceImpl implements OrganizationUserQuerySe
                 .orElseThrow(() -> new OrganizationUserHandler(ErrorStatus.ORGANIZATION_USER_NOT_FOUND));
     }
 
+
     public OrganizationResponse.OrganizationDetailDto convertToDetailDto(OrganizationUser user) {
         return OrganizationResponse.OrganizationDetailDto.builder()
                 .id(user.getOId())

@@ -247,36 +247,36 @@ public class BlockchainService {
         return balance;
     }
 
-//    //수혜자 기부금 인출
-//    public CompletableFuture<TransactionReceipt> withdrawFunds() {
-//        log.info("Withdrawing funds for " + credentials.getAddress());
-//
-//        Function function = new Function(
-//                "withdraw",
-//                Collections.emptyList(),
-//                Collections.emptyList()
-//        );
-//
-//        String encodedFunction = FunctionEncoder.encode(function);
-//
-//        return transactionManager.sendTransaction(
-//                gasProvider.getGasPrice(),
-//                gasProvider.getGasLimit(),
-//                contractAddress,
-//                encodedFunction,
-//                BigInteger.ZERO
-//        ).sendAsync().thenApply(ethSendTransaction -> {
-//            try {
-//                System.out.println("Withdrawal transaction hash: " + ethSendTransaction.getTransactionHash());
-//
-//                return web3j.ethGetTransactionReceipt(ethSendTransaction.getTransactionHash())
-//                        .send()
-//                        .getTransactionReceipt()
-//                        .orElseThrow(() -> new RuntimeException("Transaction receipt not available"));
-//            } catch (Exception e) {
-//                System.err.println("Error processing withdrawal: " + e.getMessage());
-//                throw new RuntimeException("Failed to get transaction receipt", e);
-//            }
-//        });
-//    }
+////    //수혜자 기부금 인출
+////    public CompletableFuture<TransactionReceipt> withdrawFunds() {
+////        log.info("Withdrawing funds for " + credentials.getAddress());
+////
+////        Function function = new Function(
+////                "withdraw",
+////                Collections.emptyList(),
+////                Collections.emptyList()
+////        );
+////
+////        String encodedFunction = FunctionEncoder.encode(function);
+////
+////        return transactionManager.sendTransaction(
+////                gasProvider.getGasPrice(),
+////                gasProvider.getGasLimit(),
+////                contractAddress,
+////                encodedFunction,
+////                BigInteger.ZERO
+////        ).sendAsync().thenApply(ethSendTransaction -> {
+////            try {
+////                System.out.println("Withdrawal transaction hash: " + ethSendTransaction.getTransactionHash());
+////
+////                return web3j.ethGetTransactionReceipt(ethSendTransaction.getTransactionHash())
+////                        .send()
+////                        .getTransactionReceipt()
+////                        .orElseThrow(() -> new RuntimeException("Transaction receipt not available"));
+////            } catch (Exception e) {
+////                System.err.println("Error processing withdrawal: " + e.getMessage());
+////                throw new RuntimeException("Failed to get transaction receipt", e);
+////            }
+////        });
+////    }
 }

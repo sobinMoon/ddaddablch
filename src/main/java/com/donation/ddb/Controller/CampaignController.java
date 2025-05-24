@@ -7,6 +7,7 @@ import com.donation.ddb.Domain.CampaignCommentLike;
 import com.donation.ddb.Dto.Request.CampaignCommentRequestDto;
 import com.donation.ddb.Dto.Request.CampaignRequestDto;
 import com.donation.ddb.Dto.Response.CampaignResponse;
+import com.donation.ddb.Dto.Response.OrganizationResponse;
 import com.donation.ddb.Service.CampaignCommentLikeService.CampaignCommentLikeService;
 import com.donation.ddb.Service.CampaignCommentQueryService.CampaignCommentQueryService;
 import com.donation.ddb.Service.CampaignPlansQueryService.CampaignPlansQueryService;
@@ -303,6 +304,14 @@ public class CampaignController {
     }
 
     public CampaignResponse.CampaignDetailDto convertToDetailDto(Campaign campaign) {
+        // 변경된 부분: 올바른 타입 사용
+        OrganizationResponse.OrganizationDetailDto organizationDto = null;
+
+        // null 체크 유지
+        if (campaign.getOrganizationUser() != null) {
+            organizationDto = organizationUserQueryService.convertToDetailDto(campaign.getOrganizationUser());
+        }
+
         return CampaignResponse.CampaignDetailDto.builder()
                 .id(campaign.getCId())
                 .name(campaign.getCName())
@@ -320,7 +329,7 @@ public class CampaignController {
                 .walletAddress(campaign.getCWalletAddress())
                 .createdAt(campaign.getCreatedAt())
                 .updatedAt(campaign.getUpdatedAt())
-                .organization(organizationUserQueryService.convertToDetailDto(campaign.getOrganizationUser()))
+                .organization(organizationDto)
                 .campaignPlans(campaignPlansQueryService.getCampaignPlanDetails(campaign.getCId()))
                 .campaignSpendings(campaignSpendingQueryService.getCampaignSpending(campaign.getCId()))
                 .build();

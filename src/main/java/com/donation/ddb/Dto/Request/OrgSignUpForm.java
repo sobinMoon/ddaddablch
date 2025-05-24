@@ -31,7 +31,7 @@ public class OrgSignUpForm {
     @NotBlank(message="비밀번호를 입력해주세요")
     private String confirmPassword;
 
-    @Pattern(regexp = "^0x[a-fA-F0-9]{40}$", message = "올바른 지갑 주소 형식이어야 합니다.")
+    @Pattern(regexp = "^$|^0x[a-fA-F0-9]{40}$", message = "올바른 지갑 주소 형식이어야 합니다.")
     private String walletAddress;
 
     private String description;
