@@ -317,6 +317,7 @@ public class CampaignController {
                 .businessStart(campaign.getBusinessStart())
                 .businessEnd(campaign.getBusinessEnd())
                 .statusFlag(campaign.getCStatusFlag())
+                .walletAddress(campaign.getCWalletAddress())
                 .createdAt(campaign.getCreatedAt())
                 .updatedAt(campaign.getUpdatedAt())
                 .organization(organizationUserQueryService.convertToDetailDto(campaign.getOrganizationUser()))
