@@ -1,7 +1,8 @@
 package com.donation.ddb.Controller;
 
 
-import com.donation.ddb.Domain.DataNotFoundException;
+import com.donation.ddb.Domain.Exception.DataNotFoundException;
+import com.donation.ddb.Domain.Exception.EmailAlreadyExistsException;
 import com.donation.ddb.Dto.Request.OrgEmailVerificationRequestDto;
 import com.donation.ddb.Dto.Request.OrgSignUpForm;
 import com.donation.ddb.Repository.OrganizationUserRepository.OrganizationUserRepository;
@@ -14,7 +15,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.*;
@@ -156,7 +156,17 @@ public class OrgUserController {
         }catch(IllegalArgumentException | IllegalStateException e){
             log.error("회원가입 처리 중 오류 발생 ",e.getMessage());
             return ResponseEntity.badRequest().body(e.getMessage());
-        }catch(DataNotFoundException e){
+        }catch(EmailAlreadyExistsException e){
+            log.error("이미 회원 가입 되어있는 경우 오류 발생 : {}",e.getMessage());
+            return ResponseEntity.status(HttpStatus.CONFLICT)
+                    .body(
+                            Map.of("success",false,
+                                    "message",e.getMessage())
+
+
+                    );
+        }
+        catch(DataNotFoundException e){
             log.error("회원가입 처리 중 데이터 관련 오류 : {}",e.getMessage());
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body(e.getMessage());

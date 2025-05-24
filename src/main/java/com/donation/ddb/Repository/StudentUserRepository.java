@@ -1,7 +1,6 @@
 package com.donation.ddb.Repository;
 
 
-import com.donation.ddb.Domain.EmailAlreadyExistsException;
 import com.donation.ddb.Domain.StudentUser;
 import org.springframework.data.jpa.repository.JpaRepository;import org.springframework.stereotype.Repository;
 

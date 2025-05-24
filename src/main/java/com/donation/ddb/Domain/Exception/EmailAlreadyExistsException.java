@@ -1,4 +1,4 @@
-package com.donation.ddb.Domain;
+package com.donation.ddb.Domain.Exception;
 
 
 public class EmailAlreadyExistsException extends RuntimeException{

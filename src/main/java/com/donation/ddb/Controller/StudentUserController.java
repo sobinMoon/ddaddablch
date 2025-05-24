@@ -1,39 +1,26 @@
 package com.donation.ddb.Controller;
 
 
-import com.donation.ddb.Domain.DataNotFoundException;
-import com.donation.ddb.Domain.EmailAlreadyExistsException;
-import com.donation.ddb.Dto.Request.DuplicateNicknameRequestDto;
+import com.donation.ddb.Domain.Exception.DataNotFoundException;
+import com.donation.ddb.Domain.Exception.EmailAlreadyExistsException;
 import com.donation.ddb.Dto.Request.EmailVerificationRequestDto;
-import com.donation.ddb.Dto.Request.OrgSignUpForm;
 import com.donation.ddb.Dto.Request.StudentSignUpForm;
 import com.donation.ddb.Dto.Response.DuplicateNicknameResponseDto;
 import com.donation.ddb.Service.EmailService;
 import com.donation.ddb.Service.JwtTokenProvider;
-import com.donation.ddb.Service.OrgUserService;
 import com.donation.ddb.Service.StudentUserService;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import okhttp3.Response;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
-import javax.naming.Binding;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-
-import static com.donation.ddb.Domain.Role.ROLE_STUDENT;
 
 @Controller
 @RequiredArgsConstructor

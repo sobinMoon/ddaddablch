@@ -1,8 +1,8 @@
 package com.donation.ddb.Service;
 
 
-import com.donation.ddb.Domain.DataNotFoundException;
-import com.donation.ddb.Domain.EmailAlreadyExistsException;
+import com.donation.ddb.Domain.Exception.DataNotFoundException;
+import com.donation.ddb.Domain.Exception.EmailAlreadyExistsException;
 import com.donation.ddb.Domain.StudentUser;
 import com.donation.ddb.Domain.VerificationToken;
 import com.donation.ddb.Repository.StudentUserRepository;
@@ -13,8 +13,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.Optional;
 
 import static com.donation.ddb.Domain.Role.ROLE_STUDENT;
 

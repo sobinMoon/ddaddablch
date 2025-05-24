@@ -1,13 +1,12 @@
 package com.donation.ddb.Controller;
 
 
-import com.donation.ddb.Domain.DataNotFoundException;
+import com.donation.ddb.Domain.Exception.DataNotFoundException;
 import com.donation.ddb.Dto.Request.LogoutRequest;
 import com.donation.ddb.Repository.RefreshTokenRepository;
 import com.donation.ddb.Service.AuthService;
 import com.donation.ddb.Service.JwtTokenProvider;
 import com.donation.ddb.Service.RefreshTokenService;
-import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;

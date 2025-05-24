@@ -30,7 +30,7 @@ public class OrganizationUser extends BaseEntity {
     private String oPassword;
 
     @Column(unique=true)
-    private String oWalletAddress;
+    private String oWalletAddress; //추 후 삭제 가능
 
     @Column(unique=true)
     private String oBusinessNumber;

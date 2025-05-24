@@ -1,6 +1,7 @@
 package com.donation.ddb.Service;
 
 import com.donation.ddb.Domain.*;
+import com.donation.ddb.Domain.Exception.DataNotFoundException;
 import com.donation.ddb.Dto.Request.WalletAddressVerifyRequestDto;
 import com.donation.ddb.Repository.AuthEventRepository;
 import com.donation.ddb.Repository.RefreshTokenRepository;
@@ -11,7 +12,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.web3j.crypto.Sign;
-import org.web3j.crypto.Hash;
 import org.web3j.crypto.Keys;
 import org.web3j.utils.Numeric;
 
@@ -20,6 +20,7 @@ import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -35,9 +36,23 @@ public class AuthService {
 
     @Transactional
     public String generateMessage(String email,String walletAddress){
+
         //사용자 찾기
         StudentUser su=studentUserRepository.findBysEmail(email)
                 .orElseThrow(()-> new DataNotFoundException("없는 email입니다."));
+
+
+        Optional<AuthEvent> optAuthEvent=authEventRepository.findByWalletAddress(walletAddress);
+
+//        if(optAuthEvent.isPresent()){
+//            authEventRepository.delete(optAuthEvent.get());
+//        }
+
+        authEventRepository.findByWalletAddress(walletAddress)
+                .ifPresent(event-> {
+                    authEventRepository.delete(event);
+                    authEventRepository.flush();
+                    });
 
         //nonce 생성하기 , UUID: 36자 고유 문자열이어서 충돌 가능성 거의 없음.
         String nonce= UUID.randomUUID().toString();

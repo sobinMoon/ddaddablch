@@ -2,6 +2,8 @@ package com.donation.ddb.Service;
 
 
 import com.donation.ddb.Domain.*;
+import com.donation.ddb.Domain.Exception.DataNotFoundException;
+import com.donation.ddb.Domain.Exception.EmailAlreadyExistsException;
 import com.donation.ddb.Repository.OrganizationUserRepository.OrganizationUserRepository;
 import com.donation.ddb.Repository.VerificationTokenRepository;
 import io.micrometer.common.util.StringUtils;
@@ -38,8 +40,16 @@ public class OrgUserService {
                 .orElseThrow(()-> new DataNotFoundException("이메일 인증을 먼저 해주세요."));
 
         user.setOName(name);
+
+        if(organizationUserRepository.existsByoEmail(email)) {
+            throw new EmailAlreadyExistsException(email);
+        }
+
+
         user.setOEmail(email);
         user.setOPassword(passwordEncoder.encode(password));
+
+
         user.setRole(Role.ROLE_ORGANIZATION);
         user.setOBusinessNumber(businessNumber);
         user.setOWalletAddress(walletAddress);

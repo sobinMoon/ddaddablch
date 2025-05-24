@@ -1,11 +1,9 @@
 package com.donation.ddb.Service;
 
-import com.donation.ddb.Domain.TokenExpiredException;
+import com.donation.ddb.Domain.Exception.TokenExpiredException;
 import com.donation.ddb.Domain.VerificationToken;
 import com.donation.ddb.Repository.VerificationTokenRepository;
-import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.MailException;
 import org.springframework.mail.SimpleMailMessage;
@@ -13,7 +11,6 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.UUID;
 

@@ -11,6 +11,7 @@ import com.donation.ddb.Repository.CampaignRepository.CampaignRepository;
 import com.donation.ddb.Repository.StudentUserRepository;
 import com.donation.ddb.Repository.projection.CommentLikeCount;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,6 +25,7 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
+@Slf4j
 public class CampaignCommentQueryService {
     private final CampaignRepository campaignRepository;
     private final CampaignCommentRepository campaignCommentRepository;
@@ -44,6 +46,8 @@ public class CampaignCommentQueryService {
 
         // 유저가 좋아요를 눌렀는지 여부를 조회
         Set<Long> likedCommentIds = new HashSet<>();
+
+        log.info(">> 요청받은 userEmail : "+userEmail);
         if (userEmail != null) {
             StudentUser user = studentUserRepository.findBysEmail(userEmail)
                     .orElseThrow(() -> new IllegalArgumentException("User not found"));

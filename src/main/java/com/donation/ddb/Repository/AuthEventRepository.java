@@ -8,4 +8,5 @@ import java.util.Optional;
 
 public interface AuthEventRepository extends JpaRepository<AuthEvent,Long> {
     Optional<AuthEvent> findByUser(StudentUser studentuser);
+    Optional<AuthEvent> findByWalletAddress(String walletAddress);
 }

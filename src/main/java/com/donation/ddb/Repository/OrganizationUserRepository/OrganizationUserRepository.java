@@ -9,4 +9,5 @@ public interface OrganizationUserRepository extends JpaRepository<OrganizationUs
     Optional<OrganizationUser> findByoId(Long aLong);
     Optional<OrganizationUser> findByoEmail(String email);
     Optional<OrganizationUser> findByoWalletAddress(String address);
+    Boolean existsByoEmail(String email);
 }
