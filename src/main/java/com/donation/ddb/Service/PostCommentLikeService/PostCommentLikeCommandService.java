@@ -1,13 +1,11 @@
 package com.donation.ddb.Service.PostCommentLikeService;
 
 import com.donation.ddb.Converter.PostCommentLikeConverter;
-import com.donation.ddb.Domain.Post;
 import com.donation.ddb.Domain.PostComment;
 import com.donation.ddb.Domain.PostCommentLike;
 import com.donation.ddb.Domain.StudentUser;
 import com.donation.ddb.Repository.PostCommentLikeRepository;
 import com.donation.ddb.Repository.PostCommentRepository;
-import com.donation.ddb.Repository.PostRepository;
 import com.donation.ddb.Repository.StudentUserRepository;
 import com.donation.ddb.apiPayload.exception.handler.PostHandler;
 import lombok.RequiredArgsConstructor;

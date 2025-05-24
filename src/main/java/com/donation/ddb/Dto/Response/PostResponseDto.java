@@ -8,6 +8,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 public class PostResponseDto {
 
@@ -17,6 +18,47 @@ public class PostResponseDto {
     @Builder
     public static class JoinResultDto {
         private Long postId;
+        private LocalDateTime createdAt;
+    }
+
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Getter
+    @Builder
+    public static class PreviewDto {
+        private Long postId;
+        private String title;
+        private String previewContent;
+        private String nft;
+        private Long likeCount;
+        private Long commentCount;
+        private LocalDateTime createdAt;
+    }
+
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Getter
+    @Builder
+    public static class PreviewListDto {
+        private List<PreviewDto> postList;
+        private Integer listSize;
+        private Integer totalPage;
+        private Long totalElements;
+        private Boolean isFirst;
+        private Boolean isLast;
+    }
+
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Getter
+    @Builder
+    public static class DetailDto {
+        private Long postId;
+        private String title;
+        private String content;
+        private String nft;
+        private Long likeCount;
+        private Long commentCount;
         private LocalDateTime createdAt;
     }
 }
