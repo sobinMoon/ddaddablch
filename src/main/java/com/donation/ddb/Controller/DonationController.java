@@ -2,7 +2,7 @@ package com.donation.ddb.Controller;
 
 import com.donation.ddb.Dto.Request.DonationRequestDTO;
 import com.donation.ddb.Repository.OrganizationUserRepository;
-import com.donation.ddb.Service.BlockchainService;
+import com.donation.ddb.Service.BlockChainService.BlockchainService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

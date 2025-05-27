@@ -1,4 +1,4 @@
-package com.donation.ddb.Service;
+package com.donation.ddb.Service.WalletService;
 
 import com.donation.ddb.Domain.*;
 import com.donation.ddb.Domain.Exception.DataNotFoundException;

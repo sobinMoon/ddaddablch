@@ -1,4 +1,4 @@
-package com.donation.ddb.Service;
+package com.donation.ddb.Service.TokenService;
 
 import com.donation.ddb.Domain.RefreshToken;
 import com.donation.ddb.Repository.RefreshTokenRepository;

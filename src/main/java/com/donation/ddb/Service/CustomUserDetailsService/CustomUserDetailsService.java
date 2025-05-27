@@ -1,4 +1,4 @@
-package com.donation.ddb.Service;
+package com.donation.ddb.Service.CustomUserDetailsService;
 
 import com.donation.ddb.Domain.CustomUserDetails;
 import com.donation.ddb.Domain.OrganizationUser;

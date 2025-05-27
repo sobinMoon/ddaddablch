@@ -1,13 +1,11 @@
 package com.donation.ddb.Controller;
 
 
-import com.donation.ddb.Dto.Request.EmailVerificationRequestDto;
 import com.donation.ddb.Dto.Request.WalletAddressVerifyRequestDto;
 import com.donation.ddb.Dto.Request.WalletMessageRequestDTO;
 import com.donation.ddb.Dto.Response.WalletAddressVerifyResponseDto;
 import com.donation.ddb.Dto.Response.WalletMessageResponseDto;
-import com.donation.ddb.Service.AuthService;
-import com.donation.ddb.Service.EmailService;
+import com.donation.ddb.Service.WalletService.AuthService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -17,9 +15,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.HashMap;
-import java.util.Map;
 
 @Controller
 @RequestMapping("/wallet/auth/")

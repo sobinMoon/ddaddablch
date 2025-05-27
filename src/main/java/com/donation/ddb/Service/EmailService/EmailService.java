@@ -1,4 +1,4 @@
-package com.donation.ddb.Service;
+package com.donation.ddb.Service.EmailService;
 
 import com.donation.ddb.Domain.Exception.TokenExpiredException;
 import com.donation.ddb.Domain.VerificationToken;

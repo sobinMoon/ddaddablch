@@ -1,4 +1,4 @@
-package com.donation.ddb.Service;
+package com.donation.ddb.Service.OrgUserService;
 
 
 import com.donation.ddb.Domain.*;

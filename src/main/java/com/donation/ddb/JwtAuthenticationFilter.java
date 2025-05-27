@@ -1,6 +1,6 @@
 package com.donation.ddb;
 
-import com.donation.ddb.Service.JwtTokenProvider;
+import com.donation.ddb.Service.TokenService.JwtTokenProvider;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
