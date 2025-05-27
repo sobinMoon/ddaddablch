@@ -5,6 +5,7 @@ import com.donation.ddb.Domain.CampaignStatusFlag;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface CampaignRepository extends JpaRepository<Campaign, Long>, CampaignRepositoryCustom {
     // Custom query methods can be defined here if needed
@@ -16,4 +17,5 @@ public interface CampaignRepository extends JpaRepository<Campaign, Long>, Campa
 //    List<Campaign> findCampaignBycStatusFlag(CampaignStatusFlag cStatusFlag);
 
     Campaign findBycId(Long cId);
+    Optional<Campaign> findBycWalletAddress(String walletAddress);
 }

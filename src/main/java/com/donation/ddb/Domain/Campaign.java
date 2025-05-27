@@ -3,6 +3,7 @@ package com.donation.ddb.Domain;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -31,9 +32,10 @@ public class Campaign extends BaseEntity {
     @Column(name = "c_goal", nullable = false)
     private Integer cGoal;
 
-    @Column(name = "c_current_amount", nullable = false)
+    @Column(name = "c_current_amount", nullable = false, precision = 38, scale = 18)
+    //전체 자리수, 소수점 이하 자리수
     @Builder.Default
-    private Integer cCurrentAmount = 0;
+    private BigDecimal cCurrentAmount = BigDecimal.ZERO;
 
     @Enumerated(EnumType.STRING)
     @Builder.Default

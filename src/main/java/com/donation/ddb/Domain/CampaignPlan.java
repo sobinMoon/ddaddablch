@@ -26,4 +26,6 @@ public class CampaignPlan {
     @Column(name = "cp_amount", nullable = false)
     private Integer cpAmount;
 
+
+
 }
