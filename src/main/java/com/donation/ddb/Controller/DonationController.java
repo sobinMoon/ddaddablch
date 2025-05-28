@@ -3,6 +3,7 @@ package com.donation.ddb.Controller;
 import com.donation.ddb.Domain.Campaign;
 import com.donation.ddb.Domain.Donation;
 import com.donation.ddb.Domain.DonationStatus;
+import com.donation.ddb.Domain.Exception.DataNotFoundException;
 import com.donation.ddb.Dto.Request.DonationRecordRequestDTO;
 import com.donation.ddb.Dto.Request.DonationRequestDTO;
 import com.donation.ddb.Dto.Request.DonationStatusUpdateDTO;
@@ -11,6 +12,8 @@ import com.donation.ddb.Repository.OrganizationUserRepository;
 import com.donation.ddb.Service.DonationService.BlockchainService;
 import com.donation.ddb.Service.DonationService.DonationService;
 import com.donation.ddb.apiPayload.ApiResponse;
+import com.donation.ddb.apiPayload.code.status.ErrorStatus;
+import com.donation.ddb.apiPayload.code.status.SuccessStatus;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -80,17 +83,26 @@ public class DonationController {
                     errorMap.put(error.getField(), error.getDefaultMessage());
                     log.warn("로그인 유효성 검증 실패: {} - {}", error.getField(), error.getDefaultMessage());
                 });
-                return ResponseEntity.badRequest().body(
-                        ApiResponse.onFailure("VALIDATION_ERROR", "입력값이 올바르지 않습니다.", errorMap)
-                );
+                return ResponseEntity.status(ErrorStatus._BAD_REQUEST.getHttpStatus())
+                        .body(ApiResponse.onFailure(
+                                ErrorStatus._BAD_REQUEST.getCode(),
+                                "입력값이 올바르지 않습니다.",
+                                errorMap));
             }
 
             //해시검증
             String transactionHash=request.getTransactionHash();
             if(transactionHash == null || transactionHash.trim().isEmpty()){
-                Map<String,String> errorResponse=new HashMap<>();
-                errorResponse.put("error","트랜잭션 해시가 필요합니다.");
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
+//                Map<String,String> errorResponse=new HashMap<>();
+//                errorResponse.put("error","트랜잭션 해시가 필요합니다.");
+//                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
+                return ResponseEntity.status(ErrorStatus.DONATION_MISSING_TRANSACTION_HASH.getHttpStatus())
+                        .body(
+                        ApiResponse.onFailure(
+                                ErrorStatus.DONATION_MISSING_TRANSACTION_HASH.getCode(),
+                                ErrorStatus.DONATION_MISSING_TRANSACTION_HASH.getMessage(),
+                                null)
+                );
             }
 
             // 블록체인에서 트랜잭션 정보 조회 및 검증 -> 가나슈에 있는 내용과 일치하는지
@@ -101,19 +113,22 @@ public class DonationController {
                     request.getAmount() //이더 단위 금액
             );
 
-            if(!isValidTransaction){
-                Map<String,String> errorResponse=new HashMap<>();
-                errorResponse.put("error","유효하지 않은 트랜잭션 입니다. 블록체인에서 해당 트랜잭션을 찾을 수 없습니다.");
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
+            if (!isValidTransaction) {
+                return ResponseEntity.status(ErrorStatus.DONATION_INVALID_TRANSACTION.getHttpStatus())
+                        .body(ApiResponse.onFailure(
+                                ErrorStatus.DONATION_INVALID_TRANSACTION.getCode(),
+                                ErrorStatus.DONATION_INVALID_TRANSACTION.getMessage(),
+                                null));
             }
 
             // 중복 기부 기록 확인 -> 이미 기록된건지
             if (donationService.isDuplicateTransaction(transactionHash)) {
-                Map<String, String> errorResponse = new HashMap<>();
-                errorResponse.put("error", "이미 기록된 트랜잭션입니다.");
-                return ResponseEntity.status(HttpStatus.CONFLICT).body(errorResponse);
+                return ResponseEntity.status(ErrorStatus.DONATION_DUPLICATE_TRANSACTION.getHttpStatus())
+                        .body(ApiResponse.onFailure(
+                                ErrorStatus.DONATION_DUPLICATE_TRANSACTION.getCode(),
+                                ErrorStatus.DONATION_DUPLICATE_TRANSACTION.getMessage(),
+                                null));
             }
-
             //기부 기록 저장
             Donation response=donationService.recordDonation(
                     transactionHash,
@@ -125,12 +140,35 @@ public class DonationController {
                     request.getMessage()
             );
 
-            return ResponseEntity.ok(response);
+            return ResponseEntity.ok(ApiResponse.of(SuccessStatus.DONATION_RECORDED, null));
 
-        }catch(Exception e){
-            Map<String, String> errorResponse = new HashMap<>();
-            errorResponse.put("error", "기부 기록 중 오류가 발생했습니다: " + e.getMessage());
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
+        }catch (IllegalArgumentException e) {
+            log.error("기부 기록 중 데이터 오류: ", e);
+            if (e.getMessage().contains("학생")) {
+                return ResponseEntity.status(ErrorStatus.STUDENT_USER_NOT_FOUND.getHttpStatus())
+                        .body(ApiResponse.onFailure(
+                                ErrorStatus.STUDENT_USER_NOT_FOUND.getCode(),
+                                ErrorStatus.STUDENT_USER_NOT_FOUND.getMessage(),
+                                null));
+            } else if (e.getMessage().contains("캠페인")) {
+                return ResponseEntity.status(ErrorStatus.CAMPAIGN_NOT_FOUND.getHttpStatus())
+                        .body(ApiResponse.onFailure(
+                                ErrorStatus.CAMPAIGN_NOT_FOUND.getCode(),
+                                ErrorStatus.CAMPAIGN_NOT_FOUND.getMessage(),
+                                null));
+            }
+            return ResponseEntity.status(ErrorStatus._BAD_REQUEST.getHttpStatus())
+                    .body(ApiResponse.onFailure(
+                            ErrorStatus._BAD_REQUEST.getCode(),
+                            e.getMessage(),
+                            null));
+        } catch (Exception e) {
+            log.error("기부 기록 중 오류 발생: ", e);
+            return ResponseEntity.status(ErrorStatus.DONATION_RECORD_FAILED.getHttpStatus())
+                    .body(ApiResponse.onFailure(
+                            ErrorStatus.DONATION_RECORD_FAILED.getCode(),
+                            ErrorStatus.DONATION_RECORD_FAILED.getMessage(),
+                            null));
         }
     }
 
@@ -144,23 +182,43 @@ public class DonationController {
             String newStatus=request.getStatus();
 
             if (txHash == null || txHash.trim().isEmpty() || newStatus == null || newStatus.trim().isEmpty()) {
-                return ResponseEntity.badRequest().body(Map.of("error", "transactionHash와 status는 필수입니다."));
+                return ResponseEntity.status(ErrorStatus.DONATION_MISSING_REQUIRED_FIELDS.getHttpStatus())
+                        .body(ApiResponse.onFailure(
+                                ErrorStatus.DONATION_MISSING_REQUIRED_FIELDS.getCode(),
+                                ErrorStatus.DONATION_MISSING_REQUIRED_FIELDS.getMessage(),
+                                null));
             }
             DonationStatus statusEnum;
 
             try {
                 statusEnum = DonationStatus.valueOf(newStatus.toUpperCase()); // 문자열 -> enum
-            }catch(IllegalStateException e){
-                throw new IllegalStateException("지원하지 않는 statusEnum입니다. ");
+            }catch (IllegalArgumentException e) {
+                return ResponseEntity.status(ErrorStatus.DONATION_INVALID_STATUS.getHttpStatus())
+                        .body(ApiResponse.onFailure(
+                                ErrorStatus.DONATION_INVALID_STATUS.getCode(),
+                                ErrorStatus.DONATION_INVALID_STATUS.getMessage() + ": " + newStatus,
+                                null));
             }
 
             //상태 업데이트
             Donation updated=donationService.updatedDonationStatus(txHash,statusEnum);
 
-            return ResponseEntity.ok(updated);
-        }catch(Exception e){
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(Map.of("error","상태 변경에 실패하였습니다"+e.getMessage()));
+            //return ResponseEntity.ok(ApiResponse.of(SuccessStatus.DONATION_RECORDED, null));
+            return ResponseEntity.ok(ApiResponse.of(SuccessStatus.DONATION_STATUS_UPDATED,null));
+        }catch (DataNotFoundException e) {
+            log.error("기부 기록을 찾을 수 없음: ", e);
+            return ResponseEntity.status(ErrorStatus.DONATION_NOT_FOUND.getHttpStatus())
+                    .body(ApiResponse.onFailure(
+                            ErrorStatus.DONATION_NOT_FOUND.getCode(),
+                            ErrorStatus.DONATION_NOT_FOUND.getMessage(),
+                            null));
+        } catch (Exception e) {
+            log.error("상태 업데이트 중 오류 발생: ", e);
+            return ResponseEntity.status(ErrorStatus.DONATION_STATUS_UPDATE_FAILED.getHttpStatus())
+                    .body(ApiResponse.onFailure(
+                            ErrorStatus.DONATION_STATUS_UPDATE_FAILED.getCode(),
+                            ErrorStatus.DONATION_STATUS_UPDATE_FAILED.getMessage(),
+                            null));
         }
 
 
@@ -196,21 +254,21 @@ public class DonationController {
     }
 
 
-////    //수혜자가 기부금 인출
-////    @PostMapping("/withdraw/{beneficiaryAddress}")
-////    public ResponseEntity<?> withdrawFunds(@PathVariable("beneficiaryAddress") String beneficiaryAddress) {
-////        try {
-////            String txHash=blockchainService.withdrawFunds(beneficiaryAddress);
-////
-////            Map<String, Object> result = new HashMap<>();
-////            result.put("transactionHash", txHash);
-////            result.put("status", "success");
-////
-////            return ResponseEntity.ok(result);
-////        } catch(Exception e){
-////            return ResponseEntity.badRequest().body("인출 실패: " + e.getMessage());
-////
-////        }
-////    }
+//    //수혜자가 기부금 인출
+//    @PostMapping("/withdraw/{beneficiaryAddress}")
+//    public ResponseEntity<?> withdrawFunds(@PathVariable("beneficiaryAddress") String beneficiaryAddress) {
+//        try {
+//            String txHash=blockchainService.withdrawFunds(beneficiaryAddress);
+//
+//            Map<String, Object> result = new HashMap<>();
+//            result.put("transactionHash", txHash);
+//            result.put("status", "success");
+//
+//            return ResponseEntity.ok(result);
+//        } catch(Exception e){
+//            return ResponseEntity.badRequest().body("인출 실패: " + e.getMessage());
+//
+//        }
+//    }
 
 }

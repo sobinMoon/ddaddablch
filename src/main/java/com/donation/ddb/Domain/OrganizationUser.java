@@ -102,5 +102,4 @@ public class OrganizationUser extends BaseEntity {
         if(walletAddress==null) return false;
         return getWalletList().contains(walletAddress.toLowerCase());
     }
-
 }

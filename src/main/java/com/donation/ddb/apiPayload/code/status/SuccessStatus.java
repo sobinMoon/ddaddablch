@@ -11,7 +11,12 @@ import org.springframework.http.HttpStatus;
 public enum SuccessStatus implements BaseCode {
 
     // 일반적인 응답
-    _OK(HttpStatus.OK, "COMMON200", "성공입니다.");
+    _OK(HttpStatus.OK, "COMMON200", "성공입니다."),
+
+    //기부 관련 응답
+    DONATION_RECORDED(HttpStatus.OK,"DONATION201","기부가 성공적으로 기록되었습니다."),
+    DONATION_STATUS_UPDATED(HttpStatus.OK,"DONATION202","기부 상태가 성공적으로 업데이트되었습니다."),
+    BALANCE_RETRIEVED(HttpStatus.OK,"DONATION203","잔액 조회가 완료되었습니다.");
 
     private final HttpStatus httpStatus;
     private final String code;
