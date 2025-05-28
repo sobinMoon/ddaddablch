@@ -17,6 +17,7 @@ import java.util.Objects;
 @Repository
 @RequiredArgsConstructor
 public class PostCommentRepositoryImpl implements PostCommentRepositoryCustom {
+
     private final JPAQueryFactory jpaQueryFactory;
     private final QPost post = QPost.post;
 

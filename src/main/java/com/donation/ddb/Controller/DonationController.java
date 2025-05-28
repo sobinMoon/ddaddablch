@@ -1,5 +1,6 @@
 package com.donation.ddb.Controller;
 
+import com.donation.ddb.Domain.Campaign;
 import com.donation.ddb.Domain.Donation;
 import com.donation.ddb.Domain.DonationStatus;
 import com.donation.ddb.Dto.Request.DonationRecordRequestDTO;
@@ -94,8 +95,8 @@ public class DonationController {
             // 블록체인에서 트랜잭션 정보 조회 및 검증 -> 가나슈에 있는 내용과 일치하는지
             boolean isValidTransaction=blockchainService.verifyTransaction(
                     transactionHash,
-                    request.getDonatorWalletAddress(),
-                    request.getBeneficiaryWalletAddress(),
+                    request.getDonorWalletAddress(),
+                    request.getCampaignWalletAddress(),
                     request.getAmount() //이더 단위 금액
             );
 
@@ -115,10 +116,11 @@ public class DonationController {
             //기부 기록 저장
             Donation response=donationService.recordDonation(
                     transactionHash,
-                    request.getDonatorWalletAddress(),
-                    request.getBeneficiaryWalletAddress(),
+                    request.getDonorWalletAddress(),
+                    request.getCampaignWalletAddress(),
                     request.getAmount(),
                     request.getCampaignId(),
+                    request.getUserId(),
                     request.getMessage()
             );
 
@@ -167,11 +169,12 @@ public class DonationController {
     @GetMapping("/balance/{address}")
     public ResponseEntity<Map<String,String>> getBalance(@PathVariable("address") String address) {
         try {
-            if((organizationUserRepository.findByoWalletAddress(address)).isEmpty()){
-                Map<String, String> errorResponse = new HashMap<>();
-                errorResponse.put("error", "존재하지 않는 수혜자 주소입니다.");
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
-            }
+//            if((organizationUserRepository.findByoWalletAddress(address)).isEmpty()){
+//                Map<String, String> errorResponse = new HashMap<>();
+//                errorResponse.put("error", "존재하지 않는 수혜자 주소입니다.");
+//                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
+//            }
+
 
             BigInteger balance = blockchainService.getBalance(address);
             BigDecimal ethbalance=new BigDecimal(balance).divide(BigDecimal.TEN.pow(18));

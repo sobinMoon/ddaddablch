@@ -15,13 +15,13 @@ import java.util.Optional;
 public interface DonationRepository extends JpaRepository<Donation,Long> {
 
     //중복 트랜잭션 체크
-    boolean existByTransactionHash(String transactionHash);
+    boolean existsByTransactionHash(String transactionHash);
 
     //트랜잭션 확인
     Optional<Donation> findByTransactionHash(String transactionHash);
 
     //특정 학생의 기부 내역 조회 (최신순)
-    Page<Donation> findByStudentUserOrderByCreatedAtDesc(StudentUser studentUser);
+    // Page<Donation> findByStudentUserOrderByCreatedAtDesc(StudentUser studentUser);
 
 //    //특정 학생의 총 기부 금액 조회
 //    @Query("SELECT SUM(d.amount) FROM Donation d WHERE d.studentUser.sId=:studentId AND d.status = 'CONFIRMED'")

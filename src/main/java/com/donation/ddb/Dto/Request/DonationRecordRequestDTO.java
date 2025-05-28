@@ -21,10 +21,10 @@ public class DonationRecordRequestDTO {
     private String transactionHash;
 
     @NotBlank(message="기부자 지갑 주소는 필수입니다.")
-    private String donatorWalletAddress;
+    private String donorWalletAddress;
 
     @NotBlank(message = "수혜자 지갑 주소는 필수입니다")
-    private String beneficiaryWalletAddress;
+    private String campaignWalletAddress;
 
     @NotNull(message = "기부 금액은 필수입니다")
     @DecimalMin(value = "0.0", inclusive = false, message = "기부 금액은 0보다 커야 합니다")
@@ -33,6 +33,9 @@ public class DonationRecordRequestDTO {
 
     // 캠페인 ID
     private Long campaignId;
+
+    // 수혜자 ID
+    private Long userId;
 
     // 기부 메시지 -> 선택임.
     private String message;

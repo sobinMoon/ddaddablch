@@ -61,8 +61,10 @@ public class OrganizationUser extends BaseEntity {
     @Builder.Default
     private Role role = Role.ROLE_ORGANIZATION; //ROLE_ORGANIZATION
 
-    @OneToMany(mappedBy = "organizationUser", cascade = CascadeType.ALL)
+    // 수정: orphanRemoval 추가
+    @OneToMany(mappedBy = "organizationUser", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Campaign> campaigns = new ArrayList<>();
+
 
     //지갑 관리 메소드
     //지갑 주소 목록 반환

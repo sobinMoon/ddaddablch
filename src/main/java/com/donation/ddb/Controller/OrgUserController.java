@@ -123,7 +123,6 @@ public class OrgUserController {
                     orgSignUpForm.getPassword(),
                     orgSignUpForm.getConfirmPassword(),
                     orgSignUpForm.getBusinessNumber(),
-                    orgSignUpForm.getWalletAddress(),
                     orgSignUpForm.getDescription(),
                     orgSignUpForm.getProfileImage()
             );

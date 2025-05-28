@@ -5,6 +5,7 @@ import com.donation.ddb.Domain.CampaignPlan;
 import com.donation.ddb.Domain.CampaignStatusFlag;
 import lombok.*;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -24,7 +25,7 @@ public class CampaignResponse {
         private String imageUrl;
         private String description;
         private Integer goal;
-        private Integer currentAmount;
+        private BigDecimal currentAmount;
         private CampaignCategory category;
         private Long donateCount;
         private LocalDate donateStart;
@@ -46,7 +47,7 @@ public class CampaignResponse {
         private String imageUrl;
         private String description;
         private Integer goal;
-        private Integer currentAmount;
+        private BigDecimal currentAmount;
         private CampaignCategory category;
         private Long donateCount;
         private LocalDate donateStart;

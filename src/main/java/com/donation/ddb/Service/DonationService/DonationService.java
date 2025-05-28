@@ -25,7 +25,7 @@ public class DonationService {
 
     // 트랜잭션이 중복인지 확인
     public Boolean isDuplicateTransaction(String transactionHash){
-        Boolean isduplicate=donationRepository.existByTransactionHash(transactionHash);
+        Boolean isduplicate=donationRepository.existsByTransactionHash(transactionHash);
         log.info("트랜잭션 중복 확인 - Hash: {}, 중복 여부 : {}",transactionHash,isduplicate);
         return isduplicate;
     }
@@ -34,37 +34,37 @@ public class DonationService {
     // -> 기부 성공or실패하면 Status 바꾸기
     @Transactional
     public Donation recordDonation(String hash,
-                                   String donatorWalletAddress,
+                                   String donorWalletAddress,
                                    String beneficiaryWalletAddress,
                                    BigDecimal amount, //이더 단위
                                    Long campaignId,
+                                   Long userId,
                                    String message){
 
         log.info("기부 기록 저장 시작 - Hash: {} Amount: {} ETH ",hash,amount);
         try{
             // 중복 트랜잭션인거 확인 필요하나? -> 컨트롤러 앞에서 isduplicate함수 호출되면 굳이
 
+            // 기부자 조회하기
+            StudentUser studentUser=studentUserRepository.findById(userId)
+                 .orElseThrow(() -> {
+                     log.error("캠페인을 찾을 수 없습니다. ID: {}", campaignId);
+                     return new IllegalArgumentException("존재하지 않는 캠페인입니다: " + campaignId);
+                 });
             // 캠페인 조회하기
             Campaign campaign = campaignRepository.findById(campaignId)
                     .orElseThrow(() -> {
                         log.error("캠페인을 찾을 수 없습니다. ID: {}", campaignId);
                         return new IllegalArgumentException("존재하지 않는 캠페인입니다: " + campaignId);
                     });
-
-            // 기부자 조회 (지갑주소로)
-            StudentUser donator= findStudentByWalletAddress(donatorWalletAddress);
-
-            // 캠페인 조회
-            Campaign campaign1=findCampaignByWalletAddress(beneficiaryWalletAddress);
-
             // Donation 엔티티 생성
             Donation newDonation = Donation.builder()
                     .transactionHash(hash)
-                    .donorWalletAddress(donatorWalletAddress)
+                    .donorWalletAddress(donorWalletAddress)
                     .campaignWalletAddress(beneficiaryWalletAddress)
                     .amount(amount)
                     .message(message)
-                    .studentUser(donator)
+                    .studentUser(studentUser)
                     .campaign(campaign)
                     .status(DonationStatus.PENDING) // 초기 상태는 PENDING -> 그니까 기부하기 전에 메타마스크 인증하고 해야되나
                     .build();

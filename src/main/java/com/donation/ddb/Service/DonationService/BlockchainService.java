@@ -45,6 +45,9 @@ import java.util.concurrent.CompletableFuture;
 @Slf4j
 public class BlockchainService {
 
+    @Value("${test.mode:false}")
+    private boolean testMode;
+
     private Web3j web3j;
     private Credentials credentials;
     private TransactionManager transactionManager;
@@ -119,7 +122,7 @@ public class BlockchainService {
         }
     }
 
-//    // 수혜자에게 기부
+    //    // 수혜자에게 기부
 //    public CompletableFuture<TransactionReceipt> donate(String beneficiaryAddress, BigInteger amount) {
 //        log.info("Donating " + amount + " wei to " + beneficiaryAddress);
 //
@@ -211,7 +214,10 @@ public class BlockchainService {
     // 잔액조회
     public BigInteger getBalance(String address) throws Exception {
         log.info("Checking balance for " + address);
-
+        if (testMode) {
+            log.info("테스트 모드: 가상 잔액 반환 - Address: {}", address);
+            return Convert.toWei("5.0", Convert.Unit.ETHER).toBigInteger(); // 5 ETH 반환
+        }
         Function function = new Function(
                 "getBeneficiaryBalance",//호출할 컨트랙트 함수 이름
                 Collections.singletonList(new Address(address)), //입력
@@ -248,6 +254,16 @@ public class BlockchainService {
     // 트랜잭션 검증
     public boolean verifyTransaction(String transactionHash, String expectedFromAddress,
                                      String expectedToAddress, BigDecimal expectedAmount) {
+        // 테스트 모드일 때는 간단한 검증만 수행
+        if (testMode) {
+            log.info("테스트 모드: 트랜잭션 검증 우회 - Hash: {}", transactionHash);
+
+            // 기본적인 형식 검증만 수행
+            if (transactionHash != null && transactionHash.startsWith("0x") && transactionHash.length() == 66) {
+                return true;  // 테스트용으로 항상 성공 반환
+            }
+            return false;
+        }
         try {
             // 1. 트랜잭션 영수증 조회
             EthGetTransactionReceipt transactionReceipt = web3j.ethGetTransactionReceipt(transactionHash).send();

@@ -21,12 +21,12 @@ public class DonationResponseDTO {
     private BigDecimal amount;
     private String donorName;
     private String donorNickname;
-    private String beneficiaryName;
+
     private String campaignName;
     private String message;
     //private Boolean isAnonymous;
     private String status;
-    private LocalDateTime createdAt;
+
 
     public static DonationResponseDTO from(Donation donation) {
         return DonationResponseDTO.builder()
@@ -34,16 +34,16 @@ public class DonationResponseDTO {
                 .transactionHash(donation.getTransactionHash())
                 .amount(donation.getAmount())
                 //.donorName(donation.getIsAnonymous() ? "익명" : donation.getStudentUser().getSName())
-                .donorName(donation.getOrganizationUser().getOName())
+                .donorName(donation.getStudentUser().getSEmail())
                 .donorNickname(donation.getStudentUser().getSNickname())
-                .beneficiaryName(donation.getOrganizationUser().getOName())
                 .campaignName(donation.getCampaign() != null ? donation.getCampaign().getCName() : null)
                 .message(donation.getMessage())
                 //.isAnonymous(donation.getIsAnonymous())
                 .status(donation.getStatus().toString())
-                .createdAt(donation.getCreatedAt())
+                //.createdAt(donation.getCreatedAt())
                 .build();
     }
 
 
 }
+

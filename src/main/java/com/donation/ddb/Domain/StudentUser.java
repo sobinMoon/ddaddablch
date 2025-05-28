@@ -74,18 +74,20 @@ public class StudentUser {
     @Column(columnDefinition="TEXT")
     private String walletAddresses; // JSON: ["0x123...", "0x456..."]
 
-
-    @OneToMany(mappedBy = "studentUser", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "studentUser", cascade = CascadeType.ALL,orphanRemoval = true)
     private List<Post> postList;
 
-    @OneToMany(mappedBy = "studentUser", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "studentUser", cascade = CascadeType.ALL,orphanRemoval = true)
     private List<PostComment> postCommentList;
 
-    @OneToMany(mappedBy = "studentUser", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "studentUser", cascade = CascadeType.ALL,orphanRemoval = true)
     private List<PostLike> postLikeList;
 
-    @OneToMany(mappedBy = "studentUser", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "studentUser", cascade = CascadeType.ALL,orphanRemoval = true)
     private List<PostCommentLike> postCommentLikeList;
+
+    @OneToMany(mappedBy="studentUser",cascade=CascadeType.ALL,orphanRemoval = true)
+    private List<CampaignComment> campaignCommentList;
 
     //지갑 관리 메소드
 
