@@ -5,6 +5,7 @@ import com.donation.ddb.Domain.Donation;
 import com.donation.ddb.Domain.DonationStatus;
 import com.donation.ddb.Dto.Request.DonationRecordRequestDTO;
 import com.donation.ddb.Dto.Request.DonationRequestDTO;
+import com.donation.ddb.Dto.Request.DonationStatusUpdateDTO;
 import com.donation.ddb.Dto.Response.DonationResponseDTO;
 import com.donation.ddb.Repository.OrganizationUserRepository;
 import com.donation.ddb.Service.DonationService.BlockchainService;
@@ -136,11 +137,11 @@ public class DonationController {
     //patch -> 부분 수정
     @PatchMapping("/status")
     public ResponseEntity<?> updateDonationStatus(
-            @RequestBody Map<String,String> request
-    ){
+            @RequestBody @Valid DonationStatusUpdateDTO request
+            ){
         try{
-            String txHash=request.get("transactionHash");
-            String newStatus=request.get("status");
+            String txHash=request.getTransactionHash();
+            String newStatus=request.getStatus();
 
             if (txHash == null || txHash.trim().isEmpty() || newStatus == null || newStatus.trim().isEmpty()) {
                 return ResponseEntity.badRequest().body(Map.of("error", "transactionHash와 status는 필수입니다."));

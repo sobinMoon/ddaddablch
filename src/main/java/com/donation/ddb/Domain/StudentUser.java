@@ -1,5 +1,6 @@
 package com.donation.ddb.Domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.persistence.*;
@@ -88,6 +89,11 @@ public class StudentUser {
 
     @OneToMany(mappedBy="studentUser",cascade=CascadeType.ALL,orphanRemoval = true)
     private List<CampaignComment> campaignCommentList;
+
+    // StudentUser.java
+    @OneToMany(mappedBy = "studentUser")
+    @JsonIgnore  // 이 한 줄만 추가
+    private List<Donation> donationList;
 
     //지갑 관리 메소드
 

@@ -1,5 +1,6 @@
 package com.donation.ddb.Domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -68,6 +69,7 @@ public class Campaign extends BaseEntity {
     private String cWalletAddress;
 
     @OneToMany(mappedBy = "campaign", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore  // 이 한 줄만 추가
     private List<CampaignPlan> campaignPlanList = new ArrayList<>();
 
     @OneToMany(mappedBy = "campaign", cascade = CascadeType.ALL, orphanRemoval = true)
