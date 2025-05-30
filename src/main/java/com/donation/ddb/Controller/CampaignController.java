@@ -15,6 +15,7 @@ import com.donation.ddb.Service.OrganizationUserService.OrganizationUserQuerySer
 import com.donation.ddb.apiPayload.ApiResponse;
 import com.donation.ddb.apiPayload.code.status.ErrorStatus;
 import com.donation.ddb.apiPayload.exception.handler.CampaignHandler;
+import jakarta.validation.Valid;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -180,7 +181,7 @@ public class CampaignController {
 
     @PostMapping
     public ApiResponse<?> addCampaign(
-            @RequestBody CampaignRequestDto.JoinDto request,
+            @RequestBody @Valid CampaignRequestDto.JoinDto request,
             @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
         // 캠페인 추가 로직
