@@ -180,24 +180,23 @@ public class CampaignController {
 
     @PostMapping
     public ApiResponse<?> addCampaign(
-            @RequestBody CampaignRequestDto campaignRequestDto
+            @RequestBody CampaignRequestDto.JoinDto request,
+            @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
         // 캠페인 추가 로직
+        String email = null;
 
-        System.out.println("CampaignRequestDto: " + campaignRequestDto);
+        if (userDetails == null) {
+            throw new CampaignHandler(ErrorStatus._UNAUTHORIZED);
+        }
+        else if (!userDetails.isOrganization()) {
+            throw new CampaignHandler(ErrorStatus._FORBIDDEN);
+        }
+        else {
+            email = userDetails.getUsername();
+        }
 
-        Campaign campaign = campaignService.addCampaign(
-                campaignRequestDto.getId(),
-                campaignRequestDto.getName(),
-                campaignRequestDto.getImageUrl(),
-                campaignRequestDto.getDescription(),
-                campaignRequestDto.getGoal(),
-                campaignRequestDto.getCategory(),
-                campaignRequestDto.getDonateStart(),
-                campaignRequestDto.getDonateEnd(),
-                campaignRequestDto.getBusinessStart(),
-                campaignRequestDto.getBusinessEnd()
-        );
+        Campaign campaign = campaignService.addCampaign(request, email);
 
         return ApiResponse.onSuccess(convertToListDto(campaign));
     }

@@ -2,6 +2,7 @@ package com.donation.ddb.Service.CampaignService;
 
 import com.donation.ddb.Domain.Campaign;
 import com.donation.ddb.Domain.CampaignCategory;
+import com.donation.ddb.Dto.Request.CampaignRequestDto;
 import com.donation.ddb.Dto.Response.CampaignResponse;
 import org.springframework.data.domain.Pageable;
 
@@ -19,18 +20,7 @@ public interface CampaignQueryService {
 //            CampaignSearchDto searchDto
     );
 
-    Campaign addCampaign(
-            Long oId,
-            String cName,
-            String cImageUrl,
-            String cDescription,
-            Integer cGoal,
-            CampaignCategory cCategory,
-            LocalDate donateStart,
-            LocalDate donateEnd,
-            LocalDate businessStart,
-            LocalDate businessEnd
-    );
+    Campaign addCampaign(CampaignRequestDto.JoinDto joinDto, String email);
 
     Campaign findBycId(Long cId);
 
