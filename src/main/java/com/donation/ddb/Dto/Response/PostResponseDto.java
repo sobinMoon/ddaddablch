@@ -60,6 +60,7 @@ public class PostResponseDto {
         private String nft;
         private Long likeCount;
         private Long commentCount;
+        private Boolean liked;
         private StudentUserResponse.StudentUserCommentDto studentUser;
         private LocalDateTime createdAt;
     }
