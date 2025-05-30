@@ -3,12 +3,14 @@ package com.donation.ddb.Controller;
 import com.donation.ddb.Converter.CampaignCommentLikeConverter;
 import com.donation.ddb.Domain.*;
 import com.donation.ddb.Dto.Request.CampaignCommentRequestDto;
+import com.donation.ddb.Dto.Request.CampaignPlanRequestDto;
 import com.donation.ddb.Dto.Request.CampaignRequestDto;
 import com.donation.ddb.Dto.Response.CampaignResponse;
 import com.donation.ddb.Dto.Response.OrganizationResponse;
 import com.donation.ddb.Service.CampaignCommentLikeService.CampaignCommentLikeService;
 import com.donation.ddb.Service.CampaignCommentQueryService.CampaignCommentQueryService;
-import com.donation.ddb.Service.CampaignPlansQueryService.CampaignPlansQueryService;
+import com.donation.ddb.Service.CampaignPlansService.CampaignPlanCommandService;
+import com.donation.ddb.Service.CampaignPlansService.CampaignPlansQueryService;
 import com.donation.ddb.Service.CampaignService.CampaignQueryService;
 import com.donation.ddb.Service.CampaignSpendingQueryService.CampaignSpendingQueryService;
 import com.donation.ddb.Service.OrganizationUserService.OrganizationUserQueryService;
@@ -23,12 +25,10 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 import static com.querydsl.core.types.Projections.constructor;
 
@@ -58,6 +58,8 @@ public class CampaignController {
 
     @Autowired
     private CampaignCommentLikeService campaignCommentLikeService;;
+    @Autowired
+    private CampaignPlanCommandService campaignPlanCommandService;
 
     @GetMapping("home")
     public ResponseEntity<?> campaignList() {
@@ -198,6 +200,10 @@ public class CampaignController {
         }
 
         Campaign campaign = campaignService.addCampaign(request, email);
+
+        List<CampaignPlanRequestDto.JoinDto> campaignPlans = request.getPlans();
+
+        campaignPlanCommandService.addCampaignPlan(campaignPlans, campaign);
 
         return ApiResponse.onSuccess(convertToListDto(campaign));
     }
