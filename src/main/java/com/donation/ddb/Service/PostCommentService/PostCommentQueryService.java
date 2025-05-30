@@ -32,7 +32,7 @@ public class PostCommentQueryService {
         List <PostCommentWithUser> postCommentWithUsers = postCommentRepository.findPostListWithUser(postId);
 
         List<Long> commentIds = postCommentWithUsers.stream()
-                .map(PostCommentWithUser -> PostCommentWithUser.getPostComment().getPcId())
+                .map(postCommentWithUser -> postCommentWithUser.getPostComment().getPcId())
                 .toList();
 
         Set<Long> likedCommentIds = new HashSet<>();
