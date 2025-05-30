@@ -16,7 +16,7 @@ public class Donation extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Long dId;
 
     //기부자 정보
     @ManyToOne(fetch= FetchType.LAZY)
@@ -51,7 +51,6 @@ public class Donation extends BaseEntity {
     @Enumerated(EnumType.STRING)
     @Builder.Default
     private DonationStatus status=DonationStatus.PENDING;
-
 
     //기부 메시지
     @Column(length=500)

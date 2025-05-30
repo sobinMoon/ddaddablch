@@ -31,7 +31,6 @@ public class DonationRecordRequestDTO {
     //@Positive(message = "기부 금액은 0보다 커야 합니다")
     private BigDecimal amount;
 
-
     // 캠페인 ID
     @NotNull(message = "캠페인 ID는 필수입니다.")
     private Long campaignId;

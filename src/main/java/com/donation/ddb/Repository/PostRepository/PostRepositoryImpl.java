@@ -3,10 +3,12 @@ package com.donation.ddb.Repository.PostRepository;
 import com.donation.ddb.Domain.QPost;
 import com.donation.ddb.Domain.QPostComment;
 import com.donation.ddb.Domain.QPostLike;
+import com.donation.ddb.Dto.Response.StudentMyPageResponseDTO;
 import com.donation.ddb.Repository.projection.PostWithCount;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.JPAExpressions;
+import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -16,6 +18,9 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Objects;
+
+import static com.donation.ddb.Domain.QPostComment.postComment;
+import static com.donation.ddb.Domain.QPostLike.postLike;
 
 @Repository
 @RequiredArgsConstructor
@@ -60,8 +65,8 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
         return new PageImpl<>(results, pageable, Objects.requireNonNullElse(total, 0L));
     }
 
-    @Override
-    public PostWithCount findPostWithCountByPId(Long postId) {
+    // 공통 SELECT 절을 만드는 메서드
+    private JPAQuery<PostWithCount> createPostWithCountQuery() {
         QPostLike postLike = QPostLike.postLike;
         QPostComment postComment = QPostComment.postComment;
 
@@ -72,20 +77,44 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
                         post.pTitle,
                         post.pContent,
                         post.pNft,
-                        JPAExpressions
-                                .select(postLike.count())
-                                .from(postLike)
-                                .where(postLike.post.eq(post)),
-                        JPAExpressions
-                                .select(postComment.count())
-                                .from(postComment)
-                                .where(postComment.post.eq(post)),
+                        JPAExpressions.select(postLike.count()).from(postLike).where(postLike.post.eq(post)),
+                        JPAExpressions.select(postComment.count()).from(postComment).where(postComment.post.eq(post)),
                         post.studentUser,
                         post.createdAt
                 ))
-                .from(post)
+                .from(post);
+    }
+
+    // 기존 메서드
+    @Override
+    public PostWithCount findPostWithCountByPId(Long postId) {
+        return createPostWithCountQuery()
                 .where(post.pId.eq(postId))
                 .fetchOne();
+    }
+
+    // 새 메서드
+    @Override
+    public List<StudentMyPageResponseDTO.RecentPostDTO> findRecentPostsByStudentId(Long sId) {
+//        return createPostWithCountQuery()
+//                .where(post.studentUser.sId.eq(sId))
+//                .orderBy(post.createdAt.desc())
+//                .fetch();
+          return jpaQueryFactory
+                  .select(
+                          Projections.constructor(
+                                  StudentMyPageResponseDTO.RecentPostDTO.class,
+                                  post.pId,
+                                  post.pTitle,
+                                  post.createdAt,
+                                  post.pNft,
+                                  JPAExpressions.select(postLike.count()).from(postLike).where(postLike.post.eq(post)),     // likeCount
+                                  JPAExpressions.select(postComment.count()).from(postComment).where(postComment.post.eq(post)) // commentCount
+                          ))
+                  .from(post)
+                  .where(post.studentUser.sId.eq(sId))
+                  .orderBy(post.createdAt.desc())
+                  .fetch();
     }
 
 }

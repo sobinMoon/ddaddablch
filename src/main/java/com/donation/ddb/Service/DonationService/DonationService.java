@@ -72,7 +72,7 @@ public class DonationService {
             //DB 에 저장하기
             Donation savedDonation=donationRepository.save(newDonation);
 
-            log.info("기부 기록 저장 완료 - ID: {}, Hash: {}", savedDonation.getId(), hash);
+            log.info("기부 기록 저장 완료 - ID: {}, Hash: {}", savedDonation.getDId(), hash);
             return savedDonation;
 
 
@@ -119,7 +119,7 @@ public class DonationService {
         donation.setStatus(status);
         donationRepository.save(donation);
 
-        log.info("기부 상태 업데이트 완료 - ID: {}, 새로운 상태: {}", donation.getId(), status);
+        log.info("기부 상태 업데이트 완료 - ID: {}, 새로운 상태: {}", donation.getDId(), status);
         return donation;
     }
 

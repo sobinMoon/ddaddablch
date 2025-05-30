@@ -33,9 +33,9 @@ public class QDonation extends EntityPathBase<Donation> {
     //inherited
     public final DateTimePath<java.time.LocalDateTime> createdAt = _super.createdAt;
 
-    public final StringPath donorWalletAddress = createString("donorWalletAddress");
+    public final NumberPath<Long> dId = createNumber("dId", Long.class);
 
-    public final NumberPath<Long> id = createNumber("id", Long.class);
+    public final StringPath donorWalletAddress = createString("donorWalletAddress");
 
     public final StringPath message = createString("message");
 
