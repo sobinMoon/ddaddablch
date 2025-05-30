@@ -1,9 +1,7 @@
 package com.donation.ddb.Controller;
 
 import com.donation.ddb.Converter.CampaignCommentLikeConverter;
-import com.donation.ddb.Domain.Campaign;
-import com.donation.ddb.Domain.CampaignComment;
-import com.donation.ddb.Domain.CampaignCommentLike;
+import com.donation.ddb.Domain.*;
 import com.donation.ddb.Dto.Request.CampaignCommentRequestDto;
 import com.donation.ddb.Dto.Request.CampaignRequestDto;
 import com.donation.ddb.Dto.Response.CampaignResponse;
@@ -215,15 +213,22 @@ public class CampaignController {
 
     @GetMapping("{cId}/comments")
     public ApiResponse<?> getCampaignComments(
-            @AuthenticationPrincipal UserDetails userDetails,
+            @AuthenticationPrincipal CustomUserDetails userDetails,
             @PathVariable(value = "cId") Long cId,
             @RequestParam(value = "page", defaultValue = "0") int page,
             @RequestParam(value = "size", defaultValue = "10") int size) {
 
+        log.info("userDetails: {}", userDetails);
+        log.info("userDetails.getUsername(): {}", userDetails != null ? userDetails.getUsername() : "null");
+        log.info("isStudent: {}", userDetails != null && userDetails.isStudent());
+        log.info("getAuthorities(): {}", userDetails != null ? userDetails.getAuthorities() : "null");
+        log.info("role: {}", userDetails != null ? userDetails.getAuthorities().stream().findFirst().orElse(null) : "null");
+
         String userEmail = null;
 
-        if (userDetails != null) {
+        if (userDetails != null && userDetails.isStudent()) {
             userEmail = userDetails.getUsername();
+            System.out.println("User Email: " + userEmail);
         }
 
         if (page < 0) {
@@ -242,12 +247,19 @@ public class CampaignController {
     public ApiResponse<?> addCampaignComment(
             @PathVariable(value = "cId") Long cId,
             @RequestBody CampaignCommentRequestDto campaignCommentRequestDto,
-            @AuthenticationPrincipal UserDetails userDetails
+            @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
         // 캠페인 댓글 추가 로직
         if (userDetails == null) {
             throw new CampaignHandler(ErrorStatus._UNAUTHORIZED);
         }
+
+        if (!userDetails.isStudent()) {
+            throw new CampaignHandler(ErrorStatus._FORBIDDEN);
+        }
+
+        log.info("userDetails: {}", userDetails);
+        log.info("email: {}", userDetails.getUsername());
 
         String email = userDetails.getUsername();
 
@@ -269,10 +281,14 @@ public class CampaignController {
     @PostMapping("{cId}/comments/{ccId}/likes")
     public ApiResponse<?> addCommentLike(
             @PathVariable(value = "ccId") Long ccId,
-            @AuthenticationPrincipal UserDetails userDetails
+            @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
         if (userDetails == null) {
             throw new CampaignHandler(ErrorStatus._UNAUTHORIZED);
+        }
+
+        if (!userDetails.isStudent()) {
+            throw new CampaignHandler(ErrorStatus._FORBIDDEN);
         }
 
         String email = userDetails.getUsername();

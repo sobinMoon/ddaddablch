@@ -57,7 +57,7 @@ public class PostConverter {
                 .build();
     }
 
-    public static PostResponseDto.DetailDto toDetailDto(PostWithCount post) {
+    public static PostResponseDto.DetailDto toDetailDto(PostWithCount post, Boolean isLiked) {
         return PostResponseDto.DetailDto.builder()
                 .postId(post.getPostId())
                 .title(post.getTitle())
@@ -65,6 +65,7 @@ public class PostConverter {
                 .nft(post.getNft())
                 .likeCount(post.getLikeCount())
                 .commentCount(post.getCommentCount())
+                .liked(isLiked)
                 .studentUser(StudentUserConverter.toCommentDto(post.getStudentUser()))
                 .createdAt(post.getCreatedAt())
                 .build();

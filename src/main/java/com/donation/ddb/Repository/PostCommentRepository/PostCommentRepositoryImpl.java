@@ -6,6 +6,7 @@ import com.donation.ddb.Domain.QPostCommentLike;
 import com.donation.ddb.Dto.Response.PostCommentResponseDto;
 import com.donation.ddb.Repository.projection.PostCommentWithUser;
 import com.querydsl.core.types.Projections;
+import com.querydsl.core.types.dsl.CaseBuilder;
 import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
@@ -36,7 +37,7 @@ public class PostCommentRepositoryImpl implements PostCommentRepositoryCustom {
                                 .where(postCommentLike.postComment.eq(postComment))
                 ))
                 .from(postComment)
-                .orderBy(post.createdAt.desc())
+                .orderBy(postComment.createdAt.desc())
                 .fetch();
 
         return results;

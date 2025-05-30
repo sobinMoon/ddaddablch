@@ -8,6 +8,7 @@ import com.donation.ddb.Dto.Response.PostCommentResponseDto;
 import com.donation.ddb.Repository.projection.PostCommentWithUser;
 
 import java.util.List;
+import java.util.Map;
 
 public class PostCommentConverter {
 
@@ -30,19 +31,23 @@ public class PostCommentConverter {
                 .build();
     }
 
-    public static PostCommentResponseDto.ListDto toListItemDto(PostCommentWithUser postComment) {
+    public static PostCommentResponseDto.ListDto toListItemDto(PostCommentWithUser postComment, Boolean liked) {
         return PostCommentResponseDto.ListDto.builder()
                 .postCommentId(postComment.getPostComment().getPcId())
                 .content(postComment.getPostComment().getPcContent())
                 .studentUser(StudentUserConverter.toCommentDto(postComment.getStudentUser()))
+                .liked(liked)
                 .likeCount(postComment.getLikeCount())
                 .createdAt(postComment.getPostComment().getCreatedAt())
                 .build();
     }
 
-    public static List<PostCommentResponseDto.ListDto> toListDto(List<PostCommentWithUser> postComments) {
-        return postComments.stream()
-                .map(PostCommentConverter::toListItemDto)
-                .toList();
-    }
+//    public static List<PostCommentResponseDto.ListDto> toListDto(List<PostCommentWithUser> postComments) {
+//        return postComments.stream()
+//                .map(postCommentWithUser -> toListItemDto()
+//                        postCommentWithUser,
+//                        postCommentWithUser.getLiked() != null && postCommentWithUser.getLiked()
+//                ))
+//                .toList();
+//    }
 }
