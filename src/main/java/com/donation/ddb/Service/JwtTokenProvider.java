@@ -1,5 +1,6 @@
 package com.donation.ddb.Service;
 
+import com.donation.ddb.Domain.CustomUserDetails;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
@@ -7,6 +8,7 @@ import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
 import jakarta.servlet.http.HttpServletRequest;
 import jnr.constants.platform.Local;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -24,6 +26,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Component
+@RequiredArgsConstructor
 public class JwtTokenProvider {
 
     @Value("${app.jwt.secret}")
@@ -35,13 +38,15 @@ public class JwtTokenProvider {
     @Value("${app.jwt.refresh-expiration}")
     private int refreshTokenExpirationMs;
 
+    private final CustomUserDetailsService customUserDetailsService;
+
     //인증된 사용자 정보를 기반으로 jwt생성
     //ACCESS TOKEN생성
     public String generateToken(Authentication authentication){
         // 안전한 캐스팅 처리
-        UserDetails userDetails;
-        if (authentication.getPrincipal() instanceof UserDetails) {
-            userDetails = (UserDetails) authentication.getPrincipal();
+        CustomUserDetails customUserDetails;
+        if (authentication.getPrincipal() instanceof CustomUserDetails) {
+            customUserDetails = (CustomUserDetails) authentication.getPrincipal();
         } else {
             // 캐스팅 불가능한 경우 대체 로직
             throw new RuntimeException("인증 객체에서 UserDetails를 찾을 수 없습니다.");
@@ -50,31 +55,27 @@ public class JwtTokenProvider {
         Date now = new Date();
         Date expiryDate=new Date(now.getTime()+jwtExpirationMs);
 
-        // 권한 뽑기
-        Collection<? extends GrantedAuthority> authorities = userDetails.getAuthorities();
-        List<String> roles = authorities.stream()
-                .map(GrantedAuthority::getAuthority)
-                .collect(Collectors.toList());
-
         return Jwts.builder()
-                .setSubject(userDetails.getUsername())
-                .claim("roles",roles)
+                .setSubject(customUserDetails.getUsername())
+                .claim("userId", customUserDetails.getId())   // ← 추가
+                .claim("role", customUserDetails.getRole())   // ← 추가
+                .claim("nickname",customUserDetails.getNickname())
                 .setIssuedAt(now)
                 .setExpiration(expiryDate)
                 .signWith(Keys.hmacShaKeyFor(jwtSecret.getBytes()), SignatureAlgorithm.HS512)
                 .compact();
-
     }
 
     // Refresh Token 생성
     public String generateRefreshToken(Authentication authentication) {
-        String username = authentication.getName();//여기서 name은 email임
+        CustomUserDetails userDetails=(CustomUserDetails) authentication.getPrincipal();
 
         Date now = new Date();
         Date expiryDate = new Date(now.getTime() + refreshTokenExpirationMs);
 
         return Jwts.builder()
-                .setSubject(username)
+                .setSubject(userDetails.getEmail())
+                //여기엔 role안넣어도되나,,?
                 .setIssuedAt(now)
                 .setExpiration(expiryDate)
                 .signWith(Keys.hmacShaKeyFor(jwtSecret.getBytes()), SignatureAlgorithm.HS512)
@@ -111,25 +112,22 @@ public class JwtTokenProvider {
                 .parseClaimsJws(token)
                 .getBody();
 
-        String username = claims.getSubject();
+        String email = claims.getSubject();
+        Long userId = claims.get("userId", Long.class);
+        String role = claims.get("role", String.class);
+        String nickname=claims.get("nickname",String.class);
 
-        // JWT에 저장된 roles 클레임에서 권한 정보 꺼내기
-        List<String> roles = claims.get("roles", List.class);
-
-        // 권한 문자열을 Spring Security에서 사용하는 형식으로 변환
-        List<GrantedAuthority> authorities = roles.stream()
-                .map(SimpleGrantedAuthority::new)
-                .collect(Collectors.toList());
-
-        // 인증된 사용자 객체 생성 (비밀번호는 필요 없으니 공란으로)
-        UserDetails userDetails = org.springframework.security.core.userdetails.User
-                .withUsername(username)
+        CustomUserDetails customUserDetails = CustomUserDetails.builder()
+                .id(userId)
+                .email(email)
+                .nickname(nickname)
                 .password("")
-                .authorities(authorities)
+                .role(role)
                 .build();
 
         // Spring Security에 등록할 인증 객체 반환
-        return new UsernamePasswordAuthenticationToken(userDetails, "", authorities);
+        return new UsernamePasswordAuthenticationToken(customUserDetails, "",
+               customUserDetails.getAuthorities() );
     }
 
     // 토큰에서 사용자 이름 추출

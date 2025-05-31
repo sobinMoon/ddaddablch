@@ -1,6 +1,7 @@
 package com.donation.ddb.Controller;
 
 
+import com.donation.ddb.Domain.CustomUserDetails;
 import com.donation.ddb.Dto.Request.EmailVerificationRequestDto;
 import com.donation.ddb.Dto.Request.WalletAddressVerifyRequestDto;
 import com.donation.ddb.Dto.Request.WalletMessageRequestDTO;
@@ -14,6 +15,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
@@ -22,7 +24,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Controller
-@RequestMapping("/wallet/auth/")
 @RequiredArgsConstructor
 @Slf4j
 public class AuthController {
@@ -30,7 +31,7 @@ public class AuthController {
     @Autowired
     private final AuthService authService;
 
-    @PostMapping("/request-message")
+    @PostMapping("/wallet/auth/request-message")
     public ResponseEntity<WalletMessageResponseDto> requestMessage(@RequestBody WalletMessageRequestDTO walletMessageRequestDTO){
 
         String message=authService.generateMessage(walletMessageRequestDTO.getEmail(),walletMessageRequestDTO.getWalletAddress());
@@ -40,7 +41,7 @@ public class AuthController {
     }
 
 
-    @PostMapping("/verify-signature")
+    @PostMapping("/wallet/auth/verify-signature")
     public ResponseEntity<WalletAddressVerifyResponseDto> verify(@RequestBody @Valid WalletAddressVerifyRequestDto walletAddressVerifyDto,
                                                                 BindingResult bindingResult) {
         boolean isValid = authService.verifySignature(walletAddressVerifyDto);
@@ -54,5 +55,24 @@ public class AuthController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
         }
     }
+    @GetMapping("/auth/me")
+    public ResponseEntity<?> getUserInfo(@AuthenticationPrincipal CustomUserDetails userDetails){
+        if(userDetails==null){
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(Map.of("authenticated", false,
+                            "error", "인증되지 않은 사용자입니다."));
+        }
+        Map<String, Object> userInfo = Map.of(
+                "id", userDetails.getId(),
+                "email", userDetails.getEmail(),
+                "role", userDetails.getRole(),
+                "nickname", userDetails.getNickname()
+        );
+
+        return ResponseEntity.ok(userInfo);
+
+    }
+
+
 
 }

@@ -32,15 +32,11 @@ public class StudentMyPageResponseDTO {
     private List<DonationSummaryDTO> recentDonations; //최근 기부 내역 -> 그냥 전부 다
 
     // 활동 정보
-    // private Integer totalPostCount; //총 작성 글 수 -> x
-    // private Integer totalCommentCount; //총 댓글 수 -> x
-    // private Integer totalLikeCount;  //받은 좋아요 수 -> x
     private List<RecentPostDTO> recentPosts; //최근 작성 글
     private List<PostCommentDTO> recentComments; //최근 댓글 모음
 
     // 알림 정보
     //private Integer unreadNotificationCount; // 읽지 않은 알림 수
-    //private StudentStatsDTO stats; -> x
 
     // 내부 DTO 클래스들
     @Getter

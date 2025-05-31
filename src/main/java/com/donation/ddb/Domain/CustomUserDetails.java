@@ -18,7 +18,8 @@ public class CustomUserDetails implements UserDetails {
     private final Long id;
     private final String email;
     private final String password;
-    private final String role; // "STUDENT" 또는 "ORGANIZATION"
+    private final String nickname;
+    private final String role; // "ROLE_STUDENT" 또는 "ROLE_ORGANIZATION"
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

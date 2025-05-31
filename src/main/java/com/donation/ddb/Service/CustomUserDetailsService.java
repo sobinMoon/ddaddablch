@@ -36,7 +36,8 @@ public class CustomUserDetailsService implements UserDetailsService {
                     .id(student.getSId())
                     .email(student.getSEmail())
                     .password(student.getSPassword())
-                    .role(student.getRole().name()) // "STUDENT"
+                    .nickname(student.getSNickname())
+                    .role(student.getRole().name()) // "ROLE_STUDENT"
                     .build();
         }
 
@@ -70,6 +71,7 @@ public class CustomUserDetailsService implements UserDetailsService {
                     .id(student.getSId())
                     .email(student.getSEmail())
                     .role(student.getRole().name())
+                    .nickname(student.getSNickname())
                     .build();
 
         } else if ("ORGANIZATION".equals(role)) {

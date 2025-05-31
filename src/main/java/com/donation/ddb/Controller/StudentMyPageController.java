@@ -33,7 +33,7 @@ public class StudentMyPageController {
         try{
             StudentMyPageResponseDTO myPageInfo=
                     studentMyPageService.getMyPageInfo();
-            //return ResponseEntity.ok(myPageInfo);
+
             return ResponseEntity.ok(
                     ApiResponse.of(SuccessStatus.STUDENT_MYPAGE_INFO_RECEIVED,myPageInfo)
             );
@@ -53,23 +53,4 @@ public class StudentMyPageController {
                             null));
         }
     }
-
-    //학생 기부 내역 조회
-    //학생 프로필 정보 수정
-
-//    //공개 프로필 필요할까?
-//    @GetMapping("/{studentId}")
-//    public ResponseEntity<StudentMyPageResponseDTO> getMyPageInfo(@PathVariable Long studentId){
-//        try{
-//            StudentMyPageResponseDTO myPageResponseDTO
-//                    =studentMyPageService.getMyPageInfo(studentId);
-//
-//            return ResponseEntity.ok(myPageResponseDTO);
-//        }catch (Exception e){
-//            return ResponseEntity.badRequest().build();
-//        }
-//   }
-
-
-
 }

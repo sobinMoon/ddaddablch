@@ -50,7 +50,7 @@ public class Donation extends BaseEntity {
     //트랜잭션 상태
     @Enumerated(EnumType.STRING)
     @Builder.Default
-    private DonationStatus status=DonationStatus.PENDING;
+    private DonationStatus status=DonationStatus.SUCCESS;
 
     //기부 메시지
     @Column(length=500)

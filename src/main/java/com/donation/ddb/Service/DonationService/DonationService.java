@@ -66,7 +66,7 @@ public class DonationService {
                     .message(message)
                     .studentUser(studentUser)
                     .campaign(campaign)
-                    .status(DonationStatus.PENDING) // 초기 상태는 PENDING -> 그니까 기부하기 전에 메타마스크 인증하고 해야되나
+                    .status(DonationStatus.SUCCESS) // 초기 상태는 PENDING -> 그니까 기부하기 전에 메타마스크 인증하고 해야되나
                     .build();
 
             //DB 에 저장하기
