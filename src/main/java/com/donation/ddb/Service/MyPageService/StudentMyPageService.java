@@ -9,6 +9,7 @@ import com.donation.ddb.Repository.PostCommentRepository.PostCommentRepository;
 import com.donation.ddb.Repository.PostRepository.PostRepository;
 import com.donation.ddb.Repository.StudentUserRepository;
 import com.donation.ddb.Repository.projection.PostWithCount;
+import com.donation.ddb.Service.NotificationService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
@@ -30,6 +31,7 @@ public class StudentMyPageService {
     private final DonationRepository donationRepository;
     private final PostRepository postRepository;
     private final PostCommentRepository postCommentRepository;
+    private final NotificationService notificationService;
 
     public StudentMyPageResponseDTO getMyPageInfo(){
 
@@ -76,6 +78,7 @@ public class StudentMyPageService {
                 // 추후 구현할 필드들
                 .recentPosts(posts)
                 .recentComments(comments)
+                .unreadNotifications(notificationService.getUnreadNotifications(student.getSId()))
                 // .totalCommentCount(activityStats.getTotalCommentCount())
                 // .unreadNotificationCount(unreadNotificationCount)
                 .build();

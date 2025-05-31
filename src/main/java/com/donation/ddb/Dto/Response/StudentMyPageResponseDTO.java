@@ -1,6 +1,7 @@
 package com.donation.ddb.Dto.Response;
 
 import com.donation.ddb.Domain.CampaignComment;
+import com.donation.ddb.Domain.Notification;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.*;
 
@@ -36,7 +37,7 @@ public class StudentMyPageResponseDTO {
     private List<PostCommentDTO> recentComments; //최근 댓글 모음
 
     // 알림 정보
-    //private Integer unreadNotificationCount; // 읽지 않은 알림 수
+    private List<Notification> unreadNotifications; // 읽지 않은 알림 수
 
     // 내부 DTO 클래스들
     @Getter

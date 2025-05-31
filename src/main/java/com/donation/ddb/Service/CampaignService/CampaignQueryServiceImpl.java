@@ -114,4 +114,9 @@ public class CampaignQueryServiceImpl implements CampaignQueryService {
     public Campaign findBycId(Long cId) {
         return campaignRepository.findBycId(cId);
     }
+
+    @Override
+    public Campaign findBycName(String cName){
+        return campaignRepository.findBycName(cName);
+    }
 }

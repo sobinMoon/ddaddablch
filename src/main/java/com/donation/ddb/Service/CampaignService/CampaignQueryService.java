@@ -33,6 +33,6 @@ public interface CampaignQueryService {
     );
 
     Campaign findBycId(Long cId);
-
+    Campaign findBycName(String cName);
 
 }

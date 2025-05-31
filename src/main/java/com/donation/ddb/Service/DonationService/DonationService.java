@@ -4,8 +4,10 @@ import com.donation.ddb.Domain.*;
 import com.donation.ddb.Domain.Exception.DataNotFoundException;
 import com.donation.ddb.Repository.CampaignRepository.CampaignRepository;
 import com.donation.ddb.Repository.DonationRepository.DonationRepository;
+import com.donation.ddb.Repository.NotificationRepository;
 import com.donation.ddb.Repository.OrganizationUserRepository;
 import com.donation.ddb.Repository.StudentUserRepository;
+import com.donation.ddb.Service.NotificationService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -22,6 +24,7 @@ public class DonationService {
     private final CampaignRepository campaignRepository;
     private final StudentUserRepository studentUserRepository;
     private final OrganizationUserRepository organizationUserRepository;
+    private final NotificationService notificationService;
 
     // 트랜잭션이 중복인지 확인
     public Boolean isDuplicateTransaction(String transactionHash){
@@ -71,6 +74,13 @@ public class DonationService {
 
             //DB 에 저장하기
             Donation savedDonation=donationRepository.save(newDonation);
+
+            // 기부 완료 알림 생성
+            notificationService.createDonationCompleteNotification(
+                    studentUser.getSId(),           // 기부한 학생 ID
+                    campaign.getCName(),        // 캠페인 이름
+                    savedDonation.getDId()      // 기부 ID
+            );
 
             log.info("기부 기록 저장 완료 - ID: {}, Hash: {}", savedDonation.getDId(), hash);
             return savedDonation;
