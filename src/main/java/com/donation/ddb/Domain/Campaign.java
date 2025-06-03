@@ -65,8 +65,11 @@ public class Campaign extends BaseEntity {
     @Column(name = "c_wallet_address", nullable = false)
     private String cWalletAddress;
 
-    @OneToMany(mappedBy = "campaign", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<CampaignPlan> campaignPlanList = new ArrayList<>();
+//    @OneToMany(mappedBy = "campaign", cascade = CascadeType.ALL, orphanRemoval = true)
+//    private List<CampaignPlan> campaignPlanList = new ArrayList<>();
+
+    @OneToOne(mappedBy = "campaign", cascade = CascadeType.ALL)
+    private CampaignUpdate campaignUpdate;
 
     @OneToMany(mappedBy = "campaign", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<CampaignSpending> campaignSpendingList = new ArrayList<>();

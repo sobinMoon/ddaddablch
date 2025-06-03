@@ -24,5 +24,7 @@ public interface CampaignQueryService {
 
     Campaign findBycId(Long cId);
 
+    Boolean existsBycId(Long cId);
+
 
 }

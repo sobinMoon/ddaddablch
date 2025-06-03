@@ -24,5 +24,5 @@ public class CampaignSpending {
     private String csTitle;
 
     @Column(name = "cs_amount", nullable = false)
-    private int csAmount;
+    private Integer csAmount;
 }
