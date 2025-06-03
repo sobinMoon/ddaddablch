@@ -117,6 +117,13 @@ module.exports = {
       //  },
       //  evmVersion: "byzantium"
       // }
+      settings: {
+        optimizer: {
+          enabled: true,
+          runs: 200,
+        },
+        viaIR: true, // ✅ 이 한 줄만 추가!
+      },
     },
   },
 
