@@ -1,8 +1,10 @@
 package com.donation.ddb.Service;
 
 import com.donation.ddb.Domain.Enums.NotificationType;
+import com.donation.ddb.Domain.Exception.DataNotFoundException;
 import com.donation.ddb.Domain.Notification;
 import com.donation.ddb.Repository.NotificationRepository;
+import com.donation.ddb.Repository.StudentUserRepository;
 import com.donation.ddb.Service.CampaignCommentQueryService.CampaignCommentQueryService;
 import com.donation.ddb.Service.CampaignService.CampaignQueryServiceImpl;
 import lombok.RequiredArgsConstructor;
@@ -20,9 +22,13 @@ public class NotificationService {
 
     private final NotificationRepository notificationRepository;
     private final CampaignQueryServiceImpl campaignQueryService;
+    private final StudentUserRepository studentUserRepository;
 
     // 읽지 않은 알림 개수 조회
     public Integer getUnreadNotificationCount(Long studentId) {
+        if(!studentUserRepository.existsById(studentId)){
+            throw new DataNotFoundException("해당 id의 학생이 존재하지 않습니다.");
+        }
         return notificationRepository.countByStudentIdAndIsReadFalse(studentId);
     }
 
@@ -39,7 +45,10 @@ public class NotificationService {
     // 알림 읽음 처리
     @Transactional
     public void markAsRead(Long notificationId) {
-        notificationRepository.markAsRead(notificationId);
+        int updatedRows = notificationRepository.markAsRead(notificationId);
+        if (updatedRows == 0) {
+            throw new DataNotFoundException("알림을 찾을 수 없습니다");
+        }
     }
 
     // 모든 알림 읽음 처리

@@ -21,7 +21,7 @@ public interface NotificationRepository extends JpaRepository<Notification,Long>
     // 특정 알림 읽음 처리
     @Modifying
     @Query("UPDATE Notification n SET n.isRead = true WHERE n.notificationId = :notificationId")
-    void markAsRead(@Param("notificationId") Long notificationId);
+    int markAsRead(@Param("notificationId") Long notificationId);
 
     // 특정 학생의 모든 알림 읽음 처리
     @Modifying
