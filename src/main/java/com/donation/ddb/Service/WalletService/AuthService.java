@@ -1,4 +1,4 @@
-package com.donation.ddb.Service;
+package com.donation.ddb.Service.WalletService;
 
 import com.donation.ddb.Domain.*;
 import com.donation.ddb.Domain.Exception.DataNotFoundException;
@@ -20,6 +20,7 @@ import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -69,8 +70,8 @@ public class AuthService {
         String message=authEvent.generateAuthMessage();
 
         //사용자 지갑 주소 업데이트
-        if(su.getSWalletAddress()==null || !su.getSWalletAddress().equals(walletAddress)){
-            su.setSWalletAddress(walletAddress);
+        if(su.getWalletAddresses()==null || su.getWalletAddresses().isEmpty()){
+            su.addWallet(walletAddress);
         }
 
         authEventRepository.save(authEvent);
@@ -86,9 +87,18 @@ public class AuthService {
             String signature = requestDto.getSignature();//metamask가 생성한 서명값(0x+130자리 hex 문자열)
             String message=requestDto.getMessage();
 
-            //지갑 주소로 사용자 조회하기
-            StudentUser user=studentUserRepository.findBysWalletAddress(walletAddress)
-                    .orElseThrow(()-> new DataNotFoundException("해당 지갑 주소를 가진 사용자를 찾을 수 없습니다"));
+//            //지갑 주소로 사용자 조회하기
+//            StudentUser user=studentUserRepository.findBysWalletAddress(walletAddress)
+//                    .orElseThrow(()-> new DataNotFoundException("해당 지갑 주소를 가진 사용자를 찾을 수 없습니다"));
+
+            //모든 사용자에서 해당 지갑 가진 사용자 찾기
+            // 수정된 코드 - 모든 사용자에서 해당 지갑을 가진 사용자 찾기
+            List<StudentUser> allUsers = studentUserRepository.findAll();
+            StudentUser user = allUsers.stream()
+                    .filter(u -> u.hasWallet(walletAddress))
+                    .findFirst()
+                    .orElseThrow(() -> new DataNotFoundException("해당 지갑 주소를 가진 사용자를 찾을 수 없습니다"));
+
 
             //사용자의 최신 인증 이벤트 조회하기
             AuthEvent authEvent=authEventRepository

@@ -1,4 +1,4 @@
-package com.donation.ddb.Service;
+package com.donation.ddb.Service.OrgUserService;
 
 
 import com.donation.ddb.Domain.*;
@@ -26,7 +26,6 @@ public class OrgUserService {
     public Long createOrg(String name, String email,
                           String password,String confirmPassword,
                           String businessNumber,
-                          String walletAddress,
                           String description,
                           String profileimage){
         if(StringUtils.isEmpty(password) || !password.equals(confirmPassword)){
@@ -34,7 +33,6 @@ public class OrgUserService {
         }
 
         OrganizationUser user=new OrganizationUser();
-
 
         VerificationToken foundToken=tokenRepository.findByEmail(email)
                 .orElseThrow(()-> new DataNotFoundException("이메일 인증을 먼저 해주세요."));
@@ -45,14 +43,12 @@ public class OrgUserService {
             throw new EmailAlreadyExistsException(email);
         }
 
-
         user.setOEmail(email);
         user.setOPassword(passwordEncoder.encode(password));
 
 
         user.setRole(Role.ROLE_ORGANIZATION);
         user.setOBusinessNumber(businessNumber);
-        user.setOWalletAddress(walletAddress);
         user.setODescription(description);
         user.setOProfileImage(profileimage);
 

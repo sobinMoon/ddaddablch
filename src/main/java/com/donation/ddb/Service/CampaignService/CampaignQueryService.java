@@ -31,5 +31,6 @@ public interface CampaignQueryService {
 
     Campaign updateCampaign(Campaign campaign);
 
+    Campaign findBycName(String cName);
 
 }

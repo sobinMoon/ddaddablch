@@ -31,9 +31,6 @@ public class StudentSignUpForm {
     )
     private String sEmail;
 
-    @JsonProperty("walletAddress")
-    private String sWalletAddress;
-
     //비밀번호 복잡성 검증 로직 필요하면 추가하기
     @NotBlank(message="비밀번호를 입력해주세요")
     @JsonProperty("password")

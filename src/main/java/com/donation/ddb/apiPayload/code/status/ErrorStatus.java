@@ -38,8 +38,22 @@ public enum ErrorStatus implements BaseErrorCode {
 
     STUDENT_USER_NOT_FOUND(HttpStatus.NOT_FOUND, "STUDENT_USER4001", "학생 사용자가 없습니다."),
 
-    ORGANIZATION_USER_NOT_FOUND(HttpStatus.NOT_FOUND, "ORGANIZATION_USER4001", "단체 사용자가 없습니다.");
+    ORGANIZATION_USER_NOT_FOUND(HttpStatus.NOT_FOUND, "ORGANIZATION_USER4001", "단체 사용자가 없습니다."),
 
+    // 기부 관련 에러 코드 추가
+    DONATION_MISSING_TRANSACTION_HASH(HttpStatus.BAD_REQUEST, "DONATION4001", "트랜잭션 해시가 필요합니다."),
+    DONATION_INVALID_TRANSACTION(HttpStatus.BAD_REQUEST, "DONATION4002", "유효하지 않은 트랜잭션입니다. 블록체인에서 해당 트랜잭션을 찾을 수 없습니다."),
+    DONATION_DUPLICATE_TRANSACTION(HttpStatus.CONFLICT, "DONATION4003", "이미 기록된 트랜잭션입니다."),
+    DONATION_NOT_FOUND(HttpStatus.NOT_FOUND, "DONATION4004", "해당 해시의 기부 기록을 찾을 수 없습니다."),
+    DONATION_INVALID_STATUS(HttpStatus.BAD_REQUEST, "DONATION4005", "지원하지 않는 기부 상태값입니다."),
+    DONATION_MISSING_REQUIRED_FIELDS(HttpStatus.BAD_REQUEST, "DONATION4006", "필수 입력값이 누락되었습니다."),
+    DONATION_RECORD_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "DONATION5001", "기부 기록 저장에 실패했습니다."),
+    DONATION_STATUS_UPDATE_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "DONATION5002", "기부 상태 업데이트에 실패했습니다."),
+
+    // 블록체인 관련 에러 코드
+    BLOCKCHAIN_CONNECTION_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "BLOCKCHAIN5001", "블록체인 연결에 실패했습니다."),
+    BLOCKCHAIN_BALANCE_QUERY_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "BLOCKCHAIN5002", "잔액 조회 중 오류가 발생했습니다."),
+    BLOCKCHAIN_TRANSACTION_VERIFICATION_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "BLOCKCHAIN5003", "트랜잭션 검증 중 오류가 발생했습니다.");
 
     // 예시,,,
     // ARTICLE_NOT_FOUND(HttpStatus.NOT_FOUND, "ARTICLE4001", "게시글이 없습니다.");

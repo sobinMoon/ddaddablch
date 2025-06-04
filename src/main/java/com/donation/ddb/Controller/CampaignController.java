@@ -49,6 +49,8 @@ import static com.querydsl.core.types.Projections.constructor;
 @Validated
 public class CampaignController {
 
+
+
     @Autowired
     private CampaignQueryService campaignService;
 

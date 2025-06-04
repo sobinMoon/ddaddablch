@@ -6,9 +6,9 @@ import com.donation.ddb.Domain.Exception.EmailAlreadyExistsException;
 import com.donation.ddb.Dto.Request.OrgEmailVerificationRequestDto;
 import com.donation.ddb.Dto.Request.OrgSignUpForm;
 import com.donation.ddb.Repository.OrganizationUserRepository;
-import com.donation.ddb.Service.EmailService;
-import com.donation.ddb.Service.JwtTokenProvider;
-import com.donation.ddb.Service.OrgUserService;
+import com.donation.ddb.Service.EmailService.EmailService;
+import com.donation.ddb.Service.TokenService.JwtTokenProvider;
+import com.donation.ddb.Service.OrgUserService.OrgUserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -123,7 +123,6 @@ public class OrgUserController {
                     orgSignUpForm.getPassword(),
                     orgSignUpForm.getConfirmPassword(),
                     orgSignUpForm.getBusinessNumber(),
-                    orgSignUpForm.getWalletAddress(),
                     orgSignUpForm.getDescription(),
                     orgSignUpForm.getProfileImage()
             );

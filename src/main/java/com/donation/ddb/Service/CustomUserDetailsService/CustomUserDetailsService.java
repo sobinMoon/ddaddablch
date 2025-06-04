@@ -1,4 +1,4 @@
-package com.donation.ddb.Service;
+package com.donation.ddb.Service.CustomUserDetailsService;
 
 import com.donation.ddb.Domain.CustomUserDetails;
 import com.donation.ddb.Domain.OrganizationUser;
@@ -36,7 +36,8 @@ public class CustomUserDetailsService implements UserDetailsService {
                     .id(student.getSId())
                     .email(student.getSEmail())
                     .password(student.getSPassword())
-                    .role(student.getRole().name()) // "STUDENT"
+                    .nickname(student.getSNickname())
+                    .role(student.getRole().name()) // "ROLE_STUDENT"
                     .build();
         }
 
@@ -50,6 +51,7 @@ public class CustomUserDetailsService implements UserDetailsService {
                     .id(organization.getOId())
                     .email(organization.getOEmail())
                     .password(organization.getOPassword())
+                    .nickname(organization.getOName() != null ? organization.getOName() : organization.getOEmail()) // null 방지
                     .role(organization.getRole().name()) // "ORGANIZATION"
                     .build();
         }
@@ -70,6 +72,7 @@ public class CustomUserDetailsService implements UserDetailsService {
                     .id(student.getSId())
                     .email(student.getSEmail())
                     .role(student.getRole().name())
+                    .nickname(student.getSNickname())
                     .build();
 
         } else if ("ORGANIZATION".equals(role)) {
@@ -80,6 +83,7 @@ public class CustomUserDetailsService implements UserDetailsService {
                     .id(organization.getOId())
                     .email(organization.getOEmail())
                     .role(organization.getRole().name())
+                    .nickname(organization.getOName() != null ? organization.getOName() : organization.getOEmail()) // null 방지
                     .build();
         }
 

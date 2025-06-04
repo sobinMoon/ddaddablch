@@ -1,4 +1,4 @@
-package com.donation.ddb.Service;
+package com.donation.ddb.Service.StudentUserService;
 
 
 import com.donation.ddb.Domain.Exception.DataNotFoundException;

@@ -2,7 +2,7 @@ package com.donation.ddb;
 
 import com.donation.ddb.Controller.AuthController;
 import com.donation.ddb.Domain.StudentUser;
-import com.donation.ddb.Service.AuthService;
+import com.donation.ddb.Service.WalletService.AuthService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.mockito.InjectMocks;

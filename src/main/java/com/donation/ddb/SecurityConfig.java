@@ -1,6 +1,6 @@
 package com.donation.ddb;
 
-import com.donation.ddb.Service.JwtTokenProvider;
+import com.donation.ddb.Service.TokenService.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -14,8 +14,6 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
-import org.springframework.security.web.header.writers.frameoptions.XFrameOptionsHeaderWriter;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.cors.CorsConfiguration;
@@ -107,13 +105,13 @@ public class SecurityConfig {
                 "http://192.168.56.1:5173"
                 ,"http://192.168.56.1:3000",
                 "http://192.168.56.1:8000",
-                "http://10.101.48.92:3000",   // ✅ 여기에 추가
-                "http://10.101.48.92:5500",   // ✅ 필요시 추가
-                "http://10.101.48.92:8080" ,   // ✅ 필요시 추가,
+                "http://10.101.48.92:3000",
+                "http://10.101.48.92:5500",
+                "http://10.101.48.92:8080" ,
                 "http://10.101.48.92:5173",
-                "http://10.101.48.199:3000",   // ✅ 여기에 추가
-                "http://10.101.48.199:5500",   // ✅ 필요시 추가
-                "http://10.101.48.199:8080" ,   // ✅ 필요시 추가,
+                "http://10.101.48.199:3000",
+                "http://10.101.48.199:5500",
+                "http://10.101.48.199:8080" ,
                 "http://10.101.48.199:5173",
                 "http://10.101.32.65:3000",   // ✅ 여기에 추가
                 "http://10.101.32.65:5500",   // ✅ 필요시 추가
@@ -123,6 +121,10 @@ public class SecurityConfig {
                 "http://10.101.32.1:5500",   // ✅ 필요시 추가
                 "http://10.101.32.1:8080" ,   // ✅ 필요시 추가,
                 "http://10.101.32.1:5173",
+                "http://10.101.32.88:3000",
+                "http://10.101.32.88:5500",
+                "http://10.101.32.88:8080",
+                "http://10.101.32.88:5173",
 
                 "http://localhost:5173"
 

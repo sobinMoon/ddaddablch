@@ -31,19 +31,15 @@ public class OrgSignUpForm {
     @NotBlank(message="비밀번호를 입력해주세요")
     private String confirmPassword;
 
-    @Pattern(regexp = "^$|^0x[a-fA-F0-9]{40}$", message = "올바른 지갑 주소 형식이어야 합니다.")
-    private String walletAddress;
+//    @Pattern(regexp = "^$|^0x[a-fA-F0-9]{40}$", message = "올바른 지갑 주소 형식이어야 합니다.")
+//    private String walletAddress;
 
     private String description;
 
     private String profileImage;
 
-
-
     @Pattern(regexp = "\\d{3}-\\d{2}-\\d{5}", message = "사업자등록번호는 123-45-67890 형식이어야 합니다.")
-    @NotBlank(message="사업자 번호를 입력해주세요")
+    //@NotBlank(message="사업자 번호를 입력해주세요") -> 선택으로 바꿈
     private String businessNumber;
-
-
 
 }

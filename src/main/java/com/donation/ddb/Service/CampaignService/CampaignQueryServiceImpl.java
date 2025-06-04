@@ -99,4 +99,9 @@ public class CampaignQueryServiceImpl implements CampaignQueryService {
     public List<CampaignWithUpdate> findRecentUpdates() {
         return campaignUpdateRepository.findLatestUpdates();
     }
+
+    @Override
+    public Campaign findBycName(String cName) {
+        return campaignRepository.findBycName(cName);
+    }
 }
