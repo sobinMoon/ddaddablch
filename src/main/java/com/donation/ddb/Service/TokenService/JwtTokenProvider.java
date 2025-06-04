@@ -2,8 +2,6 @@ package com.donation.ddb.Service.TokenService;
 
 import com.donation.ddb.Domain.CustomUserDetails;
 import com.donation.ddb.Domain.Role;
-import com.donation.ddb.Domain.CustomUserDetails;
-import com.donation.ddb.Service.CustomUserDetailsService.CustomUserDetailsService;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
@@ -11,23 +9,23 @@ import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
 import jakarta.servlet.http.HttpServletRequest;
 import jnr.constants.platform.Local;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
 
+import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Component
-@RequiredArgsConstructor
 public class JwtTokenProvider {
 
     @Value("${app.jwt.secret}")
@@ -38,8 +36,6 @@ public class JwtTokenProvider {
 
     @Value("${app.jwt.refresh-expiration}")
     private int refreshTokenExpirationMs;
-
-    private final CustomUserDetailsService customUserDetailsService;
 
     //인증된 사용자 정보를 기반으로 jwt생성
     //ACCESS TOKEN생성
@@ -56,28 +52,33 @@ public class JwtTokenProvider {
         Date now = new Date();
         Date expiryDate=new Date(now.getTime()+jwtExpirationMs);
 
+        // 권한 뽑기
+        Collection<? extends GrantedAuthority> authorities = customUserDetails.getAuthorities();
+//        List<String> roles = authorities.stream()
+//                .map(GrantedAuthority::getAuthority)
+//                .collect(Collectors.toList());
+
         return Jwts.builder()
                 .setSubject(customUserDetails.getUsername())
                 .claim("userId", customUserDetails.getId())   // ← 추가
                 .claim("role", customUserDetails.getRole())   // ← 추가
                 .claim("nickname",customUserDetails.getNickname())
+                //.claim("authorities",customUserDetails.getAuthorities())
                 .setIssuedAt(now)
                 .setExpiration(expiryDate)
                 .signWith(Keys.hmacShaKeyFor(jwtSecret.getBytes()), SignatureAlgorithm.HS512)
                 .compact();
-
     }
 
     // Refresh Token 생성
     public String generateRefreshToken(Authentication authentication) {
-        CustomUserDetails userDetails=(CustomUserDetails) authentication.getPrincipal();
+        String username = authentication.getName();//여기서 name은 email임
 
         Date now = new Date();
         Date expiryDate = new Date(now.getTime() + refreshTokenExpirationMs);
 
         return Jwts.builder()
-                .setSubject(userDetails.getEmail())
-                //여기엔 role안넣어도되나,,?
+                .setSubject(username)
                 .setIssuedAt(now)
                 .setExpiration(expiryDate)
                 .signWith(Keys.hmacShaKeyFor(jwtSecret.getBytes()), SignatureAlgorithm.HS512)
@@ -131,7 +132,7 @@ public class JwtTokenProvider {
 
         // Spring Security에 등록할 인증 객체 반환
         return new UsernamePasswordAuthenticationToken(customUserDetails, "",
-               customUserDetails.getAuthorities() );
+                customUserDetails.getAuthorities() );
     }
 
     // 토큰에서 사용자 이름 추출
@@ -145,6 +146,7 @@ public class JwtTokenProvider {
         return claims.getSubject();
     }
 }
+
 
 
 

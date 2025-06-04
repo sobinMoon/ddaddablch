@@ -16,10 +16,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -47,12 +44,16 @@ public class CampaignCommentQueryService {
         // 유저가 좋아요를 눌렀는지 여부를 조회
         Set<Long> likedCommentIds = new HashSet<>();
 
-        log.info(">> 요청받은 userEmail : "+userEmail);
+        log.info("받은 userEmail : {}", userEmail);
         if (userEmail != null) {
-            StudentUser user = studentUserRepository.findBysEmail(userEmail)
-                    .orElseThrow(() -> new IllegalArgumentException("User not found"));
-
-            likedCommentIds = campaignCommentLikeRepository.findLikedCommentIdsByEmailAndCommentIds(user.getSEmail(), commentIds);
+            // StudentUser인지 확인 후 처리
+            Optional<StudentUser> studentOpt = studentUserRepository.findBysEmail(userEmail);
+            if (studentOpt.isPresent()) {
+                likedCommentIds = campaignCommentLikeRepository.findLikedCommentIdsByEmailAndCommentIds(userEmail, commentIds);
+            } else {
+                log.info("StudentUser가 아니거나 존재하지 않는 사용자: {}", userEmail);
+                // OrganizationUser이거나 존재하지 않는 경우 - 좋아요 정보 없이 진행
+            }
         }
 
         final Set<Long> likedCommentIdsFinal = likedCommentIds;
@@ -63,7 +64,6 @@ public class CampaignCommentQueryService {
                         comment,
                         likesMap.getOrDefault(comment.getCcId(), 0L),
                         likedCommentIdsFinal.contains(comment.getCcId())
-
                 ))
                 .toList();
 

@@ -83,7 +83,7 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-
+        //configuration.setAllowedOrigins(Arrays.asList(// 모든 도메인 허용 ✅
         // 허용할 오리진(출처) 설정
         configuration.setAllowedOrigins(Arrays.asList(
                 "http://localhost:3000",     // React 기본 포트
@@ -125,6 +125,7 @@ public class SecurityConfig {
                 "http://10.101.32.88:5500",
                 "http://10.101.32.88:8080",
                 "http://10.101.32.88:5173",
+                "http://192.168.1.100:80",
 
                 "http://localhost:5173"
 
