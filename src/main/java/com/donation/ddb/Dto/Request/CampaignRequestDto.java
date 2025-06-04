@@ -7,10 +7,7 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -21,6 +18,7 @@ public class CampaignRequestDto {
     @NoArgsConstructor
     @AllArgsConstructor
     @Builder
+    @Setter
     public static class JoinDto {
         @JsonProperty("id")
         private Long id;
@@ -30,7 +28,7 @@ public class CampaignRequestDto {
         private String name;
 
         @JsonProperty("imageUrl")
-        @NotBlank(message = "캠페인 이미지 URL은 필수입니다.")
+//        @NotBlank(message = "캠페인 이미지 URL은 필수입니다.")
         private String imageUrl;
 
         @JsonProperty("description")

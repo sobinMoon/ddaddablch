@@ -6,11 +6,11 @@ import com.donation.ddb.Dto.Request.CampaignUpdateRequestDto;
 import com.donation.ddb.Dto.Response.CampaignUpdateResponseDto;
 
 public class CampaignUpdateConverter {
-    public static CampaignUpdate toCampaignUpdate(CampaignUpdateRequestDto.JoinDto request, Campaign campaign) {
+    public static CampaignUpdate toCampaignUpdate(CampaignUpdateRequestDto.JoinDto request, String imagePath, Campaign campaign) {
         return CampaignUpdate.builder()
                 .cuTitle(request.getTitle())
                 .cuContent(request.getContent())
-                .cuImageUrl(request.getImageUrl())
+                .cuImageUrl(imagePath)
                 .campaign(campaign)
                 .build();
     }

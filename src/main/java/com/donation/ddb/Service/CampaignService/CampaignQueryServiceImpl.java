@@ -78,6 +78,11 @@ public class CampaignQueryServiceImpl implements CampaignQueryService {
     }
 
     @Override
+    public Campaign updateCampaign(Campaign campaign) {
+        return campaignRepository.save(campaign);
+    }
+
+    @Override
     public Campaign findBycId(Long cId) {
         return campaignRepository.findBycId(cId);
     }

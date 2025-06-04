@@ -26,5 +26,7 @@ public interface CampaignQueryService {
 
     Boolean existsBycId(Long cId);
 
+    Campaign updateCampaign(Campaign campaign);
+
 
 }

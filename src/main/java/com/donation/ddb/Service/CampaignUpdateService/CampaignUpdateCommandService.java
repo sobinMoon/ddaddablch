@@ -15,10 +15,10 @@ public class CampaignUpdateCommandService {
     private final CampaignUpdateRepository campaignUpdateRepository;
     private final CampaignQueryService campaignQueryService;
 
-    public CampaignUpdate addCampaignUpdate(CampaignUpdateRequestDto.JoinDto request, Long campaignId) {
+    public CampaignUpdate addCampaignUpdate(CampaignUpdateRequestDto.JoinDto request, String imagePath, Long campaignId) {
 
         Campaign campaign = campaignQueryService.findBycId(campaignId);
 
-        return campaignUpdateRepository.save(CampaignUpdateConverter.toCampaignUpdate(request, campaign));
+        return campaignUpdateRepository.save(CampaignUpdateConverter.toCampaignUpdate(request, imagePath, campaign));
     }
 }
