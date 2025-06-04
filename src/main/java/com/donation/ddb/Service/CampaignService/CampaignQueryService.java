@@ -4,6 +4,7 @@ import com.donation.ddb.Domain.Campaign;
 import com.donation.ddb.Domain.CampaignCategory;
 import com.donation.ddb.Dto.Request.CampaignRequestDto;
 import com.donation.ddb.Dto.Response.CampaignResponse;
+import com.donation.ddb.Repository.projection.CampaignWithUpdate;
 import org.springframework.data.domain.Pageable;
 
 import java.time.LocalDate;
@@ -20,11 +21,15 @@ public interface CampaignQueryService {
 //            CampaignSearchDto searchDto
     );
 
+    List<CampaignWithUpdate> findRecentUpdates();
+
     Campaign addCampaign(CampaignRequestDto.JoinDto joinDto, String email);
 
     Campaign findBycId(Long cId);
 
     Boolean existsBycId(Long cId);
+
+    Campaign updateCampaign(Campaign campaign);
 
     Campaign findBycName(String cName);
 

@@ -3,10 +3,7 @@ package com.donation.ddb.Dto.Request;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotEmpty;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.util.List;
 
@@ -14,6 +11,7 @@ public class CampaignUpdateRequestDto {
 
     @Getter
     @Builder
+    @Setter
     @NoArgsConstructor
     @AllArgsConstructor
     public static class JoinDto {
@@ -24,10 +22,6 @@ public class CampaignUpdateRequestDto {
         @JsonProperty("content")
         @NotEmpty(message = "캠페인 내용은 필수입니다.")
         private String content;
-
-        @JsonProperty("imageUrl")
-        @NotEmpty(message = "캠페인 이미지 URL은 필수입니다.")
-        private String imageUrl;
 
         @JsonProperty("spendings")
         @Valid // 내부 JoinDto의 유효성 검사를 위해 필요

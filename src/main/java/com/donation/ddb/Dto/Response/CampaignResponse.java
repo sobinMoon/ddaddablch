@@ -68,7 +68,19 @@ public class CampaignResponse {
         private LocalDateTime createdAt;
         private LocalDateTime updatedAt;
         private OrganizationResponse.OrganizationDetailDto organization;
+        private CampaignUpdateResponseDto.CampaignUpdateDto campaignUpdate;
         private List<CampaignPlanResponseDto> campaignPlans;
         private List<CampaignSpendingResponseDto> campaignSpendings;
+    }
+
+    @Getter
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class RecentUpdateDto {
+        private Long campaignId;
+        private String name;
+        private String previewContent;
+        private LocalDateTime createdAt;
     }
 }

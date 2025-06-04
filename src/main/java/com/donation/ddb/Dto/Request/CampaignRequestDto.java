@@ -1,15 +1,13 @@
 package com.donation.ddb.Dto.Request;
 
 import com.donation.ddb.Domain.CampaignCategory;
+import com.donation.ddb.Domain.CampaignStatusFlag;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -20,6 +18,7 @@ public class CampaignRequestDto {
     @NoArgsConstructor
     @AllArgsConstructor
     @Builder
+    @Setter
     public static class JoinDto {
         @JsonProperty("id")
         private Long id;
@@ -29,7 +28,7 @@ public class CampaignRequestDto {
         private String name;
 
         @JsonProperty("imageUrl")
-        @NotBlank(message = "캠페인 이미지 URL은 필수입니다.")
+//        @NotBlank(message = "캠페인 이미지 URL은 필수입니다.")
         private String imageUrl;
 
         @JsonProperty("description")
@@ -68,5 +67,15 @@ public class CampaignRequestDto {
         @Valid // 내부 JoinDto의 유효성 검사를 위해 필요
         @NotEmpty(message = "최소 한 개 이상의 기부 계획이 필요합니다.")
         List<CampaignPlanRequestDto.JoinDto> plans;
+    }
+
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
+    public static class UpdateStatusDto {
+        @JsonProperty("status")
+        @NotNull(message = "변경할 캠페인 상태값은 필수입니다. (FUNDED, IN_PROGRESS, COMPLETED)")
+        private CampaignStatusFlag status;
     }
 }

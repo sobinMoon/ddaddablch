@@ -30,4 +30,17 @@ public class CampaignCommandService {
             }
         }
     }
+
+    @Transactional
+    public Campaign updateStatusByUser(Campaign campaign, CampaignStatusFlag statusFlag) {
+        campaign.setCStatusFlag(statusFlag);
+        if (statusFlag == CampaignStatusFlag.FUNDED) {
+            campaign.setDonateEnd(LocalDate.now());
+        } else if (statusFlag == CampaignStatusFlag.IN_PROGRESS) {
+            campaign.setBusinessStart(LocalDate.now());
+        } else if (statusFlag == CampaignStatusFlag.COMPLETED) {
+            campaign.setBusinessEnd(LocalDate.now());
+        }
+        return campaignRepository.save(campaign);
+    }
 }

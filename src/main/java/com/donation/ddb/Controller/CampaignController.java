@@ -7,10 +7,13 @@ import com.donation.ddb.Domain.*;
 import com.donation.ddb.Dto.Request.*;
 import com.donation.ddb.Dto.Response.CampaignResponse;
 import com.donation.ddb.Dto.Response.OrganizationResponse;
+import com.donation.ddb.ImageStore;
+import com.donation.ddb.Repository.projection.CampaignWithUpdate;
 import com.donation.ddb.Service.CampaignCommentLikeService.CampaignCommentLikeService;
 import com.donation.ddb.Service.CampaignCommentQueryService.CampaignCommentQueryService;
 import com.donation.ddb.Service.CampaignPlansService.CampaignPlanCommandService;
 import com.donation.ddb.Service.CampaignPlansService.CampaignPlansQueryService;
+import com.donation.ddb.Service.CampaignService.CampaignCommandService;
 import com.donation.ddb.Service.CampaignService.CampaignQueryService;
 import com.donation.ddb.Service.CampaignSpendingService.CampaignSpendingCommandService;
 import com.donation.ddb.Service.CampaignSpendingService.CampaignSpendingQueryService;
@@ -26,11 +29,14 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
@@ -72,9 +78,12 @@ public class CampaignController {
     private CampaignUpdateCommandService campaignUpdateCommandService;
     @Autowired
     private CampaignSpendingCommandService campaignSpendingCommandService;
+    @Autowired
+    private CampaignCommandService campaignCommandService;
+
 
     @GetMapping("home")
-    public ResponseEntity<?> campaignList() {
+    public ApiResponse<?> campaignList() {
         Pageable pageable = PageRequest.of(0, 3);
         List<CampaignResponse.CampaignListDto> popular = campaignService.findAllCampaigns(
                 null,
@@ -94,14 +103,16 @@ public class CampaignController {
                 "FUNDRAISING",
                 "ENDING_SOON",
                 pageable);
+        List<CampaignWithUpdate> recentUpdates = campaignService.findRecentUpdates();
 
-        Map<String, List<CampaignResponse.CampaignListDto>> campaignResponseDtoList = Map.of(
+        Map<String, List<?>> campaignResponseDtoList = Map.of(
                 "popular", popular,
                 "latest", latest,
-                "endingSoon", endingSoon
+                "endingSoon", endingSoon,
+                "recentUpdates", CampaignConverter.toRecentUpdateListDto(recentUpdates)
         );
 
-        return ResponseEntity.ok(campaignResponseDtoList);
+        return ApiResponse.onSuccess(campaignResponseDtoList);
     }
 
     // 진행 중 캠페인 리스트
@@ -193,11 +204,12 @@ public class CampaignController {
         return ResponseEntity.ok(resMap);
     }
 
-    @PostMapping
+    @PostMapping(value = "")
     public ApiResponse<?> addCampaign(
-            @RequestBody @Valid CampaignRequestDto.JoinDto request,
+            @RequestPart(value="request", name="request") @Valid CampaignRequestDto.JoinDto request,
+            @RequestPart(value = "image") MultipartFile image,
             @AuthenticationPrincipal CustomUserDetails userDetails
-    ) {
+    ) throws IOException {
         String email = null;
 
         if (userDetails == null) {
@@ -208,7 +220,13 @@ public class CampaignController {
             email = userDetails.getUsername();
         }
 
+        request.setImageUrl("default.png");
         Campaign campaign = campaignService.addCampaign(request, email);
+
+        String imagePath = ImageStore.storeImage(image, "\\campaigns\\" + campaign.getCId() + "\\detail\\");
+        campaign.setCImageUrl(imagePath);
+
+        campaign = campaignService.updateCampaign(campaign);
 
         List<CampaignPlanRequestDto.JoinDto> campaignPlans = request.getPlans();
 
@@ -308,12 +326,13 @@ public class CampaignController {
 
     }
 
-    @PostMapping("/{cId}/updates")
+    @PostMapping(value = "/{cId}/updates", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ApiResponse<?> addCampaignUpdate(
             @ExistCampaign @PathVariable(value = "cId") Long cId,
-            @RequestBody @Valid CampaignUpdateRequestDto.JoinDto request,
+            @RequestPart(value="request", name="request") @Valid CampaignUpdateRequestDto.JoinDto request,
+            @RequestPart(value = "image") MultipartFile image,
             @AuthenticationPrincipal CustomUserDetails userDetails
-    ) {
+    ) throws IOException {
         Campaign campaign = campaignService.findBycId(cId);
 
         if (userDetails == null) {
@@ -325,13 +344,39 @@ public class CampaignController {
             throw new CampaignHandler(ErrorStatus._FORBIDDEN);
         }
 
-        CampaignUpdate campaignUpdate = campaignUpdateCommandService.addCampaignUpdate(request, cId);
+        if (campaign.getCStatusFlag() != CampaignStatusFlag.COMPLETED) {
+            throw new CampaignHandler(ErrorStatus.CAMPAIGN_NOT_COMPLETED);
+        }
+
+        String imagePath = ImageStore.storeImage(image, "\\campaigns\\" + cId + "\\updates\\");
+
+        CampaignUpdate campaignUpdate = campaignUpdateCommandService.addCampaignUpdate(request, imagePath, cId);
 
         List<CampaignSpendingRequestDto.JoinDto> campaignSpendings = request.getSpendings();
 
         campaignSpendingCommandService.addCampaignPlan(campaignSpendings, campaign);
 
         return ApiResponse.onSuccess(CampaignUpdateConverter.toJoinResultDto(campaignUpdate));
+    }
+
+    @PatchMapping("/{cId}/status")
+    public ApiResponse<?> updateCampaignStatus(
+            @ExistCampaign @PathVariable(value = "cId") Long cId,
+            @RequestBody @Valid CampaignRequestDto.UpdateStatusDto request,
+            @AuthenticationPrincipal CustomUserDetails userDetails
+    ) {
+        Campaign campaign = campaignService.findBycId(cId);
+
+        if (userDetails == null) {
+            throw new CampaignHandler(ErrorStatus._UNAUTHORIZED);
+        } else if (!userDetails.isOrganization() ||
+                !campaign.getOrganizationUser().getOEmail().equals(userDetails.getUsername())) {
+            throw new CampaignHandler(ErrorStatus._FORBIDDEN);
+        }
+
+        campaignCommandService.updateStatusByUser(campaign, request.getStatus());
+
+        return ApiResponse.onSuccess(CampaignConverter.toJoinResult(campaign));
     }
 
     public CampaignResponse.CampaignDetailDto convertToDetailDto(Campaign campaign) {
@@ -361,6 +406,7 @@ public class CampaignController {
                 .createdAt(campaign.getCreatedAt())
                 .updatedAt(campaign.getUpdatedAt())
                 .organization(organizationDto)
+                .campaignUpdate(CampaignUpdateConverter.toCampaignUpdateDto(campaign.getCampaignUpdate()))
                 .campaignPlans(campaignPlansQueryService.getCampaignPlanDetails(campaign.getCId()))
                 .campaignSpendings(campaignSpendingQueryService.getCampaignSpending(campaign.getCId()))
                 .build();

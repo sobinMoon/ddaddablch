@@ -6,11 +6,11 @@ import com.donation.ddb.Dto.Request.CampaignUpdateRequestDto;
 import com.donation.ddb.Dto.Response.CampaignUpdateResponseDto;
 
 public class CampaignUpdateConverter {
-    public static CampaignUpdate toCampaignUpdate(CampaignUpdateRequestDto.JoinDto request, Campaign campaign) {
+    public static CampaignUpdate toCampaignUpdate(CampaignUpdateRequestDto.JoinDto request, String imagePath, Campaign campaign) {
         return CampaignUpdate.builder()
                 .cuTitle(request.getTitle())
                 .cuContent(request.getContent())
-                .cuImageUrl(request.getImageUrl())
+                .cuImageUrl(imagePath)
                 .campaign(campaign)
                 .build();
     }
@@ -23,6 +23,10 @@ public class CampaignUpdateConverter {
     }
 
     public static CampaignUpdateResponseDto.CampaignUpdateDto toCampaignUpdateDto(CampaignUpdate campaignUpdate) {
+        if (campaignUpdate == null) {
+            return null; // Handle null case if needed
+        }
+
         return CampaignUpdateResponseDto.CampaignUpdateDto.builder()
                 .id(campaignUpdate.getCuId())
                 .title(campaignUpdate.getCuTitle())
