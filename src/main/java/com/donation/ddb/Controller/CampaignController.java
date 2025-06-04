@@ -326,6 +326,10 @@ public class CampaignController {
             throw new CampaignHandler(ErrorStatus._FORBIDDEN);
         }
 
+        if (campaign.getCStatusFlag() != CampaignStatusFlag.COMPLETED) {
+            throw new CampaignHandler(ErrorStatus.CAMPAIGN_NOT_COMPLETED);
+        }
+
         CampaignUpdate campaignUpdate = campaignUpdateCommandService.addCampaignUpdate(request, cId);
 
         List<CampaignSpendingRequestDto.JoinDto> campaignSpendings = request.getSpendings();
