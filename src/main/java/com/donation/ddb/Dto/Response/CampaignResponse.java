@@ -67,6 +67,7 @@ public class CampaignResponse {
         private LocalDateTime createdAt;
         private LocalDateTime updatedAt;
         private OrganizationResponse.OrganizationDetailDto organization;
+        private CampaignUpdateResponseDto.CampaignUpdateDto campaignUpdate;
         private List<CampaignPlanResponseDto> campaignPlans;
         private List<CampaignSpendingResponseDto> campaignSpendings;
     }

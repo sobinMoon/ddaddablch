@@ -23,6 +23,10 @@ public class CampaignUpdateConverter {
     }
 
     public static CampaignUpdateResponseDto.CampaignUpdateDto toCampaignUpdateDto(CampaignUpdate campaignUpdate) {
+        if (campaignUpdate == null) {
+            return null; // Handle null case if needed
+        }
+
         return CampaignUpdateResponseDto.CampaignUpdateDto.builder()
                 .id(campaignUpdate.getCuId())
                 .title(campaignUpdate.getCuTitle())

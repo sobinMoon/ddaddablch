@@ -1,6 +1,7 @@
 package com.donation.ddb.Dto.Request;
 
 import com.donation.ddb.Domain.CampaignCategory;
+import com.donation.ddb.Domain.CampaignStatusFlag;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
@@ -68,5 +69,15 @@ public class CampaignRequestDto {
         @Valid // 내부 JoinDto의 유효성 검사를 위해 필요
         @NotEmpty(message = "최소 한 개 이상의 기부 계획이 필요합니다.")
         List<CampaignPlanRequestDto.JoinDto> plans;
+    }
+
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
+    public static class UpdateStatusDto {
+        @JsonProperty("name")
+        @NotBlank(message = "변경할 캠페인 상태값은 필수입니다. (FUNDED, IN_PROGRESS, COMPLETED)")
+        private CampaignStatusFlag status;
     }
 }
