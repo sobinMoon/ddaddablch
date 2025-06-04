@@ -86,4 +86,10 @@ public class CampaignQueryServiceImpl implements CampaignQueryService {
     public Boolean existsBycId(Long cId) {
         return campaignRepository.existsBycId(cId);
     }
+
+    @Override
+    public Campaign findBycName(String cName)
+    {
+        return campaignRepository.findBycName(cName);
+    }
 }

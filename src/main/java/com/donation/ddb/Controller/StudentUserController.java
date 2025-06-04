@@ -25,7 +25,7 @@ import java.util.Map;
 @Controller
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/user/sign-up")
-@Slf4j //로깅
+@Slf4j
 public class StudentUserController {
 
     @Autowired
@@ -63,7 +63,6 @@ public class StudentUserController {
     public ResponseEntity<?> signup(@RequestBody @Valid StudentSignUpForm studentSignUpForm,
                                    BindingResult bindingResult){
 
-        //로깅
         log.info("회원가입 요청 수신: ",studentSignUpForm.getSEmail());
 
         //유효성 검증 실패했을 때 처리
@@ -151,6 +150,7 @@ public class StudentUserController {
             });
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorMap);
         }
+
         try {
             emailService.sendVerificationEmail(request.getEmail());
             return ResponseEntity.ok(

@@ -26,5 +26,6 @@ public interface CampaignQueryService {
 
     Boolean existsBycId(Long cId);
 
+    Campaign findBycName(String cName);
 
 }

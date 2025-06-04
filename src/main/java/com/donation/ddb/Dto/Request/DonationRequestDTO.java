@@ -11,5 +11,4 @@ import java.math.BigDecimal;
 public class DonationRequestDTO {
     private String beneficiary;
     private BigDecimal amount;
-
 }

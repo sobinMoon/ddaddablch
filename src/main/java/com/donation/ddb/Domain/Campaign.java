@@ -1,8 +1,10 @@
 package com.donation.ddb.Domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -31,9 +33,10 @@ public class Campaign extends BaseEntity {
     @Column(name = "c_goal", nullable = false)
     private Integer cGoal;
 
-    @Column(name = "c_current_amount", nullable = false)
+    @Column(name = "c_current_amount", nullable = false, precision = 38, scale = 18)
+    //전체 자리수, 소수점 이하 자리수
     @Builder.Default
-    private Integer cCurrentAmount = 0;
+    private BigDecimal cCurrentAmount = BigDecimal.ZERO;
 
     @Enumerated(EnumType.STRING)
     @Builder.Default
@@ -65,11 +68,9 @@ public class Campaign extends BaseEntity {
     @Column(name = "c_wallet_address", nullable = false)
     private String cWalletAddress;
 
-//    @OneToMany(mappedBy = "campaign", cascade = CascadeType.ALL, orphanRemoval = true)
-//    private List<CampaignPlan> campaignPlanList = new ArrayList<>();
-
-    @OneToOne(mappedBy = "campaign", cascade = CascadeType.ALL)
-    private CampaignUpdate campaignUpdate;
+    @OneToMany(mappedBy = "campaign", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore  // 이 한 줄만 추가
+    private List<CampaignPlan> campaignPlanList = new ArrayList<>();
 
     @OneToMany(mappedBy = "campaign", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<CampaignSpending> campaignSpendingList = new ArrayList<>();
