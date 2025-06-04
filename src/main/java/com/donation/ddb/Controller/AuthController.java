@@ -55,23 +55,47 @@ public class AuthController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
         }
     }
-    @GetMapping("/auth/me")
-    public ResponseEntity<?> getUserInfo(@AuthenticationPrincipal CustomUserDetails userDetails){
-        if(userDetails==null){
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(Map.of("authenticated", false,
-                            "error", "인증되지 않은 사용자입니다."));
-        }
-        Map<String, Object> userInfo = Map.of(
-                "id", userDetails.getId(),
-                "email", userDetails.getEmail(),
-                "role", userDetails.getRole(),
-                "nickname", userDetails.getNickname()
-        );
-
-        return ResponseEntity.ok(userInfo);
-
+//    @GetMapping("/auth/me")
+//    public ResponseEntity<?> getUserInfo(@AuthenticationPrincipal CustomUserDetails userDetails){
+//        if(userDetails==null){
+//            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+//                    .body(Map.of("authenticated", false,
+//                            "error", "인증되지 않은 사용자입니다."));
+//        }
+//        Map<String, Object> userInfo = Map.of(
+//                "id", userDetails.getId(),
+//                "email", userDetails.getEmail(),
+//                "role", userDetails.getRole(),
+//                "nickname", userDetails.getNickname()
+//        );
+//
+//        return ResponseEntity.ok(userInfo);
+//
+//    }
+@GetMapping("/auth/me")
+public ResponseEntity<?> getUserInfo(@AuthenticationPrincipal CustomUserDetails userDetails){
+    if(userDetails == null){
+        Map<String, Object> errorResponse = new HashMap<>();
+        errorResponse.put("authenticated", false);
+        errorResponse.put("error", "인증되지 않은 사용자입니다.");
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errorResponse);
     }
+
+    // 디버깅용 로그
+    System.out.println("=== 사용자 정보 디버깅 ===");
+    System.out.println("ID: " + userDetails.getId() + " (null: " + (userDetails.getId() == null) + ")");
+    System.out.println("Email: " + userDetails.getEmail() + " (null: " + (userDetails.getEmail() == null) + ")");
+    System.out.println("Role: " + userDetails.getRole() + " (null: " + (userDetails.getRole() == null) + ")");
+    System.out.println("Nickname: " + userDetails.getNickname() + " (null: " + (userDetails.getNickname() == null) + ")");
+
+    Map<String, Object> userInfo = new HashMap<>();
+    userInfo.put("id", userDetails.getId());
+    userInfo.put("email", userDetails.getEmail());
+    userInfo.put("role", userDetails.getRole());
+    userInfo.put("nickname", userDetails.getNickname());
+
+    return ResponseEntity.ok(userInfo);
+}
 
 
 

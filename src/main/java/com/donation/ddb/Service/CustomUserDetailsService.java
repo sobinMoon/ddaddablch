@@ -51,6 +51,7 @@ public class CustomUserDetailsService implements UserDetailsService {
                     .id(organization.getOId())
                     .email(organization.getOEmail())
                     .password(organization.getOPassword())
+                    .nickname(organization.getOName() != null ? organization.getOName() : organization.getOEmail()) // null 방지
                     .role(organization.getRole().name()) // "ORGANIZATION"
                     .build();
         }
@@ -82,6 +83,7 @@ public class CustomUserDetailsService implements UserDetailsService {
                     .id(organization.getOId())
                     .email(organization.getOEmail())
                     .role(organization.getRole().name())
+                    .nickname(organization.getOName() != null ? organization.getOName() : organization.getOEmail()) // null 방지
                     .build();
         }
 

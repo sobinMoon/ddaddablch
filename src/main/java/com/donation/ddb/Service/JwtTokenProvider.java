@@ -117,12 +117,14 @@ public class JwtTokenProvider {
         String role = claims.get("role", String.class);
         String nickname=claims.get("nickname",String.class);
 
+
+        // null 값들을 안전하게 처리
         CustomUserDetails customUserDetails = CustomUserDetails.builder()
-                .id(userId)
-                .email(email)
-                .nickname(nickname)
+                .id(userId != null ? userId : 0L)
+                .email(email != null ? email : "")
+                .nickname(nickname != null ? nickname : "") // null 방지
                 .password("")
-                .role(role)
+                .role(role != null ? role : "")
                 .build();
 
         // Spring Security에 등록할 인증 객체 반환
