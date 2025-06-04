@@ -1,22 +1,26 @@
 package com.donation.ddb.Controller;
 
 import com.donation.ddb.Converter.CampaignCommentLikeConverter;
-import com.donation.ddb.Domain.Campaign;
-import com.donation.ddb.Domain.CampaignComment;
-import com.donation.ddb.Domain.CampaignCommentLike;
-import com.donation.ddb.Dto.Request.CampaignCommentRequestDto;
-import com.donation.ddb.Dto.Request.CampaignRequestDto;
+import com.donation.ddb.Converter.CampaignConverter;
+import com.donation.ddb.Converter.CampaignUpdateConverter;
+import com.donation.ddb.Domain.*;
+import com.donation.ddb.Dto.Request.*;
 import com.donation.ddb.Dto.Response.CampaignResponse;
 import com.donation.ddb.Dto.Response.OrganizationResponse;
 import com.donation.ddb.Service.CampaignCommentLikeService.CampaignCommentLikeService;
 import com.donation.ddb.Service.CampaignCommentQueryService.CampaignCommentQueryService;
-import com.donation.ddb.Service.CampaignPlansQueryService.CampaignPlansQueryService;
+import com.donation.ddb.Service.CampaignPlansService.CampaignPlanCommandService;
+import com.donation.ddb.Service.CampaignPlansService.CampaignPlansQueryService;
 import com.donation.ddb.Service.CampaignService.CampaignQueryService;
-import com.donation.ddb.Service.CampaignSpendingQueryService.CampaignSpendingQueryService;
+import com.donation.ddb.Service.CampaignSpendingService.CampaignSpendingCommandService;
+import com.donation.ddb.Service.CampaignSpendingService.CampaignSpendingQueryService;
+import com.donation.ddb.Service.CampaignUpdateService.CampaignUpdateCommandService;
 import com.donation.ddb.Service.OrganizationUserService.OrganizationUserQueryService;
 import com.donation.ddb.apiPayload.ApiResponse;
 import com.donation.ddb.apiPayload.code.status.ErrorStatus;
 import com.donation.ddb.apiPayload.exception.handler.CampaignHandler;
+import com.donation.ddb.validation.ExistCampaign;
+import jakarta.validation.Valid;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,12 +28,11 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 import static com.querydsl.core.types.Projections.constructor;
 
@@ -37,6 +40,7 @@ import static com.querydsl.core.types.Projections.constructor;
 @NoArgsConstructor
 @RequestMapping("/api/v1/campaigns")
 @Slf4j
+@Validated
 public class CampaignController {
 
 
@@ -60,7 +64,14 @@ public class CampaignController {
     private CampaignCommentQueryService campaignCommentService;
 
     @Autowired
-    private CampaignCommentLikeService campaignCommentLikeService;;
+    private CampaignCommentLikeService campaignCommentLikeService;
+    ;
+    @Autowired
+    private CampaignPlanCommandService campaignPlanCommandService;
+    @Autowired
+    private CampaignUpdateCommandService campaignUpdateCommandService;
+    @Autowired
+    private CampaignSpendingCommandService campaignSpendingCommandService;
 
     @GetMapping("home")
     public ResponseEntity<?> campaignList() {
@@ -184,26 +195,26 @@ public class CampaignController {
 
     @PostMapping
     public ApiResponse<?> addCampaign(
-            @RequestBody CampaignRequestDto campaignRequestDto
+            @RequestBody @Valid CampaignRequestDto.JoinDto request,
+            @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
-        // 캠페인 추가 로직
+        String email = null;
 
-        System.out.println("CampaignRequestDto: " + campaignRequestDto);
+        if (userDetails == null) {
+            throw new CampaignHandler(ErrorStatus._UNAUTHORIZED);
+        } else if (!userDetails.isOrganization()) {
+            throw new CampaignHandler(ErrorStatus._FORBIDDEN);
+        } else {
+            email = userDetails.getUsername();
+        }
 
-        Campaign campaign = campaignService.addCampaign(
-                campaignRequestDto.getId(),
-                campaignRequestDto.getName(),
-                campaignRequestDto.getImageUrl(),
-                campaignRequestDto.getDescription(),
-                campaignRequestDto.getGoal(),
-                campaignRequestDto.getCategory(),
-                campaignRequestDto.getDonateStart(),
-                campaignRequestDto.getDonateEnd(),
-                campaignRequestDto.getBusinessStart(),
-                campaignRequestDto.getBusinessEnd()
-        );
+        Campaign campaign = campaignService.addCampaign(request, email);
 
-        return ApiResponse.onSuccess(convertToListDto(campaign));
+        List<CampaignPlanRequestDto.JoinDto> campaignPlans = request.getPlans();
+
+        campaignPlanCommandService.addCampaignPlan(campaignPlans, campaign);
+
+        return ApiResponse.onSuccess(CampaignConverter.toJoinResult(campaign));
     }
 
     @GetMapping("{cId}")
@@ -217,15 +228,16 @@ public class CampaignController {
 
     @GetMapping("{cId}/comments")
     public ApiResponse<?> getCampaignComments(
-            @AuthenticationPrincipal UserDetails userDetails,
+            @AuthenticationPrincipal CustomUserDetails userDetails,
             @PathVariable(value = "cId") Long cId,
             @RequestParam(value = "page", defaultValue = "0") int page,
             @RequestParam(value = "size", defaultValue = "10") int size) {
 
         String userEmail = null;
 
-        if (userDetails != null) {
+        if (userDetails != null && userDetails.isStudent()) {
             userEmail = userDetails.getUsername();
+            System.out.println("User Email: " + userEmail);
         }
 
         if (page < 0) {
@@ -244,12 +256,19 @@ public class CampaignController {
     public ApiResponse<?> addCampaignComment(
             @PathVariable(value = "cId") Long cId,
             @RequestBody CampaignCommentRequestDto campaignCommentRequestDto,
-            @AuthenticationPrincipal UserDetails userDetails
+            @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
         // 캠페인 댓글 추가 로직
         if (userDetails == null) {
             throw new CampaignHandler(ErrorStatus._UNAUTHORIZED);
         }
+
+        if (!userDetails.isStudent()) {
+            throw new CampaignHandler(ErrorStatus._FORBIDDEN);
+        }
+
+        log.info("userDetails: {}", userDetails);
+        log.info("email: {}", userDetails.getUsername());
 
         String email = userDetails.getUsername();
 
@@ -271,10 +290,14 @@ public class CampaignController {
     @PostMapping("{cId}/comments/{ccId}/likes")
     public ApiResponse<?> addCommentLike(
             @PathVariable(value = "ccId") Long ccId,
-            @AuthenticationPrincipal UserDetails userDetails
+            @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
         if (userDetails == null) {
             throw new CampaignHandler(ErrorStatus._UNAUTHORIZED);
+        }
+
+        if (!userDetails.isStudent()) {
+            throw new CampaignHandler(ErrorStatus._FORBIDDEN);
         }
 
         String email = userDetails.getUsername();
@@ -285,24 +308,30 @@ public class CampaignController {
 
     }
 
-    public CampaignResponse.CampaignListDto convertToListDto(Campaign campaign) {
-        return CampaignResponse.CampaignListDto.builder()
-                .id(campaign.getCId())
-                .name(campaign.getCName())
-                .imageUrl(campaign.getCImageUrl())
-                .description(campaign.getCDescription())
-                .goal(campaign.getCGoal())
-                .currentAmount(campaign.getCCurrentAmount())
-                .category(campaign.getCCategory())
-                .donateCount(campaign.getDonateCount())
-                .donateStart(campaign.getDonateStart())
-                .donateEnd(campaign.getDonateEnd())
-                .businessStart(campaign.getBusinessStart())
-                .businessEnd(campaign.getBusinessEnd())
-                .statusFlag(campaign.getCStatusFlag())
-                .createdAt(campaign.getCreatedAt())
-                .updatedAt(campaign.getUpdatedAt())
-                .build();
+    @PostMapping("/{cId}/updates")
+    public ApiResponse<?> addCampaignUpdate(
+            @ExistCampaign @PathVariable(value = "cId") Long cId,
+            @RequestBody @Valid CampaignUpdateRequestDto.JoinDto request,
+            @AuthenticationPrincipal CustomUserDetails userDetails
+    ) {
+        Campaign campaign = campaignService.findBycId(cId);
+
+        if (userDetails == null) {
+            throw new CampaignHandler(ErrorStatus._UNAUTHORIZED);
+        } else if (!userDetails.isOrganization() ||
+                !campaign.getOrganizationUser().getOEmail().equals(userDetails.getUsername())) {
+            log.info("User email: {}", userDetails.getUsername());
+            log.info("Campaign organization email: {}", campaign.getOrganizationUser().getOEmail());
+            throw new CampaignHandler(ErrorStatus._FORBIDDEN);
+        }
+
+        CampaignUpdate campaignUpdate = campaignUpdateCommandService.addCampaignUpdate(request, cId);
+
+        List<CampaignSpendingRequestDto.JoinDto> campaignSpendings = request.getSpendings();
+
+        campaignSpendingCommandService.addCampaignPlan(campaignSpendings, campaign);
+
+        return ApiResponse.onSuccess(CampaignUpdateConverter.toJoinResultDto(campaignUpdate));
     }
 
     public CampaignResponse.CampaignDetailDto convertToDetailDto(Campaign campaign) {

@@ -16,4 +16,6 @@ public interface CampaignRepository extends JpaRepository<Campaign, Long>, Campa
 //    List<Campaign> findCampaignBycStatusFlag(CampaignStatusFlag cStatusFlag);
 
     Campaign findBycId(Long cId);
+
+    Boolean existsBycId(Long cId);
 }

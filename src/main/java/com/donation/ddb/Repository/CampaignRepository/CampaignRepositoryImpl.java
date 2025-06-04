@@ -1,6 +1,8 @@
 package com.donation.ddb.Repository.CampaignRepository;
 
+import com.donation.ddb.Converter.CampaignConverter;
 import com.donation.ddb.Domain.*;
+import com.donation.ddb.Dto.Request.CampaignRequestDto;
 import com.donation.ddb.Dto.Response.CampaignResponse;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.jpa.impl.JPAQuery;
@@ -111,24 +113,9 @@ public class CampaignRepositoryImpl implements CampaignRepositoryCustom {
     }
 
     @Override
-    public Campaign addCampaign(Long oId, String cName, String CImageUrl, String cDescription, Integer cGoal, CampaignCategory cCategory, LocalDate donateStart, LocalDate donateEnd, LocalDate businessStart, LocalDate businessEnd) {
+    public Campaign addCampaign(CampaignRequestDto.JoinDto request, OrganizationUser organizationUser) {
 
-        System.out.println("addCampaign called with oId: " + oId + ", cName: " + cName + ", CImageUrl: " + CImageUrl + ", cDescription: " + cDescription + ", cGoal: " + cGoal + ", cCategory: " + cCategory + ", donateStart: " + donateStart + ", donateEnd: " + donateEnd + ", businessStart: " + businessStart + ", businessEnd: " + businessEnd);
-
-        OrganizationUser organizationUser = em.getReference(OrganizationUser.class, oId);
-
-        Campaign campaign = Campaign.builder()
-                .cName(cName)
-                .cImageUrl(CImageUrl)
-                .cDescription(cDescription)
-                .cGoal(cGoal)
-                .cCategory(cCategory)
-                .donateStart(donateStart)
-                .donateEnd(donateEnd)
-                .businessStart(businessStart)
-                .businessEnd(businessEnd)
-                .organizationUser(organizationUser)
-                .build();
+        Campaign campaign = CampaignConverter.toCampaign(request, organizationUser);
 
         em.persist(campaign);
 

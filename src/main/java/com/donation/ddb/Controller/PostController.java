@@ -4,10 +4,7 @@ import com.donation.ddb.Converter.PostCommentConverter;
 import com.donation.ddb.Converter.PostCommentLikeConverter;
 import com.donation.ddb.Converter.PostConverter;
 import com.donation.ddb.Converter.PostLikeConverter;
-import com.donation.ddb.Domain.Post;
-import com.donation.ddb.Domain.PostComment;
-import com.donation.ddb.Domain.PostCommentLike;
-import com.donation.ddb.Domain.PostLike;
+import com.donation.ddb.Domain.*;
 import com.donation.ddb.Dto.Request.PostCommentRequestDto;
 import com.donation.ddb.Dto.Request.PostRequestDto;
 import com.donation.ddb.Dto.Response.PostCommentResponseDto;
@@ -15,9 +12,11 @@ import com.donation.ddb.Dto.Response.PostResponseDto;
 import com.donation.ddb.Repository.projection.PostCommentWithUser;
 import com.donation.ddb.Repository.projection.PostWithCount;
 import com.donation.ddb.Service.PostCommentLikeService.PostCommentLikeCommandService;
+import com.donation.ddb.Service.PostCommentLikeService.PostCommentLikeQueryService;
 import com.donation.ddb.Service.PostCommentService.PostCommentCommandService;
 import com.donation.ddb.Service.PostCommentService.PostCommentQueryService;
 import com.donation.ddb.Service.PostLikeService.PostLikeCommandService;
+import com.donation.ddb.Service.PostLikeService.PostLikeQueryService;
 import com.donation.ddb.Service.PostService.PostCommandService;
 import com.donation.ddb.Service.PostService.PostQueryService;
 import com.donation.ddb.apiPayload.ApiResponse;
@@ -35,6 +34,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/v1/posts")
@@ -49,9 +49,13 @@ public class PostController {
     @Autowired
     private PostLikeCommandService postLikeCommandService;
     @Autowired
+    private PostLikeQueryService postLikeQueryService;
+    @Autowired
     private PostCommentCommandService postCommentCommandService;
     @Autowired
     private PostCommentLikeCommandService postCommentLikeCommandService;
+    @Autowired
+    private PostCommentLikeQueryService postCommentLikeQueryService;
     @Autowired
     private PostQueryService postQueryService;
     @Autowired
@@ -60,11 +64,15 @@ public class PostController {
     @PostMapping("")
     public ApiResponse<?> addPost(
             @RequestBody @Valid PostRequestDto.JoinDto joinDto,
-            @AuthenticationPrincipal UserDetails userDetails
+            @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
 
         if (userDetails == null) {
             throw new CampaignHandler(ErrorStatus._UNAUTHORIZED);
+        }
+
+        if (userDetails.isOrganization()) {
+            throw new CampaignHandler(ErrorStatus._FORBIDDEN);
         }
 
         String email = userDetails.getUsername();
@@ -77,10 +85,14 @@ public class PostController {
     @PostMapping("/{postId}/likes")
     public ApiResponse<?> addPostLike(
             @PathVariable(value="postId") @ExistPost Long postId,
-            @AuthenticationPrincipal UserDetails userDetails
+            @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
         if (userDetails == null) {
             throw new CampaignHandler(ErrorStatus._UNAUTHORIZED);
+        }
+
+        if (userDetails.isOrganization()) {
+            throw new CampaignHandler(ErrorStatus._FORBIDDEN);
         }
 
         String email = userDetails.getUsername();
@@ -94,10 +106,14 @@ public class PostController {
     public ApiResponse<?> addPostComment(
             @PathVariable(value="postId") @ExistPost Long postId,
             @RequestBody @Valid PostCommentRequestDto.JoinDto request,
-            @AuthenticationPrincipal UserDetails userDetails
+            @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
         if (userDetails == null) {
             throw new CampaignHandler(ErrorStatus._UNAUTHORIZED);
+        }
+
+        if (userDetails.isOrganization()) {
+            throw new CampaignHandler(ErrorStatus._FORBIDDEN);
         }
 
         String email = userDetails.getUsername();
@@ -111,10 +127,14 @@ public class PostController {
     public ApiResponse<?> addPostCommentLike(
             @PathVariable(value="postId") @ExistPost Long postId,
             @PathVariable(value="commentId") Long commentId,
-            @AuthenticationPrincipal UserDetails userDetails
+            @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
         if (userDetails == null) {
             throw new CampaignHandler(ErrorStatus._UNAUTHORIZED);
+        }
+
+        if (userDetails.isOrganization()) {
+            throw new CampaignHandler(ErrorStatus._FORBIDDEN);
         }
 
         String email = userDetails.getUsername();
@@ -140,19 +160,33 @@ public class PostController {
 
     @GetMapping("/{postId}")
     public ApiResponse<PostResponseDto.DetailDto> getPostDetail(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
             @PathVariable(value="postId") @ExistPost Long postId
     ) {
+        Boolean liked = false;
+
+        if (userDetails != null && userDetails.isStudent()) {
+            String email = userDetails.getUsername();
+            liked = postLikeQueryService.existsByPostAndStudentUser(postId, email);
+        }
+
         PostWithCount post = postQueryService.findPostWithCountByPId(postId);
 
-        return ApiResponse.onSuccess(PostConverter.toDetailDto(post));
+        return ApiResponse.onSuccess(PostConverter.toDetailDto(post, liked));
     }
 
     @GetMapping("/{postId}/comments")
     public ApiResponse<List<PostCommentResponseDto.ListDto>> getPostCommentList(
-            @PathVariable(value="postId") @ExistPost Long postId
+            @PathVariable(value="postId") @ExistPost Long postId,
+            @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
-        List<PostCommentWithUser> postCommentList = postCommentQueryService.getPostCommentList(postId);
+        String email = null;
+        if (userDetails != null && userDetails.isStudent()) {
+            email = userDetails.getUsername();
+        }
 
-        return ApiResponse.onSuccess(PostCommentConverter.toListDto(postCommentList));
+        List<PostCommentResponseDto.ListDto> postCommentList = postCommentQueryService.getPostCommentList(email, postId);
+
+        return ApiResponse.onSuccess(postCommentList);
     }
 }

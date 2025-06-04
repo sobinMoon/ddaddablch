@@ -4,11 +4,14 @@ import com.donation.ddb.Domain.QPost;
 import com.donation.ddb.Domain.QPostComment;
 import com.donation.ddb.Domain.QPostLike;
 import com.donation.ddb.Repository.projection.PostWithCount;
-import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.Projections;
+import com.querydsl.core.types.dsl.BooleanExpression;
+import com.querydsl.core.types.dsl.Expressions;
+import com.querydsl.core.types.Expression;
 import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -19,6 +22,7 @@ import java.util.Objects;
 
 @Repository
 @RequiredArgsConstructor
+@Slf4j
 public class PostRepositoryImpl implements PostRepositoryCustom {
     private final JPAQueryFactory jpaQueryFactory;
     private final QPost post = QPost.post;

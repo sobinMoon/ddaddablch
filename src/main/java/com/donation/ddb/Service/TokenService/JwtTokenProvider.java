@@ -1,5 +1,7 @@
 package com.donation.ddb.Service.TokenService;
 
+import com.donation.ddb.Domain.CustomUserDetails;
+import com.donation.ddb.Domain.Role;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
@@ -119,14 +121,21 @@ public class JwtTokenProvider {
                 .collect(Collectors.toList());
 
         // 인증된 사용자 객체 생성 (비밀번호는 필요 없으니 공란으로)
-        UserDetails userDetails = org.springframework.security.core.userdetails.User
-                .withUsername(username)
+//        UserDetails userDetails = org.springframework.security.core.userdetails.User
+//                .withUsername(username)
+//                .password("")
+//                .authorities(authorities)
+//                .build();
+
+        CustomUserDetails customUserDetails = CustomUserDetails.builder()
+                .email(username)
                 .password("")
                 .authorities(authorities)
+                .role(roles.contains(Role.ROLE_STUDENT.name()) ? Role.ROLE_STUDENT.name() : Role.ROLE_ORGANIZATION.name())
                 .build();
 
         // Spring Security에 등록할 인증 객체 반환
-        return new UsernamePasswordAuthenticationToken(userDetails, "", authorities);
+        return new UsernamePasswordAuthenticationToken(customUserDetails, "", authorities);
     }
 
     // 토큰에서 사용자 이름 추출

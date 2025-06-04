@@ -1,9 +1,7 @@
-package com.donation.ddb.Service.CampaignSpendingQueryService;
+package com.donation.ddb.Service.CampaignSpendingService;
 
 import com.donation.ddb.Domain.CampaignSpending;
-import com.donation.ddb.Domain.CampaignSpending;
 import com.donation.ddb.Dto.Response.CampaignSpendingResponseDto;
-import com.donation.ddb.Repository.CampaignSpendingRepository.CampaignSpendingRepository;
 import com.donation.ddb.Repository.CampaignSpendingRepository.CampaignSpendingRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
