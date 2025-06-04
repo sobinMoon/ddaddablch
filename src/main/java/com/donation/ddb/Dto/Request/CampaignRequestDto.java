@@ -76,8 +76,8 @@ public class CampaignRequestDto {
     @AllArgsConstructor
     @Builder
     public static class UpdateStatusDto {
-        @JsonProperty("name")
-        @NotBlank(message = "변경할 캠페인 상태값은 필수입니다. (FUNDED, IN_PROGRESS, COMPLETED)")
+        @JsonProperty("status")
+        @NotNull(message = "변경할 캠페인 상태값은 필수입니다. (FUNDED, IN_PROGRESS, COMPLETED)")
         private CampaignStatusFlag status;
     }
 }

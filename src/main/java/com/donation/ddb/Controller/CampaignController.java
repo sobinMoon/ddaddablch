@@ -11,6 +11,7 @@ import com.donation.ddb.Service.CampaignCommentLikeService.CampaignCommentLikeSe
 import com.donation.ddb.Service.CampaignCommentQueryService.CampaignCommentQueryService;
 import com.donation.ddb.Service.CampaignPlansService.CampaignPlanCommandService;
 import com.donation.ddb.Service.CampaignPlansService.CampaignPlansQueryService;
+import com.donation.ddb.Service.CampaignService.CampaignCommandService;
 import com.donation.ddb.Service.CampaignService.CampaignQueryService;
 import com.donation.ddb.Service.CampaignSpendingService.CampaignSpendingCommandService;
 import com.donation.ddb.Service.CampaignSpendingService.CampaignSpendingQueryService;
@@ -70,6 +71,8 @@ public class CampaignController {
     private CampaignUpdateCommandService campaignUpdateCommandService;
     @Autowired
     private CampaignSpendingCommandService campaignSpendingCommandService;
+    @Autowired
+    private CampaignCommandService campaignCommandService;
 
     @GetMapping("home")
     public ResponseEntity<?> campaignList() {
@@ -332,27 +335,25 @@ public class CampaignController {
         return ApiResponse.onSuccess(CampaignUpdateConverter.toJoinResultDto(campaignUpdate));
     }
 
-//    @PatchMapping("/{cId}/status")
-//    public ApiResponse<?> updateCampaignStatus(
-//            @ExistCampaign @PathVariable(value = "cId") Long cId,
-//            @RequestBody CampaignRequestDto.UpdateStatusDto request,
-//            @AuthenticationPrincipal CustomUserDetails userDetails
-//    ) {
-//        Campaign campaign = campaignService.findBycId(cId);
-//
-//        if (userDetails == null) {
-//            throw new CampaignHandler(ErrorStatus._UNAUTHORIZED);
-//        } else if (!userDetails.isOrganization() ||
-//                !campaign.getOrganizationUser().getOEmail().equals(userDetails.getUsername())) {
-//            log.info("User email: {}", userDetails.getUsername());
-//            log.info("Campaign organization email: {}", campaign.getOrganizationUser().getOEmail());
-//            throw new CampaignHandler(ErrorStatus._FORBIDDEN);
-//        }
-//
-//        campaignUpdateCommandService.updateCampaignStatus(campaign, request.getStatusFlag());
-//
-//        return ApiResponse.onSuccess(Map.of("message", "캠페인 상태가 업데이트되었습니다."));
-//    }
+    @PatchMapping("/{cId}/status")
+    public ApiResponse<?> updateCampaignStatus(
+            @ExistCampaign @PathVariable(value = "cId") Long cId,
+            @RequestBody @Valid CampaignRequestDto.UpdateStatusDto request,
+            @AuthenticationPrincipal CustomUserDetails userDetails
+    ) {
+        Campaign campaign = campaignService.findBycId(cId);
+
+        if (userDetails == null) {
+            throw new CampaignHandler(ErrorStatus._UNAUTHORIZED);
+        } else if (!userDetails.isOrganization() ||
+                !campaign.getOrganizationUser().getOEmail().equals(userDetails.getUsername())) {
+            throw new CampaignHandler(ErrorStatus._FORBIDDEN);
+        }
+
+        campaignCommandService.updateStatusByUser(campaign, request.getStatus());
+
+        return ApiResponse.onSuccess(CampaignConverter.toJoinResult(campaign));
+    }
 
     public CampaignResponse.CampaignDetailDto convertToDetailDto(Campaign campaign) {
         // 변경된 부분: 올바른 타입 사용
