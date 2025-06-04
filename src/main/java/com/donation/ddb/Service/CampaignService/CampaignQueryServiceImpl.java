@@ -1,11 +1,10 @@
 package com.donation.ddb.Service.CampaignService;
 
-import com.donation.ddb.Domain.Campaign;
-import com.donation.ddb.Domain.CampaignCategory;
-import com.donation.ddb.Domain.CampaignSortType;
-import com.donation.ddb.Domain.CampaignStatusFlag;
+import com.donation.ddb.Domain.*;
+import com.donation.ddb.Dto.Request.CampaignRequestDto;
 import com.donation.ddb.Dto.Response.CampaignResponse;
 import com.donation.ddb.Repository.CampaignRepository.CampaignRepository;
+import com.donation.ddb.Repository.OrganizationUserRepository;
 import com.donation.ddb.apiPayload.code.status.ErrorStatus;
 import com.donation.ddb.apiPayload.exception.handler.CampaignHandler;
 import lombok.RequiredArgsConstructor;
@@ -22,6 +21,8 @@ import java.util.List;
 public class CampaignQueryServiceImpl implements CampaignQueryService {
 
     private final CampaignRepository campaignRepository;
+
+    private final OrganizationUserRepository organizationUserRepository;
 
     @Override
     public List<CampaignResponse.CampaignListDto> findAllCampaigns(String keyword, String category, String statusFlag, String sortType, Pageable pageable) {
@@ -68,50 +69,21 @@ public class CampaignQueryServiceImpl implements CampaignQueryService {
     }
 
     @Override
-    public Campaign addCampaign(
-            Long oId,
-            String cName,
-            String cImageUrl,
-            String cDescription,
-            Integer cGoal,
-            CampaignCategory cCategory,
-            LocalDate donateStart,
-            LocalDate donateEnd,
-            LocalDate businessStart,
-            LocalDate businessEnd
-    ) {
+    public Campaign addCampaign(CampaignRequestDto.JoinDto joinDto, String email) {
 
-        System.out.println(
-                "oId: " + oId +
-                ", cName: " + cName +
-                ", CImageUrl: " + cImageUrl +
-                ", cDescription: " + cDescription +
-                ", cGoal: " + cGoal +
-                ", cCategory: " + cCategory +
-                ", donateStart: " + donateStart +
-                ", donateEnd: " + donateEnd +
-                ", businessStart: " + businessStart +
-                ", businessEnd: " + businessEnd
-        );
+        OrganizationUser user = organizationUserRepository.findByoEmail(email).
+                orElseThrow(() -> new CampaignHandler(ErrorStatus.ORGANIZATION_USER_NOT_FOUND));
 
-        Campaign campaign = campaignRepository.addCampaign(
-                oId,
-                cName,
-                cImageUrl,
-                cDescription,
-                cGoal,
-                cCategory,
-                donateStart,
-                donateEnd,
-                businessStart,
-                businessEnd
-        );
-
-        return campaign;
+        return campaignRepository.addCampaign(joinDto, user);
     }
 
     @Override
     public Campaign findBycId(Long cId) {
         return campaignRepository.findBycId(cId);
+    }
+
+    @Override
+    public Boolean existsBycId(Long cId) {
+        return campaignRepository.existsBycId(cId);
     }
 }

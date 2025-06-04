@@ -18,6 +18,15 @@ public class CampaignResponse {
     @Builder
     @NoArgsConstructor
     @AllArgsConstructor
+    public static class JoinResultDto {
+        private Long id;
+        private LocalDateTime createdAt;
+    }
+
+    @Getter
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
     public static class CampaignListDto {
         private Long id;
         private String name;
