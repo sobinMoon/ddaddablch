@@ -8,6 +8,7 @@ import com.donation.ddb.Dto.Request.*;
 import com.donation.ddb.Dto.Response.CampaignResponse;
 import com.donation.ddb.Dto.Response.OrganizationResponse;
 import com.donation.ddb.ImageStore;
+import com.donation.ddb.Repository.projection.CampaignWithUpdate;
 import com.donation.ddb.Service.CampaignCommentLikeService.CampaignCommentLikeService;
 import com.donation.ddb.Service.CampaignCommentQueryService.CampaignCommentQueryService;
 import com.donation.ddb.Service.CampaignPlansService.CampaignPlanCommandService;
@@ -80,7 +81,7 @@ public class CampaignController {
 
 
     @GetMapping("home")
-    public ResponseEntity<?> campaignList() {
+    public ApiResponse<?> campaignList() {
         Pageable pageable = PageRequest.of(0, 3);
         List<CampaignResponse.CampaignListDto> popular = campaignService.findAllCampaigns(
                 null,
@@ -100,14 +101,16 @@ public class CampaignController {
                 "FUNDRAISING",
                 "ENDING_SOON",
                 pageable);
+        List<CampaignWithUpdate> recentUpdates = campaignService.findRecentUpdates();
 
-        Map<String, List<CampaignResponse.CampaignListDto>> campaignResponseDtoList = Map.of(
+        Map<String, List<?>> campaignResponseDtoList = Map.of(
                 "popular", popular,
                 "latest", latest,
-                "endingSoon", endingSoon
+                "endingSoon", endingSoon,
+                "recentUpdates", CampaignConverter.toRecentUpdateListDto(recentUpdates)
         );
 
-        return ResponseEntity.ok(campaignResponseDtoList);
+        return ApiResponse.onSuccess(campaignResponseDtoList);
     }
 
     // 진행 중 캠페인 리스트

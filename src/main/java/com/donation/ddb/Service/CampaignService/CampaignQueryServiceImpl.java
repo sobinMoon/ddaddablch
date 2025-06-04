@@ -4,7 +4,9 @@ import com.donation.ddb.Domain.*;
 import com.donation.ddb.Dto.Request.CampaignRequestDto;
 import com.donation.ddb.Dto.Response.CampaignResponse;
 import com.donation.ddb.Repository.CampaignRepository.CampaignRepository;
+import com.donation.ddb.Repository.CampaignUpdateRepository.CampaignUpdateRepository;
 import com.donation.ddb.Repository.OrganizationUserRepository;
+import com.donation.ddb.Repository.projection.CampaignWithUpdate;
 import com.donation.ddb.apiPayload.code.status.ErrorStatus;
 import com.donation.ddb.apiPayload.exception.handler.CampaignHandler;
 import lombok.RequiredArgsConstructor;
@@ -23,6 +25,7 @@ public class CampaignQueryServiceImpl implements CampaignQueryService {
     private final CampaignRepository campaignRepository;
 
     private final OrganizationUserRepository organizationUserRepository;
+    private final CampaignUpdateRepository campaignUpdateRepository;
 
     @Override
     public List<CampaignResponse.CampaignListDto> findAllCampaigns(String keyword, String category, String statusFlag, String sortType, Pageable pageable) {
@@ -90,5 +93,10 @@ public class CampaignQueryServiceImpl implements CampaignQueryService {
     @Override
     public Boolean existsBycId(Long cId) {
         return campaignRepository.existsBycId(cId);
+    }
+
+    @Override
+    public List<CampaignWithUpdate> findRecentUpdates() {
+        return campaignUpdateRepository.findLatestUpdates();
     }
 }
