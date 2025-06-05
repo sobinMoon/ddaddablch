@@ -33,15 +33,15 @@ public class PostCommentCommandService {
 
         PostComment savedpostComment=postCommentRepository.save(PostCommentConverter.toPostComment(joinDto, user, post));
 
-        // 알림 생성 (자기 글에 자기가 댓글 단 경우 제외)
-
-        if (!post.getStudentUser().getSId().equals(savedpostComment.getStudentUser().getSId())) {
-            notificationService.createCommentNotification(
-                    post.getStudentUser().getSId(),    // 게시글 작성자 ID
-                    savedpostComment.getStudentUser().getSNickname(),        // 댓글 작성자 닉네임
-                    post.getPId()                      // 게시글 ID
-            );
-        }
+//        // 알림 생성 (자기 글에 자기가 댓글 단 경우 제외)
+//
+//        if (!post.getStudentUser().getSId().equals(savedpostComment.getStudentUser().getSId())) {
+//            notificationService.createCommentNotification(
+//                    post.getStudentUser().getSId(),    // 게시글 작성자 ID
+//                    savedpostComment.getStudentUser().getSNickname(),        // 댓글 작성자 닉네임
+//                    post.getPId()                      // 게시글 ID
+//            );
+//        }
 
         return savedpostComment;
     }

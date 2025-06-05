@@ -11,6 +11,7 @@ import com.donation.ddb.Dto.Response.PostCommentResponseDto;
 import com.donation.ddb.Dto.Response.PostResponseDto;
 import com.donation.ddb.Repository.projection.PostCommentWithUser;
 import com.donation.ddb.Repository.projection.PostWithCount;
+import com.donation.ddb.Service.NotificationService;
 import com.donation.ddb.Service.PostCommentLikeService.PostCommentLikeCommandService;
 import com.donation.ddb.Service.PostCommentLikeService.PostCommentLikeQueryService;
 import com.donation.ddb.Service.PostCommentService.PostCommentCommandService;
@@ -60,6 +61,9 @@ public class PostController {
     private PostQueryService postQueryService;
     @Autowired
     private PostCommentQueryService postCommentQueryService;
+
+    @Autowired
+    private NotificationService notificationService;
 
     @PostMapping("")
     public ApiResponse<?> addPost(
@@ -118,8 +122,33 @@ public class PostController {
 
         String email = userDetails.getUsername();
 
-        PostComment postComment = postCommentCommandService.addPostComment(request, postId, email);
 
+        PostComment postComment = postCommentCommandService.addPostComment(request, postId, email);
+        // 알림 생성 코드 추가
+        try {
+            // 게시글 정보 조회
+            PostWithCount post = postQueryService.findPostWithCountByPId(postId);
+
+            // 댓글 작성자 정보
+            String commenterName = userDetails.getNickname();
+
+            // 게시글 작성자와 댓글 작성자가 다른 경우에만 알림 전송
+            if (!post.getStudentUser().getSEmail().equals(email)) {
+                // 게시글 작성자의 ID 가져오기
+                Long postAuthorId = post.getStudentUser().getSId();
+
+                notificationService.createCommentNotification(
+                        postAuthorId,        // 게시글 작성자 ID
+                        commenterName,       // 댓글 작성자 이름
+                        postId              // 게시글 ID
+                );
+
+                log.info("댓글 알림 전송 완료: Post {} -> Author {}", postId, postAuthorId);
+            }
+        } catch (Exception e) {
+            // 알림 생성 실패해도 댓글 생성은 성공으로 처리
+            log.error("댓글 알림 생성 실패", e);
+        }
         return ApiResponse.onSuccess(PostCommentConverter.toJoinResultDto(postComment));
     }
 

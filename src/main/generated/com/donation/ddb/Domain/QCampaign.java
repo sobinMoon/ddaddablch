@@ -32,6 +32,8 @@ public class QCampaign extends EntityPathBase<Campaign> {
 
     public final ListPath<CampaignSpending, QCampaignSpending> campaignSpendingList = this.<CampaignSpending, QCampaignSpending>createList("campaignSpendingList", CampaignSpending.class, QCampaignSpending.class, PathInits.DIRECT2);
 
+    public final QCampaignUpdate campaignUpdate;
+
     public final EnumPath<CampaignCategory> cCategory = createEnum("cCategory", CampaignCategory.class);
 
     public final NumberPath<java.math.BigDecimal> cCurrentAmount = createNumber("cCurrentAmount", java.math.BigDecimal.class);
@@ -82,6 +84,7 @@ public class QCampaign extends EntityPathBase<Campaign> {
 
     public QCampaign(Class<? extends Campaign> type, PathMetadata metadata, PathInits inits) {
         super(type, metadata, inits);
+        this.campaignUpdate = inits.isInitialized("campaignUpdate") ? new QCampaignUpdate(forProperty("campaignUpdate"), inits.get("campaignUpdate")) : null;
         this.organizationUser = inits.isInitialized("organizationUser") ? new QOrganizationUser(forProperty("organizationUser")) : null;
     }
 

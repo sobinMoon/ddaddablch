@@ -43,6 +43,8 @@ public class Campaign extends BaseEntity {
     @Column(name = "c_category", nullable = false)
     private CampaignCategory cCategory = CampaignCategory.아동청소년;
 
+    @OneToOne(mappedBy = "campaign", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    private CampaignUpdate campaignUpdate;
     // default value = 0
     @Column(name = "donate_count", nullable = false)
     @Builder.Default
