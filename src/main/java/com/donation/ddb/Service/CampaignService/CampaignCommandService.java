@@ -21,12 +21,20 @@ public class CampaignCommandService {
 
         LocalDate today = LocalDate.now();
         for (Campaign campaign : campaigns) {
+
+            CampaignStatusFlag currentStatus = campaign.getCStatusFlag();
+            CampaignStatusFlag newStatus = CampaignStatusFlag.FUNDRAISING;
+
             if (!campaign.getBusinessEnd().isAfter(today)) {
-                campaign.setCStatusFlag(CampaignStatusFlag.COMPLETED);
+                newStatus = CampaignStatusFlag.COMPLETED;
             } else if (!campaign.getBusinessStart().isAfter(today)) {
-                campaign.setCStatusFlag(CampaignStatusFlag.IN_PROGRESS);
+                newStatus = CampaignStatusFlag.IN_PROGRESS;
             } else if (!campaign.getDonateEnd().isAfter(today)) {
-                campaign.setCStatusFlag(CampaignStatusFlag.FUNDED);
+                newStatus = CampaignStatusFlag.FUNDED;
+            }
+
+            if (CampaignStatusFlag.isForwardTransition(currentStatus, newStatus)) {
+                campaign.setCStatusFlag(newStatus);
             }
         }
     }
