@@ -40,10 +40,8 @@ public class CampaignQueryServiceImpl implements CampaignQueryService {
             }
         }
 
-        CampaignStatusFlag status;
-        if (statusFlag == null) {
-            status = CampaignStatusFlag.FUNDRAISING;
-        } else {
+        CampaignStatusFlag status = null;
+        if (statusFlag != null) {
             try {
                 status = CampaignStatusFlag.valueOf(statusFlag);
             } catch (IllegalArgumentException e) {
