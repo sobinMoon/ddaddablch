@@ -109,14 +109,14 @@ public class CampaignController {
         );
         List<CampaignWithUpdate> recentUpdates = campaignQueryService.findRecentUpdates();
 
-         🔥 총 기부금 조회 추가
+//         🔥 총 기부금 조회 추가
         BigDecimal totalDonation = donationService.findAllAmount();
 
         Map<String, Object> campaignResponseDtoList = Map.of(
                 "popular", popular,
                 "latest", latest,
                 "endingSoon", endingSoon,
-                "recentUpdates", CampaignConverter.toRecentUpdateListDto(recentUpdates)
+                "recentUpdates", CampaignConverter.toRecentUpdateListDto(recentUpdates),
                 "totalDonation", totalDonation  // 🔥 총 기부금 추가
         );
         return ApiResponse.onSuccess(campaignResponseDtoList);
