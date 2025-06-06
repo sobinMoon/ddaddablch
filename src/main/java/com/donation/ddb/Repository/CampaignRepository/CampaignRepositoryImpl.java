@@ -31,7 +31,8 @@ public class CampaignRepositoryImpl implements CampaignRepositoryCustom {
             String keyword,
             CampaignCategory category,
             CampaignStatusFlag statusFlag,
-            CampaignSortType sortType
+            CampaignSortType sortType,
+            Integer size
     ) {
 
         System.out.println("dynamicQueryWithBooleanBuilder called with keyword: " + keyword + ", sortType: " + sortType);
@@ -81,6 +82,10 @@ public class CampaignRepositoryImpl implements CampaignRepositoryCustom {
                 .where(predicate);
 
         System.out.println("Query after applying predicate: " + query);
+
+        if (size != null && size > 0) {
+            query.limit(size);
+        }
 
         // Sort based on the provided sort type
         if (sortType != null) {

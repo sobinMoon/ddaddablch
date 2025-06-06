@@ -90,30 +90,33 @@ public class CampaignController {
                 null,
                 null,
                 "FUNDRAISING",
-                "POPULAR"
+                "POPULAR",
+                3
         );
         List<CampaignResponse.CampaignListDto> latest = campaignQueryService.findAllCampaigns(
                 null,
                 null,
                 "FUNDRAISING",
-                "LATEST"
+                "LATEST",
+                3
         );
         List<CampaignResponse.CampaignListDto> endingSoon = campaignQueryService.findAllCampaigns(
                 null,
                 null,
                 "FUNDRAISING",
-                "ENDING_SOON"
+                "ENDING_SOON",
+                3
         );
         List<CampaignWithUpdate> recentUpdates = campaignQueryService.findRecentUpdates();
 
-        // 🔥 총 기부금 조회 추가
+         🔥 총 기부금 조회 추가
         BigDecimal totalDonation = donationService.findAllAmount();
 
         Map<String, Object> campaignResponseDtoList = Map.of(
                 "popular", popular,
                 "latest", latest,
                 "endingSoon", endingSoon,
-                "recentUpdates", CampaignConverter.toRecentUpdateListDto(recentUpdates),
+                "recentUpdates", CampaignConverter.toRecentUpdateListDto(recentUpdates)
                 "totalDonation", totalDonation  // 🔥 총 기부금 추가
         );
         return ApiResponse.onSuccess(campaignResponseDtoList);
@@ -130,7 +133,8 @@ public class CampaignController {
                 null,
                 category,
                 "FUNDRAISING",
-                sortType
+                sortType,
+                null
         );
 
         Map<String, Object> resMap = Map.of(
@@ -152,7 +156,8 @@ public class CampaignController {
                 null,
                 category,
                 "COMPLETED",
-                sortType
+                sortType,
+                null
         );
 
         Map<String, Object> resMap = Map.of(
@@ -182,7 +187,8 @@ public class CampaignController {
                 keyword,
                 category,
                 statusFlag,
-                sortType
+                sortType,
+                null
         );
 
         Map<String, Object> resMap = Map.of(
