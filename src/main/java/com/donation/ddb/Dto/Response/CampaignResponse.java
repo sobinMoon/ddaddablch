@@ -25,6 +25,7 @@ public class CampaignResponse {
     }
 
     @Getter
+    @Setter
     @Builder
     @NoArgsConstructor
     @AllArgsConstructor
