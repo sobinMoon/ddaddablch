@@ -10,7 +10,8 @@ import com.donation.ddb.Dto.Response.OrganizationResponse;
 import com.donation.ddb.ImageStore;
 import com.donation.ddb.Repository.projection.CampaignWithUpdate;
 import com.donation.ddb.Service.CampaignCommentLikeService.CampaignCommentLikeService;
-import com.donation.ddb.Service.CampaignCommentQueryService.CampaignCommentQueryService;
+import com.donation.ddb.Service.CampaignCommentService.CampaignCommentCommandService;
+import com.donation.ddb.Service.CampaignCommentService.CampaignCommentQueryService;
 import com.donation.ddb.Service.CampaignPlansService.CampaignPlanCommandService;
 import com.donation.ddb.Service.CampaignPlansService.CampaignPlansQueryService;
 import com.donation.ddb.Service.CampaignService.CampaignCommandService;
@@ -64,7 +65,7 @@ public class CampaignController {
     private CampaignCommentQueryService campaignCommentQueryService;
 
     @Autowired
-    private CampaignCommentQueryService campaignCommentService;
+    private CampaignCommentCommandService campaignCommentCommandService;
 
     @Autowired
     private CampaignCommentLikeService campaignCommentLikeService;
@@ -288,7 +289,7 @@ public class CampaignController {
 
         String email = userDetails.getUsername();
 
-        CampaignComment newComment = campaignCommentService.addComment(
+        CampaignComment newComment = campaignCommentCommandService.addComment(
                 campaignCommentRequestDto.getContent(),
                 cId,
                 email

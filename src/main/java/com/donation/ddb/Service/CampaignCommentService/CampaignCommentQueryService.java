@@ -1,8 +1,7 @@
-package com.donation.ddb.Service.CampaignCommentQueryService;
+package com.donation.ddb.Service.CampaignCommentService;
 
 import com.donation.ddb.Domain.CampaignComment;
 import com.donation.ddb.Domain.StudentUser;
-import com.donation.ddb.Dto.Request.CampaignCommentRequestDto;
 import com.donation.ddb.Dto.Response.CampaignCommentListResponseDto;
 import com.donation.ddb.Dto.Response.CampaignCommentResponseDto;
 import com.donation.ddb.Repository.CampaignCommentLikeRepository.CampaignCommentLikeRepository;
@@ -69,17 +68,4 @@ public class CampaignCommentQueryService {
 
         return CampaignCommentListResponseDto.from(count, comments);
     }
-
-    // 댓글추가
-    public CampaignComment addComment(String content, Long cId, String userEmail) {
-        CampaignComment campaignComment = CampaignComment.builder()
-                .ccContent(content)
-                .studentUser(studentUserRepository.findBysEmail(userEmail).orElseThrow(() -> new IllegalArgumentException("User not found")))
-                .campaign(campaignRepository.findBycId(cId))
-                .build();
-        campaignCommentRepository.save(campaignComment);
-
-        return campaignComment;
-    }
-
 }
