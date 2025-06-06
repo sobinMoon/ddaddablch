@@ -1,8 +1,13 @@
 package com.donation.ddb.Service.CampaignService;
 
 import com.donation.ddb.Domain.Campaign;
-import com.donation.ddb.Domain.CampaignStatusFlag;
+import com.donation.ddb.Domain.Enums.CampaignStatusFlag;
+import com.donation.ddb.Domain.OrganizationUser;
+import com.donation.ddb.Dto.Request.CampaignRequestDto;
 import com.donation.ddb.Repository.CampaignRepository.CampaignRepository;
+import com.donation.ddb.Repository.OrganizationUserRepository;
+import com.donation.ddb.apiPayload.code.status.ErrorStatus;
+import com.donation.ddb.apiPayload.exception.handler.CampaignHandler;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -12,27 +17,52 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class CampaignCommandService {
     private final CampaignRepository campaignRepository;
+    private final OrganizationUserRepository organizationUserRepository;
 
-    @Transactional
+    public Campaign addCampaign(CampaignRequestDto.JoinDto joinDto, String email) {
+
+        OrganizationUser user = organizationUserRepository.findByoEmail(email).
+                orElseThrow(() -> new CampaignHandler(ErrorStatus.ORGANIZATION_USER_NOT_FOUND));
+
+        return campaignRepository.addCampaign(joinDto, user);
+    }
+
+    public Campaign updateCampaign(Campaign campaign) {
+        return campaignRepository.save(campaign);
+    }
+
     public void updateStatusByDate() {
         List<Campaign> campaigns = campaignRepository.findAll();
 
         LocalDate today = LocalDate.now();
         for (Campaign campaign : campaigns) {
+
+            CampaignStatusFlag currentStatus = campaign.getCStatusFlag();
+            CampaignStatusFlag newStatus = CampaignStatusFlag.FUNDRAISING;
+
             if (!campaign.getBusinessEnd().isAfter(today)) {
-                campaign.setCStatusFlag(CampaignStatusFlag.COMPLETED);
+                newStatus = CampaignStatusFlag.COMPLETED;
             } else if (!campaign.getBusinessStart().isAfter(today)) {
-                campaign.setCStatusFlag(CampaignStatusFlag.IN_PROGRESS);
+                newStatus = CampaignStatusFlag.IN_PROGRESS;
             } else if (!campaign.getDonateEnd().isAfter(today)) {
-                campaign.setCStatusFlag(CampaignStatusFlag.FUNDED);
+                newStatus = CampaignStatusFlag.FUNDED;
+            }
+
+            if (CampaignStatusFlag.isForwardTransition(currentStatus, newStatus)) {
+                campaign.setCStatusFlag(newStatus);
             }
         }
     }
 
-    @Transactional
     public Campaign updateStatusByUser(Campaign campaign, CampaignStatusFlag statusFlag) {
+
+        if (!CampaignStatusFlag.isForwardTransition(campaign.getCStatusFlag(), statusFlag)) {
+            throw new CampaignHandler(ErrorStatus.CAMPAIGN_INVALID_STATUS_UPDATE);
+        }
+
         campaign.setCStatusFlag(statusFlag);
         if (statusFlag == CampaignStatusFlag.FUNDED) {
             campaign.setDonateEnd(LocalDate.now());

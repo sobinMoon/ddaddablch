@@ -1,8 +1,7 @@
 package com.donation.ddb.Dto.Response;
 
-import com.donation.ddb.Domain.CampaignCategory;
-import com.donation.ddb.Domain.CampaignPlan;
-import com.donation.ddb.Domain.CampaignStatusFlag;
+import com.donation.ddb.Domain.Enums.CampaignCategory;
+import com.donation.ddb.Domain.Enums.CampaignStatusFlag;
 import lombok.*;
 
 import java.math.BigDecimal;

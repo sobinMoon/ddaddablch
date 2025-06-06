@@ -1,7 +1,9 @@
 package com.donation.ddb.Service.CampaignService;
 
 import com.donation.ddb.Domain.*;
-import com.donation.ddb.Dto.Request.CampaignRequestDto;
+import com.donation.ddb.Domain.Enums.CampaignCategory;
+import com.donation.ddb.Domain.Enums.CampaignSortType;
+import com.donation.ddb.Domain.Enums.CampaignStatusFlag;
 import com.donation.ddb.Dto.Response.CampaignResponse;
 import com.donation.ddb.Repository.CampaignRepository.CampaignRepository;
 import com.donation.ddb.Repository.CampaignUpdateRepository.CampaignUpdateRepository;
@@ -10,11 +12,9 @@ import com.donation.ddb.Repository.projection.CampaignWithUpdate;
 import com.donation.ddb.apiPayload.code.status.ErrorStatus;
 import com.donation.ddb.apiPayload.exception.handler.CampaignHandler;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDate;
 import java.util.List;
 
 @Service
@@ -28,7 +28,9 @@ public class CampaignQueryServiceImpl implements CampaignQueryService {
     private final CampaignUpdateRepository campaignUpdateRepository;
 
     @Override
-    public List<CampaignResponse.CampaignListDto> findAllCampaigns(String keyword, String category, String statusFlag, String sortType, Pageable pageable) {
+    public List<CampaignResponse.CampaignListDto> findAllCampaigns(
+            String keyword, String category, String statusFlag, String sortType
+    ) {
         CampaignCategory campaignCategory;
         if (category == null) {
             campaignCategory = CampaignCategory.ALL;
@@ -60,7 +62,7 @@ public class CampaignQueryServiceImpl implements CampaignQueryService {
                 throw new CampaignHandler(ErrorStatus.CAMPAIGN_INVALID_SORT_TYPE);
             }
         }
-        List<CampaignResponse.CampaignListDto> campaigns = campaignRepository.dynamicQueryWithBooleanBuilder(keyword, campaignCategory, status, sort, pageable);
+        List<CampaignResponse.CampaignListDto> campaigns = campaignRepository.dynamicQueryWithBooleanBuilder(keyword, campaignCategory, status, sort);
 
         // imageUrl을 수정해야됨
         campaigns.stream().forEach(campaign -> {
@@ -72,20 +74,6 @@ public class CampaignQueryServiceImpl implements CampaignQueryService {
             }
         });
         return campaigns;
-    }
-
-    @Override
-    public Campaign addCampaign(CampaignRequestDto.JoinDto joinDto, String email) {
-
-        OrganizationUser user = organizationUserRepository.findByoEmail(email).
-                orElseThrow(() -> new CampaignHandler(ErrorStatus.ORGANIZATION_USER_NOT_FOUND));
-
-        return campaignRepository.addCampaign(joinDto, user);
-    }
-
-    @Override
-    public Campaign updateCampaign(Campaign campaign) {
-        return campaignRepository.save(campaign);
     }
 
     @Override

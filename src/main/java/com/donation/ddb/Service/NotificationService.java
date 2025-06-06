@@ -5,7 +5,6 @@ import com.donation.ddb.Domain.Exception.DataNotFoundException;
 import com.donation.ddb.Domain.Notification;
 import com.donation.ddb.Repository.NotificationRepository;
 import com.donation.ddb.Repository.StudentUserRepository;
-import com.donation.ddb.Service.CampaignCommentQueryService.CampaignCommentQueryService;
 import com.donation.ddb.Service.CampaignService.CampaignQueryServiceImpl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
