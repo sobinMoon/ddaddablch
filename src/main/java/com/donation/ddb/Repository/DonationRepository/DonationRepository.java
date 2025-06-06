@@ -37,5 +37,9 @@ public interface DonationRepository extends JpaRepository<Donation,Long>,Donatio
     @Query("SELECT d FROM Donation d JOIN FETCH d.campaign c WHERE d.studentUser.sId=:studentId AND "+"d.status='SUCCESS'")
     List<Donation> findRecentDonationByStudentId(@Param("studentId") Long studentId, Pageable pageable);
 
+    //지금까지 총 기부된 금액
+    @Query("SELECT SUM(d.amount) FROM Donation d")
+    BigDecimal getTotalDonation();
+
     //가장 많이 기부한 카테고리 조회 -> 필요시 구현하기
 }

@@ -54,12 +54,14 @@ public class DonationService {
                      log.error("캠페인을 찾을 수 없습니다. ID: {}", campaignId);
                      return new IllegalArgumentException("존재하지 않는 캠페인입니다: " + campaignId);
                  });
+
             // 캠페인 조회하기
             Campaign campaign = campaignRepository.findById(campaignId)
                     .orElseThrow(() -> {
                         log.error("캠페인을 찾을 수 없습니다. ID: {}", campaignId);
                         return new IllegalArgumentException("존재하지 않는 캠페인입니다: " + campaignId);
                     });
+
             // Donation 엔티티 생성
             Donation newDonation = Donation.builder()
                     .transactionHash(hash)
@@ -71,13 +73,25 @@ public class DonationService {
                     .campaign(campaign)
                     .status(DonationStatus.SUCCESS) // 초기 상태는 PENDING -> 그니까 기부하기 전에 메타마스크 인증하고 해야되나
                     .build();
-
             //DB 에 저장하기
             Donation savedDonation=donationRepository.save(newDonation);
 
+            //db에 저장되고 나서 c_current_amount랑 donate_count 추가하기
+            // 🔥 캠페인 정보 업데이트 (기부 횟수와 현재 모금액)
+            campaign.addDonateCount();
+            campaign.addCurrentAmount(amount);
+            campaignRepository.save(campaign); // 캠페인 업데이트 저장
+
             // 기부 완료 알림 생성
             notificationService.createDonationCompleteNotification(
-                    studentUser.getSId(),           // 기부한 학생 ID
+                    studentUser.getSId(),
+                    campaign.getCName(),
+                    savedDonation.getDId()
+            );
+
+            // 기부 완료 알림 생성
+            notificationService.createDonationCompleteNotification(
+                    studentUser.getSId(),        // 기부한 학생 ID
                     campaign.getCName(),        // 캠페인 이름
                     savedDonation.getDId()      // 기부 ID
             );
@@ -131,6 +145,12 @@ public class DonationService {
 
         log.info("기부 상태 업데이트 완료 - ID: {}, 새로운 상태: {}", donation.getDId(), status);
         return donation;
+    }
+
+    //총 기부금 반환하기
+    public BigDecimal findAllAmount(){
+        BigDecimal amount = donationRepository.getTotalDonation();
+        return amount != null ? amount : BigDecimal.ZERO;  // null 체크 추가
     }
 
 

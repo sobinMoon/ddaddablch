@@ -81,6 +81,14 @@ public class Campaign extends BaseEntity {
     @JoinColumn(name = "o_id")
     private OrganizationUser organizationUser;
 
+    public void addDonateCount(){
+        this.donateCount = this.donateCount + 1;
+    }
+
+    public void addCurrentAmount(BigDecimal amount){
+        this.cCurrentAmount = this.cCurrentAmount.add(amount);
+    }
+
     @Override
     public String toString() {
         return "Campaign{" +
