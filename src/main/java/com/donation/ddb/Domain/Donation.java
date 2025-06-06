@@ -59,5 +59,6 @@ public class Donation extends BaseEntity {
 //    //익명 기부 여부
 //    @Builder.Default
 //    private Boolean isAnonymous=false;
+
 }
 

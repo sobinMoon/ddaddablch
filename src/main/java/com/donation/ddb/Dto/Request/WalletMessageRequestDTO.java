@@ -11,7 +11,7 @@ import lombok.Setter;
 @NoArgsConstructor
 public class WalletMessageRequestDTO {
  @NotBlank
- private String email;
+ private Long userId;
  @NotBlank
  private String walletAddress;
 }

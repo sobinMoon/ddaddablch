@@ -18,6 +18,7 @@ import com.donation.ddb.Service.CampaignService.CampaignQueryService;
 import com.donation.ddb.Service.CampaignSpendingService.CampaignSpendingCommandService;
 import com.donation.ddb.Service.CampaignSpendingService.CampaignSpendingQueryService;
 import com.donation.ddb.Service.CampaignUpdateService.CampaignUpdateCommandService;
+import com.donation.ddb.Service.DonationService.DonationService;
 import com.donation.ddb.Service.OrganizationUserService.OrganizationUserQueryService;
 import com.donation.ddb.apiPayload.ApiResponse;
 import com.donation.ddb.apiPayload.code.status.ErrorStatus;
@@ -37,6 +38,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 
@@ -81,6 +83,9 @@ public class CampaignController {
     @Autowired
     private CampaignCommandService campaignCommandService;
 
+    @Autowired
+    private DonationService donationService;
+
 
     @GetMapping("home")
     public ApiResponse<?> campaignList() {
@@ -105,13 +110,16 @@ public class CampaignController {
                 pageable);
         List<CampaignWithUpdate> recentUpdates = campaignService.findRecentUpdates();
 
-        Map<String, List<?>> campaignResponseDtoList = Map.of(
+        // 🔥 총 기부금 조회 추가
+        BigDecimal totalDonation = donationService.findAllAmount();
+
+        Map<String, Object> campaignResponseDtoList = Map.of(
                 "popular", popular,
                 "latest", latest,
                 "endingSoon", endingSoon,
-                "recentUpdates", CampaignConverter.toRecentUpdateListDto(recentUpdates)
+                "recentUpdates", CampaignConverter.toRecentUpdateListDto(recentUpdates),
+                "totalDonation", totalDonation  // 🔥 총 기부금 추가
         );
-
         return ApiResponse.onSuccess(campaignResponseDtoList);
     }
 

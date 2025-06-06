@@ -1,12 +1,15 @@
 package com.donation.ddb.Controller;
 
 
+import com.donation.ddb.Domain.AuthEvent;
 import com.donation.ddb.Domain.CustomUserDetails;
+import com.donation.ddb.Domain.Exception.DataNotFoundException;
 import com.donation.ddb.Dto.Request.EmailVerificationRequestDto;
 import com.donation.ddb.Dto.Request.WalletAddressVerifyRequestDto;
 import com.donation.ddb.Dto.Request.WalletMessageRequestDTO;
 import com.donation.ddb.Dto.Response.WalletAddressVerifyResponseDto;
 import com.donation.ddb.Dto.Response.WalletMessageResponseDto;
+import com.donation.ddb.Repository.AuthEventRepository;
 import com.donation.ddb.Service.WalletService.AuthService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -21,6 +24,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 @Controller
 @RequiredArgsConstructor
@@ -29,14 +33,44 @@ public class AuthController {
 
     @Autowired
     private final AuthService authService;
+    private final AuthEventRepository authEventRepository;
+
 
     @PostMapping("/wallet/auth/request-message")
     public ResponseEntity<WalletMessageResponseDto> requestMessage(@RequestBody WalletMessageRequestDTO walletMessageRequestDTO){
+        try {
+            // AuthEvent 생성 (수정된 메서드명 사용)
+            Long authEventId = authService.generateMessageByUserId(
+                    walletMessageRequestDTO.getUserId(),
+                    walletMessageRequestDTO.getWalletAddress()
+            );
 
-        String message=authService.generateMessage(walletMessageRequestDTO.getEmail(),walletMessageRequestDTO.getWalletAddress());
-        WalletMessageResponseDto walletMessageResponseDto=new WalletMessageResponseDto();
-        walletMessageResponseDto.setMessage(message);
-        return ResponseEntity.ok(walletMessageResponseDto);
+            // AuthEvent 조회
+            Optional<AuthEvent> authEventOpt = authEventRepository.findById(authEventId);
+
+            if (authEventOpt.isEmpty()) {
+                throw new DataNotFoundException("생성된 AuthEvent를 찾을 수 없습니다.");
+            }
+
+            AuthEvent authEvent = authEventOpt.get();
+
+            // 응답 DTO 생성
+            WalletMessageResponseDto walletMessageResponseDto = new WalletMessageResponseDto();
+            walletMessageResponseDto.setMessage(authEvent.getMessage()); // ✅ .getMessage() 메서드 호출 완료
+            walletMessageResponseDto.setNonce(authEvent.getNonce());     // ✅ nonce도 추가
+            walletMessageResponseDto.setAuthEventId(authEventId);
+
+            return ResponseEntity.ok(walletMessageResponseDto);
+
+        } catch (Exception e) {
+            log.error("메시지 생성 중 오류 발생: {}", e.getMessage(), e);
+
+            // 에러 응답 생성
+            WalletMessageResponseDto errorResponse = new WalletMessageResponseDto();
+            errorResponse.setMessage("메시지 생성 실패: " + e.getMessage());
+
+            return ResponseEntity.badRequest().body(errorResponse);
+        }
     }
 
 
