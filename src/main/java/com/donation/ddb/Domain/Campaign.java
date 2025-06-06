@@ -1,5 +1,7 @@
 package com.donation.ddb.Domain;
 
+import com.donation.ddb.Domain.Enums.CampaignCategory;
+import com.donation.ddb.Domain.Enums.CampaignStatusFlag;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;

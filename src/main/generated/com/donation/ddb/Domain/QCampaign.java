@@ -34,7 +34,7 @@ public class QCampaign extends EntityPathBase<Campaign> {
 
     public final QCampaignUpdate campaignUpdate;
 
-    public final EnumPath<CampaignCategory> cCategory = createEnum("cCategory", CampaignCategory.class);
+    public final EnumPath<com.donation.ddb.Domain.Enums.CampaignCategory> cCategory = createEnum("cCategory", com.donation.ddb.Domain.Enums.CampaignCategory.class);
 
     public final NumberPath<java.math.BigDecimal> cCurrentAmount = createNumber("cCurrentAmount", java.math.BigDecimal.class);
 
@@ -51,7 +51,7 @@ public class QCampaign extends EntityPathBase<Campaign> {
     //inherited
     public final DateTimePath<java.time.LocalDateTime> createdAt = _super.createdAt;
 
-    public final EnumPath<CampaignStatusFlag> cStatusFlag = createEnum("cStatusFlag", CampaignStatusFlag.class);
+    public final EnumPath<com.donation.ddb.Domain.Enums.CampaignStatusFlag> cStatusFlag = createEnum("cStatusFlag", com.donation.ddb.Domain.Enums.CampaignStatusFlag.class);
 
     public final StringPath cWalletAddress = createString("cWalletAddress");
 

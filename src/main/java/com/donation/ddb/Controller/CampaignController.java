@@ -4,6 +4,7 @@ import com.donation.ddb.Converter.CampaignCommentLikeConverter;
 import com.donation.ddb.Converter.CampaignConverter;
 import com.donation.ddb.Converter.CampaignUpdateConverter;
 import com.donation.ddb.Domain.*;
+import com.donation.ddb.Domain.Enums.CampaignStatusFlag;
 import com.donation.ddb.Dto.Request.*;
 import com.donation.ddb.Dto.Response.CampaignResponse;
 import com.donation.ddb.Dto.Response.OrganizationResponse;

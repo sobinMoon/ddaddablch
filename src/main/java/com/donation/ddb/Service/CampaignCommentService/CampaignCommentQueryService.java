@@ -36,22 +36,17 @@ public class CampaignCommentQueryService {
                 .map(CampaignComment::getCcId)
                 .toList();
 
-        // 좋아요 수를 일괄 조회
         Map<Long, Long> likesMap = campaignCommentLikeRepository.countLikesByCommentIds(commentIds).stream()
                 .collect(Collectors.toMap(CommentLikeCount::getCommentId, CommentLikeCount::getCount));
 
-        // 유저가 좋아요를 눌렀는지 여부를 조회
         Set<Long> likedCommentIds = new HashSet<>();
 
-        log.info("받은 userEmail : {}", userEmail);
         if (userEmail != null) {
-            // StudentUser인지 확인 후 처리
             Optional<StudentUser> studentOpt = studentUserRepository.findBysEmail(userEmail);
             if (studentOpt.isPresent()) {
                 likedCommentIds = campaignCommentLikeRepository.findLikedCommentIdsByEmailAndCommentIds(userEmail, commentIds);
             } else {
                 log.info("StudentUser가 아니거나 존재하지 않는 사용자: {}", userEmail);
-                // OrganizationUser이거나 존재하지 않는 경우 - 좋아요 정보 없이 진행
             }
         }
 

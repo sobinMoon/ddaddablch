@@ -1,4 +1,4 @@
-package com.donation.ddb.Domain;
+package com.donation.ddb.Domain.Enums;
 
 public enum CampaignSortType {
     POPULAR, // 기준: 참여한 사람 수

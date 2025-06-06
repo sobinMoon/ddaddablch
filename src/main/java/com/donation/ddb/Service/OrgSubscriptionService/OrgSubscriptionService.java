@@ -1,6 +1,7 @@
 package com.donation.ddb.Service.OrgSubscriptionService;
 
 import com.donation.ddb.Domain.*;
+import com.donation.ddb.Domain.Enums.CampaignStatusFlag;
 import com.donation.ddb.Dto.Request.NotificationSettingUpdateDTO;
 import com.donation.ddb.Dto.Request.OrgSubscriptionRequestDTO;
 import com.donation.ddb.Dto.Response.OrgSubscriptionResponseDTO;

@@ -1,7 +1,7 @@
 package com.donation.ddb.Dto.Request;
 
-import com.donation.ddb.Domain.CampaignCategory;
-import com.donation.ddb.Domain.CampaignStatusFlag;
+import com.donation.ddb.Domain.Enums.CampaignCategory;
+import com.donation.ddb.Domain.Enums.CampaignStatusFlag;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
@@ -10,7 +10,6 @@ import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.List;
 
 public class CampaignRequestDto {

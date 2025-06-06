@@ -1,7 +1,7 @@
 package com.donation.ddb.Service.CampaignService;
 
 import com.donation.ddb.Domain.Campaign;
-import com.donation.ddb.Domain.CampaignStatusFlag;
+import com.donation.ddb.Domain.Enums.CampaignStatusFlag;
 import com.donation.ddb.Domain.OrganizationUser;
 import com.donation.ddb.Dto.Request.CampaignRequestDto;
 import com.donation.ddb.Repository.CampaignRepository.CampaignRepository;

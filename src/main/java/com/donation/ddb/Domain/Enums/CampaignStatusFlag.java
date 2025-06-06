@@ -1,4 +1,4 @@
-package com.donation.ddb.Domain;
+package com.donation.ddb.Domain.Enums;
 
 public enum CampaignStatusFlag {
     // 시작전, 진행중, 종료

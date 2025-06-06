@@ -2,17 +2,18 @@ package com.donation.ddb.Repository.CampaignRepository;
 
 import com.donation.ddb.Converter.CampaignConverter;
 import com.donation.ddb.Domain.*;
+import com.donation.ddb.Domain.Enums.CampaignCategory;
+import com.donation.ddb.Domain.Enums.CampaignSortType;
+import com.donation.ddb.Domain.Enums.CampaignStatusFlag;
 import com.donation.ddb.Dto.Request.CampaignRequestDto;
 import com.donation.ddb.Dto.Response.CampaignResponse;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.jpa.impl.JPAQuery;
 import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 
-import java.time.LocalDate;
 import java.util.List;
 
 import static com.querydsl.core.types.Projections.constructor;

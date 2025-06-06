@@ -1,7 +1,9 @@
 package com.donation.ddb.Service.CampaignService;
 
 import com.donation.ddb.Domain.*;
-import com.donation.ddb.Dto.Request.CampaignRequestDto;
+import com.donation.ddb.Domain.Enums.CampaignCategory;
+import com.donation.ddb.Domain.Enums.CampaignSortType;
+import com.donation.ddb.Domain.Enums.CampaignStatusFlag;
 import com.donation.ddb.Dto.Response.CampaignResponse;
 import com.donation.ddb.Repository.CampaignRepository.CampaignRepository;
 import com.donation.ddb.Repository.CampaignUpdateRepository.CampaignUpdateRepository;
@@ -10,11 +12,9 @@ import com.donation.ddb.Repository.projection.CampaignWithUpdate;
 import com.donation.ddb.apiPayload.code.status.ErrorStatus;
 import com.donation.ddb.apiPayload.exception.handler.CampaignHandler;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDate;
 import java.util.List;
 
 @Service
