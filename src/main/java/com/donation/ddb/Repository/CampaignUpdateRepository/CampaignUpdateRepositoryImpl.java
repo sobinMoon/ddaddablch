@@ -24,7 +24,7 @@ public class CampaignUpdateRepositoryImpl implements CampaignUpdateRepositoryCus
                 .select(Projections.constructor(
                         CampaignWithUpdate.class,
                         campaign.cId,
-                        campaign.cName,
+                        campaignUpdate.cuTitle,
                         campaignUpdate.cuContent,
                         campaignUpdate.createdAt
                 ))

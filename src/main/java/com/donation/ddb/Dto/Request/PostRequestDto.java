@@ -5,11 +5,13 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 public class PostRequestDto {
 
     @NoArgsConstructor
     @Getter
+    @Setter
     public static class JoinDto {
         @JsonProperty("title")
         @Size(min = 1, max = 100, message = "제목은 1자 이상 100자 이하로 입력해주세요.")
@@ -20,8 +22,7 @@ public class PostRequestDto {
         private String content;
 
         @JsonProperty("nft")
-        @Size(min = 1, max = 500, message = "nft URL은 1자 이상 500자 이하로 입력해주세요.")
-        private String nft;
+        private String imagePath;
     }
 
     @NoArgsConstructor

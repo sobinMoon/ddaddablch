@@ -25,4 +25,8 @@ public class PostCommandService {
 
         return postRepository.save(newPost);
     }
+
+    public Post updateCampaign(Post post) {
+        return postRepository.save(post);
+    }
 }

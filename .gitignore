@@ -37,4 +37,4 @@ out/
 .vscode/
 
 ### QueryDSL ###
-/src/main/java/generated
+/src/main/java/generated/
