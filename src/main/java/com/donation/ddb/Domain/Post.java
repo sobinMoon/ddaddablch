@@ -1,16 +1,14 @@
 package com.donation.ddb.Domain;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.util.List;
 
 @Entity
 @Builder
 @Getter
+@Setter
 @AllArgsConstructor
 @NoArgsConstructor
 public class Post extends BaseEntity {
@@ -25,7 +23,9 @@ public class Post extends BaseEntity {
     @Column(nullable = false, length = 5000)
     private String pContent;
 
-    @Column(length = 500)
+    @Lob
+    @Basic(fetch = FetchType.LAZY)
+    @Column(name = "pNft")
     private String pNft;
 
     @ManyToOne(fetch = FetchType.LAZY)
