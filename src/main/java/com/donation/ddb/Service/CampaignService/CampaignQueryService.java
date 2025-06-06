@@ -16,9 +16,7 @@ public interface CampaignQueryService {
             String keyword,
             String category,
             String statusFlag,
-            String sortType,
-            Pageable pageable
-//            CampaignSearchDto searchDto
+            String sortType
     );
 
     List<CampaignWithUpdate> findRecentUpdates();

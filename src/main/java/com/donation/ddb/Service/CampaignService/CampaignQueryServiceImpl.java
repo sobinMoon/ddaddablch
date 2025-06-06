@@ -28,7 +28,9 @@ public class CampaignQueryServiceImpl implements CampaignQueryService {
     private final CampaignUpdateRepository campaignUpdateRepository;
 
     @Override
-    public List<CampaignResponse.CampaignListDto> findAllCampaigns(String keyword, String category, String statusFlag, String sortType, Pageable pageable) {
+    public List<CampaignResponse.CampaignListDto> findAllCampaigns(
+            String keyword, String category, String statusFlag, String sortType
+    ) {
         CampaignCategory campaignCategory;
         if (category == null) {
             campaignCategory = CampaignCategory.ALL;
@@ -60,7 +62,7 @@ public class CampaignQueryServiceImpl implements CampaignQueryService {
                 throw new CampaignHandler(ErrorStatus.CAMPAIGN_INVALID_SORT_TYPE);
             }
         }
-        List<CampaignResponse.CampaignListDto> campaigns = campaignRepository.dynamicQueryWithBooleanBuilder(keyword, campaignCategory, status, sort, pageable);
+        List<CampaignResponse.CampaignListDto> campaigns = campaignRepository.dynamicQueryWithBooleanBuilder(keyword, campaignCategory, status, sort);
 
         // imageUrl을 수정해야됨
         campaigns.stream().forEach(campaign -> {

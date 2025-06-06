@@ -42,17 +42,12 @@ import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 
-import static com.querydsl.core.types.Projections.constructor;
-
 @RestController
 @NoArgsConstructor
 @RequestMapping("/api/v1/campaigns")
 @Slf4j
 @Validated
 public class CampaignController {
-
-
-
     @Autowired
     private CampaignQueryService campaignService;
 
@@ -73,7 +68,6 @@ public class CampaignController {
 
     @Autowired
     private CampaignCommentLikeService campaignCommentLikeService;
-    ;
     @Autowired
     private CampaignPlanCommandService campaignPlanCommandService;
     @Autowired
@@ -89,25 +83,24 @@ public class CampaignController {
 
     @GetMapping("home")
     public ApiResponse<?> campaignList() {
-        Pageable pageable = PageRequest.of(0, 3);
         List<CampaignResponse.CampaignListDto> popular = campaignService.findAllCampaigns(
                 null,
                 null,
                 "FUNDRAISING",
-                "POPULAR",
-                pageable);
+                "POPULAR"
+        );
         List<CampaignResponse.CampaignListDto> latest = campaignService.findAllCampaigns(
                 null,
                 null,
                 "FUNDRAISING",
-                "LATEST",
-                pageable);
+                "LATEST"
+        );
         List<CampaignResponse.CampaignListDto> endingSoon = campaignService.findAllCampaigns(
                 null,
                 null,
                 "FUNDRAISING",
-                "ENDING_SOON",
-                pageable);
+                "ENDING_SOON"
+        );
         List<CampaignWithUpdate> recentUpdates = campaignService.findRecentUpdates();
 
         // 🔥 총 기부금 조회 추가
@@ -127,23 +120,18 @@ public class CampaignController {
     @GetMapping("fundraising")
     public ResponseEntity<?> inProgressCampaignList(
             @RequestParam(value = "category", required = false) String category,
-            @RequestParam(value = "sortType", required = false) String sortType,
-            @RequestParam(value = "page", defaultValue = "0") int page,
-            @RequestParam(value = "size", defaultValue = "10") int size
+            @RequestParam(value = "sortType", required = false) String sortType
     ) {
-        Pageable pageable = PageRequest.of(page, size);
 
         List<CampaignResponse.CampaignListDto> campaignResponseDtoList = campaignService.findAllCampaigns(
                 null,
                 category,
                 "FUNDRAISING",
-                sortType,
-                pageable
+                sortType
         );
 
         Map<String, Object> resMap = Map.of(
                 "campaigns", campaignResponseDtoList,
-                "pageable", pageable,
                 "totalElements", campaignResponseDtoList.size()
         );
 
@@ -154,23 +142,18 @@ public class CampaignController {
     @GetMapping("completed")
     public ResponseEntity<?> endedCampaignList(
             @RequestParam(value = "category", required = false) String category,
-            @RequestParam(value = "sortType", required = false) String sortType,
-            @RequestParam(value = "page", defaultValue = "0") int page,
-            @RequestParam(value = "size", defaultValue = "10") int size
+            @RequestParam(value = "sortType", required = false) String sortType
     ) {
-        Pageable pageable = PageRequest.of(page, size);
 
         List<CampaignResponse.CampaignListDto> campaignResponseDtoList = campaignService.findAllCampaigns(
                 null,
                 category,
                 "COMPLETED",
-                sortType,
-                pageable
+                sortType
         );
 
         Map<String, Object> resMap = Map.of(
                 "campaigns", campaignResponseDtoList,
-                "pageable", pageable,
                 "totalElements", campaignResponseDtoList.size()
         );
 
@@ -183,11 +166,8 @@ public class CampaignController {
             @RequestParam(value = "category", required = false) String category,
             @RequestParam(value = "keyword", required = false) String keyword,
             @RequestParam(value = "statusFlag", required = false) String statusFlag,
-            @RequestParam(value = "sortType", required = false) String sortType,
-            @RequestParam(value = "page", defaultValue = "0") int page,
-            @RequestParam(value = "size", defaultValue = "10") int size
+            @RequestParam(value = "sortType", required = false) String sortType
     ) {
-        Pageable pageable = PageRequest.of(page, size);
         // CampaignCategory로 변환
         if (category == null || category.isEmpty()) {
             category = "ALL"; // 기본값 설정
@@ -199,13 +179,11 @@ public class CampaignController {
                 keyword,
                 category,
                 statusFlag,
-                sortType,
-                pageable
+                sortType
         );
 
         Map<String, Object> resMap = Map.of(
                 "campaigns", campaignResponseDtoList,
-                "pageable", pageable,
                 "totalElements", campaignResponseDtoList.size()
         );
 

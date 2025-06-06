@@ -30,8 +30,7 @@ public class CampaignRepositoryImpl implements CampaignRepositoryCustom {
             String keyword,
             CampaignCategory category,
             CampaignStatusFlag statusFlag,
-            CampaignSortType sortType,
-            Pageable pageable
+            CampaignSortType sortType
     ) {
 
         System.out.println("dynamicQueryWithBooleanBuilder called with keyword: " + keyword + ", sortType: " + sortType);
@@ -102,12 +101,6 @@ public class CampaignRepositoryImpl implements CampaignRepositoryCustom {
         query.orderBy(qCampaign.cId.desc()); // Default sorting by ID in descending order
 
         System.out.println("Executing query with predicate: " + predicate);
-
-        // Apply pagination
-        if (pageable != null) {
-            query.offset(pageable.getOffset());
-            query.limit(pageable.getPageSize());
-        }
 
         return query.fetch();
     }

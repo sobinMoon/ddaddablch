@@ -16,8 +16,7 @@ public interface CampaignRepositoryCustom {
             String keyword,
             CampaignCategory category,
             CampaignStatusFlag statusFlag,
-            CampaignSortType sortType,
-            Pageable pageable
+            CampaignSortType sortType
     );
 
     Campaign addCampaign(CampaignRequestDto.JoinDto joinDto, OrganizationUser organizationUser);
