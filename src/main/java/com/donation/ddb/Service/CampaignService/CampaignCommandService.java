@@ -17,6 +17,7 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class CampaignCommandService {
     private final CampaignRepository campaignRepository;
     private final OrganizationUserRepository organizationUserRepository;
@@ -33,7 +34,6 @@ public class CampaignCommandService {
         return campaignRepository.save(campaign);
     }
 
-    @Transactional
     public void updateStatusByDate() {
         List<Campaign> campaigns = campaignRepository.findAll();
 
@@ -57,7 +57,6 @@ public class CampaignCommandService {
         }
     }
 
-    @Transactional
     public Campaign updateStatusByUser(Campaign campaign, CampaignStatusFlag statusFlag) {
 
         if (!CampaignStatusFlag.isForwardTransition(campaign.getCStatusFlag(), statusFlag)) {
