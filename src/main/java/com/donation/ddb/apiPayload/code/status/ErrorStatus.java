@@ -53,8 +53,8 @@ public enum ErrorStatus implements BaseErrorCode {
     // 블록체인 관련 에러 코드
     BLOCKCHAIN_CONNECTION_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "BLOCKCHAIN5001", "블록체인 연결에 실패했습니다."),
     BLOCKCHAIN_BALANCE_QUERY_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "BLOCKCHAIN5002", "잔액 조회 중 오류가 발생했습니다."),
-    BLOCKCHAIN_TRANSACTION_VERIFICATION_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "BLOCKCHAIN5003", "트랜잭션 검증 중 오류가 발생했습니다.");
-
+    BLOCKCHAIN_TRANSACTION_VERIFICATION_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "BLOCKCHAIN5003", "트랜잭션 검증 중 오류가 발생했습니다."),
+    ORGANIZATION_MYPAGE_ERROR(HttpStatus.INTERNAL_SERVER_ERROR,"MYPAGE4001","조직 마이페이지 정보를 불러올 수 없습니다.");
     // 예시,,,
     // ARTICLE_NOT_FOUND(HttpStatus.NOT_FOUND, "ARTICLE4001", "게시글이 없습니다.");
 
