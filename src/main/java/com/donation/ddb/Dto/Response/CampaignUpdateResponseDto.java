@@ -29,5 +29,12 @@ public class CampaignUpdateResponseDto {
         private String imageUrl;
         private LocalDateTime createdAt;
         private LocalDateTime updatedAt;
+
+        public String getImageUrl() {
+            if (imageUrl != null) {
+                return imageUrl.replace("C:\\DDADDABLCH\\", "").replace("\\", "/");
+            }
+            return null; // Handle null case if needed
+        }
     }
 }
