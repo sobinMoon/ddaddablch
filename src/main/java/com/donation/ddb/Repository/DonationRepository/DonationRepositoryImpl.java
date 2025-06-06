@@ -53,11 +53,12 @@ public class DonationRepositoryImpl implements DonationRepositoryCustom {
                             StudentMyPageResponseDTO.DonationSummaryDTO.class,
                             donation.dId,
                             campaign.cName,
+                            donation.campaign.cId,
                             donation.amount,
                             donation.createdAt,  // BaseEntity에서 상속받은 createdAt
                             donation.transactionHash,
-                            donation.status.stringValue(),
-                            donation.campaign.cImageUrl
+                            donation.status.stringValue()
+
                     ))
                     .from(donation)
                     .join(donation.campaign,campaign)

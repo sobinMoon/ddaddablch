@@ -7,13 +7,17 @@ import com.donation.ddb.Domain.Enums.CampaignSortType;
 import com.donation.ddb.Domain.Enums.CampaignStatusFlag;
 import com.donation.ddb.Dto.Request.CampaignRequestDto;
 import com.donation.ddb.Dto.Response.CampaignResponse;
+import com.donation.ddb.Dto.Response.OrgMyPageResponseDTO;
 import com.querydsl.core.BooleanBuilder;
+import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.impl.JPAQuery;
 import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 
+import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.List;
 
 import static com.querydsl.core.types.Projections.constructor;
@@ -119,5 +123,46 @@ public class CampaignRepositoryImpl implements CampaignRepositoryCustom {
         em.persist(campaign);
 
         return campaign;
+    }
+
+    @Override
+    public BigDecimal getTotalRaisedAmountByOrganization(Long organizationId) {
+        QCampaign campaign = QCampaign.campaign;
+
+        BigDecimal totalAmount = jpaQueryFactory
+                .select(campaign.cCurrentAmount.sum().coalesce(BigDecimal.ZERO))
+                .from(campaign)
+                .where(campaign.organizationUser.oId.eq(organizationId))
+                .fetchOne();
+
+        return totalAmount != null ? totalAmount : BigDecimal.ZERO;
+    }
+
+    @Override
+    public List<OrgMyPageResponseDTO.CampaignSummaryDTO> getCampaignsByStatusAndOrganization(
+            Long organizationId, List<CampaignStatusFlag> statuses) {
+
+        QCampaign campaign = QCampaign.campaign;
+        QOrganizationUser organization = QOrganizationUser.organizationUser;
+
+        return jpaQueryFactory
+                .select(Projections.constructor(
+                        OrgMyPageResponseDTO.CampaignSummaryDTO.class,
+                        campaign.cId,                    // Long campaignId
+                        campaign.cName,                  // String campaignName
+                        organization.oName,              // String organizationName
+                        campaign.cDescription,           // String description
+                        campaign.cCurrentAmount,         // BigDecimal currentAmount
+                        campaign.cGoal,                  // Integer goalAmount
+                        campaign.cImageUrl,              // String imageUrl
+                        campaign.cStatusFlag,            // CampaignStatusFlag status
+                        campaign.createdAt               // LocalDateTime createdAt
+                ))
+                .from(campaign)
+                .join(campaign.organizationUser, organization)
+                .where(campaign.organizationUser.oId.eq(organizationId)
+                        .and(campaign.cStatusFlag.in(statuses)))
+                .orderBy(campaign.createdAt.desc())
+                .fetch();
     }
 }

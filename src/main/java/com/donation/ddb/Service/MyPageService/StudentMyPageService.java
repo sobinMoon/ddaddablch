@@ -38,53 +38,53 @@ public class StudentMyPageService {
         try {
             // 현재 로그인한 사용자 정보 가져오기
             Authentication authentication= SecurityContextHolder.getContext().getAuthentication();
-        String currentUserEmail = authentication.getName(); //이메일 찾기
+            String currentUserEmail = authentication.getName(); //이메일 찾기
 
-        StudentUser student=studentUserRepository.findBysEmail(currentUserEmail)
+            StudentUser student=studentUserRepository.findBysEmail(currentUserEmail)
                 .orElseThrow(()-> new RuntimeException("사용자를 찾을 수 없습니다."));
 
-        // 기부 통계 조회 - 쿼리 한개로 조회 -> total amount, total count
-        DonationStatusDTO donationStatus=
-                donationRepository.getDonationStatsByStudentId(student.getSId());
+            // 기부 통계 조회 - 쿼리 한개로 조회 -> total amount, total count
+            DonationStatusDTO donationStatus=
+                    donationRepository.getDonationStatsByStudentId(student.getSId());
 
-        // 최근 기부 내역 조회
-        List<StudentMyPageResponseDTO.DonationSummaryDTO> recentDonations =
-                donationRepository.getRecentDonationSummary(student.getSId(), 5);
+            // 최근 기부 내역 조회
+            List<StudentMyPageResponseDTO.DonationSummaryDTO> recentDonations =
+                    donationRepository.getRecentDonationSummary(student.getSId(), 5);
 
-        //활동 정보 조회 -> 글이랑 댓글 리스트
-        List<StudentMyPageResponseDTO.RecentPostDTO> posts = postRepository.findRecentPostsByStudentId(student.getSId());
-        List<StudentMyPageResponseDTO.PostCommentDTO> comments=postCommentRepository.findRecentCommentsByStudentId(student.getSId());
+            //활동 정보 조회 -> 글이랑 댓글 리스트
+            List<StudentMyPageResponseDTO.RecentPostDTO> posts = postRepository.findRecentPostsByStudentId(student.getSId());
+            List<StudentMyPageResponseDTO.PostCommentDTO> comments=postCommentRepository.findRecentCommentsByStudentId(student.getSId());
 
-        //알림,통계 정보 조회 추후 구현하기
+            //알림,통계 정보 조회 추후 구현하기
 
-        //최종 응답 DTO 생성
-        StudentMyPageResponseDTO response = StudentMyPageResponseDTO.builder()
-                .sId(student.getSId())
-                .sName(student.getSName())
-                .sNickname(student.getSNickname())
-                .sEmail(student.getSEmail())
-                .sProfileImage(student.getSProfileImage())
-                .walletAddresses(student.getWalletList()) // JSON으로 저장된 지갑 목록
-                .createdAt(student.getCreatedAt())
+            //최종 응답 DTO 생성
+            StudentMyPageResponseDTO response = StudentMyPageResponseDTO.builder()
+                    .sId(student.getSId())
+                    .sName(student.getSName())
+                    .sNickname(student.getSNickname())
+                    .sEmail(student.getSEmail())
+                    .sProfileImage(student.getSProfileImage())
+                    .walletAddresses(student.getWalletList()) // JSON으로 저장된 지갑 목록
+                    .createdAt(student.getCreatedAt())
+                   // .campaignId()
+                    // 기부 관련 정보
+                    .totalDonationAmount(donationStatus.getTotalAmount())
+                    .totalDonationCount(donationStatus.getTotalCount())
+                    .recentDonations(convertToResponseDTOs(recentDonations))
 
-                // 기부 관련 정보
-                .totalDonationAmount(donationStatus.getTotalAmount())
-                .totalDonationCount(donationStatus.getTotalCount())
-                .recentDonations(convertToResponseDTOs(recentDonations))
+                    // 통계 정보
+                    //.stats(stats)
 
-                // 통계 정보
-                //.stats(stats)
+                    // 추후 구현할 필드들
+                    .recentPosts(posts)
+                    .recentComments(comments)
+                    .unreadNotifications(notificationService.getUnreadNotifications(student.getSId()))
+                    // .totalCommentCount(activityStats.getTotalCommentCount())
+                    // .unreadNotificationCount(unreadNotificationCount)
+                    .build();
 
-                // 추후 구현할 필드들
-                .recentPosts(posts)
-                .recentComments(comments)
-                .unreadNotifications(notificationService.getUnreadNotifications(student.getSId()))
-                // .totalCommentCount(activityStats.getTotalCommentCount())
-                // .unreadNotificationCount(unreadNotificationCount)
-                .build();
-
-        log.info("마이페이지 정보 조회 완료: 사용자ID={}", student.getSId());
-        return response;
+            log.info("마이페이지 정보 조회 완료: 사용자ID={}", student.getSId());
+            return response;
 
         } catch (Exception e) {
             log.error("마이페이지 정보 조회 중 오류 발생", e);
@@ -109,7 +109,7 @@ public class StudentMyPageService {
                         .donationDate(dto.getDonationDate())
                         .transactionHash(dto.getTransactionHash())
                         .donationStatus(dto.getDonationStatus())
-                        .campaignImageUrl(dto.getCampaignImageUrl())
+                        .campaignId(dto.getCampaignId())
                         .build())
                 .collect(Collectors.toList());
         }
