@@ -20,7 +20,7 @@ public class PostRequestDto {
         private String content;
 
         @JsonProperty("nft")
-        @Size(min = 1, max = 500, message = "nft URL은 1자 이상 500자 이하로 입력해주세요.")
+        //@Size(min = 1, max = 500, message = "nft URL은 1자 이상 500자 이하로 입력해주세요.")
         private String nft;
     }
 

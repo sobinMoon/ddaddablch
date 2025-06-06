@@ -25,7 +25,9 @@ public class Post extends BaseEntity {
     @Column(nullable = false, length = 5000)
     private String pContent;
 
-    @Column(length = 500)
+    @Lob
+    @Basic(fetch = FetchType.LAZY)
+    @Column(name = "pNft")
     private String pNft;
 
     @ManyToOne(fetch = FetchType.LAZY)
