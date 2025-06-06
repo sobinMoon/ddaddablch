@@ -2,20 +2,22 @@ package com.donation.ddb.Controller;
 
 
 import com.donation.ddb.Domain.Exception.DataNotFoundException;
+import com.donation.ddb.Dto.Request.StudentInfoUpdateResponseDTO;
 import com.donation.ddb.Dto.Response.StudentMyPageResponseDTO;
 import com.donation.ddb.Service.MyPageService.StudentMyPageService;
 import com.donation.ddb.apiPayload.ApiResponse;
 import com.donation.ddb.apiPayload.code.status.ErrorStatus;
 import com.donation.ddb.apiPayload.code.status.SuccessStatus;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/v1/mypage/student")
@@ -53,4 +55,31 @@ public class StudentMyPageController {
                             null));
         }
     }
+
+    // 종합 프로필 수정 (닉네임 + 비밀번호 + 이미지)
+    @PutMapping("/profile")
+    public ResponseEntity<?> updateProfile(
+            @RequestPart(value = "data", required = false) @Valid StudentInfoUpdateResponseDTO updateDto,
+            @RequestPart(value = "profileImage", required = false) MultipartFile profileImage) {
+        try {
+            String result = studentMyPageService.updateProfile(updateDto, profileImage);
+            return ResponseEntity.ok().body(ApiResponse.onSuccess(result));
+        } catch (IllegalArgumentException e) {
+            log.error("프로필 업데이트 실패 - 잘못된 입력: {}", e.getMessage());
+           //return ApiResponse.onFailure("INVALID_INPUT", e.getMessage(), null);
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+                    Map.of("success","false","message","잘못된 입력으로 프로필 업데이트에 실패하였습니다",
+                            "error",e.getMessage())
+            );
+        } catch (Exception e) {
+            log.error("프로필 업데이트 실패", e);
+            //return ApiResponse.onFailure("PROFILE_UPDATE_ERROR", "프로필 업데이트에 실패했습니다.", null);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
+                    Map.of("success","false",
+                            "message","서버 오류로 프로필 업데이트가 실패하였습니다.",
+                            "error",e.getMessage())
+            );
+        }
+    }
+
 }

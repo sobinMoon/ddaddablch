@@ -2,8 +2,10 @@ package com.donation.ddb.Service.MyPageService;
 
 import com.donation.ddb.Domain.PostComment;
 import com.donation.ddb.Domain.StudentUser;
+import com.donation.ddb.Dto.Request.StudentInfoUpdateResponseDTO;
 import com.donation.ddb.Dto.Response.DonationStatusDTO;
 import com.donation.ddb.Dto.Response.StudentMyPageResponseDTO;
+//import com.donation.ddb.ImageStore;
 import com.donation.ddb.Repository.DonationRepository.DonationRepository;
 import com.donation.ddb.Repository.PostCommentRepository.PostCommentRepository;
 import com.donation.ddb.Repository.PostRepository.PostRepository;
@@ -14,8 +16,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -32,6 +36,7 @@ public class StudentMyPageService {
     private final PostRepository postRepository;
     private final PostCommentRepository postCommentRepository;
     private final NotificationService notificationService;
+    private final PasswordEncoder passwordEncoder;
 
     public StudentMyPageResponseDTO getMyPageInfo(){
 
@@ -115,4 +120,96 @@ public class StudentMyPageService {
         }
 
 
+    //  종합 프로필 수정 (닉네임, 비밀번호, 이미지)
+    @Transactional
+    public String updateProfile(StudentInfoUpdateResponseDTO updateDto, MultipartFile profileImage) {
+        StudentUser student = getCurrentStudent();
+        boolean hasChanges = false;
+
+        // 닉네임 수정
+        if (updateDto != null && updateDto.getSNickname() != null && !updateDto.getSNickname().trim().isEmpty()) {
+            student.setSNickname(updateDto.getSNickname().trim());
+            hasChanges = true;
+            log.info("닉네임 업데이트: 사용자ID={}, 새 닉네임={}", student.getSId(), updateDto.getSNickname());
+        }
+
+        // 비밀번호 수정
+        if (updateDto != null && updateDto.getCurrentPassword() != null && updateDto.getNewPassword() != null) {
+            updatePasswordInternal(student, updateDto.getCurrentPassword(), updateDto.getNewPassword(), updateDto.getConfirmNewPassword());
+            hasChanges = true;
+        }
+
+//        // 프로필 이미지 수정
+//        if (profileImage != null && !profileImage.isEmpty()) {
+//            updateProfileImageInternal(student, profileImage);
+//            hasChanges = true;
+//        }
+
+        if (hasChanges) {
+            studentUserRepository.save(student);
+            return "프로필이 성공적으로 업데이트되었습니다.";
+        } else {
+            return "변경사항이 없습니다.";
+        }
+    }
+    // === 내부 헬퍼 메서드들 ===
+    private StudentUser getCurrentStudent() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String currentUserEmail = authentication.getName();
+
+        return studentUserRepository.findBysEmail(currentUserEmail)
+                .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
+    }
+
+    private void updatePasswordInternal(StudentUser student, String currentPassword, String newPassword, String confirmNewPassword) {
+        // 입력값 검증
+        if (currentPassword == null || currentPassword.trim().isEmpty()) {
+            throw new IllegalArgumentException("현재 비밀번호를 입력해주세요.");
+        }
+        if (newPassword == null || newPassword.trim().isEmpty()) {
+            throw new IllegalArgumentException("새 비밀번호를 입력해주세요.");
+        }
+        if (confirmNewPassword == null || confirmNewPassword.trim().isEmpty()) {
+            throw new IllegalArgumentException("새 비밀번호 확인을 입력해주세요.");
+        }
+
+        // 현재 비밀번호 확인
+        if (!passwordEncoder.matches(currentPassword, student.getSPassword())) {
+            throw new IllegalArgumentException("현재 비밀번호가 일치하지 않습니다.");
+        }
+
+        // 새 비밀번호 확인
+        if (!newPassword.equals(confirmNewPassword)) {
+            throw new IllegalArgumentException("새 비밀번호와 확인 비밀번호가 일치하지 않습니다.");
+        }
+
+        // 현재 비밀번호와 새 비밀번호가 같은지 확인
+        if (passwordEncoder.matches(newPassword, student.getSPassword())) {
+            throw new IllegalArgumentException("새 비밀번호는 현재 비밀번호와 달라야 합니다.");
+        }
+
+        // 비밀번호 암호화 후 저장
+        String encodedNewPassword = passwordEncoder.encode(newPassword);
+        student.setSPassword(encodedNewPassword);
+    }
+
+//    private void updateProfileImageInternal(StudentUser student, MultipartFile profileImage) {
+//        try {
+//            // 기존 이미지 삭제 (있다면)
+//            if (student.getSProfileImage() != null) {
+//                ImageStore.deleteImage(student.getSProfileImage());
+//            }
+//
+//            // 새 이미지 저장
+//            String imagePath = ImageStore.storeImage(profileImage,
+//                    "\\users\\" + student.getSId() + "\\");
+//            student.setSProfileImage(imagePath);
+//
+//            log.info("프로필 이미지 업데이트 완료: 사용자ID={}, 이미지경로={}",
+//                    student.getSId(), imagePath);
+//
+//        } catch (Exception e) {
+//            log.error("프로필 이미지 업데이트 실패", e);
+//            throw new RuntimeException("프로필 이미지 업데이트에 실패했습니다.", e);
+//        }
 }
