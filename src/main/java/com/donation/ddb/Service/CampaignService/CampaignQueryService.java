@@ -12,7 +12,8 @@ public interface CampaignQueryService {
             String keyword,
             String category,
             String statusFlag,
-            String sortType
+            String sortType,
+            Integer size
     );
 
     List<CampaignWithUpdate> findRecentUpdates();

@@ -9,6 +9,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Locale;
+
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -23,10 +25,15 @@ public class OrganizationUserQueryServiceImpl implements OrganizationUserQuerySe
 
 
     public OrganizationResponse.OrganizationDetailDto convertToDetailDto(OrganizationUser user) {
+        String convertedProfileImage = user.getOProfileImage();
+        if (user.getOProfileImage() != null && !user.getOProfileImage().isEmpty()) {
+            convertedProfileImage = user.getOProfileImage().replace("C:\\DDADDABLCH\\", "").replace("\\", "/");
+        }
+
         return OrganizationResponse.OrganizationDetailDto.builder()
                 .id(user.getOId())
                 .name(user.getOName())
-                .profileImage(user.getOProfileImage())
+                .profileImage(convertedProfileImage)
                 .description(user.getODescription())
                 .build();
     }
