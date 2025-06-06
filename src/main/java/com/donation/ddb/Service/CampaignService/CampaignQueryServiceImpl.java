@@ -77,20 +77,6 @@ public class CampaignQueryServiceImpl implements CampaignQueryService {
     }
 
     @Override
-    public Campaign addCampaign(CampaignRequestDto.JoinDto joinDto, String email) {
-
-        OrganizationUser user = organizationUserRepository.findByoEmail(email).
-                orElseThrow(() -> new CampaignHandler(ErrorStatus.ORGANIZATION_USER_NOT_FOUND));
-
-        return campaignRepository.addCampaign(joinDto, user);
-    }
-
-    @Override
-    public Campaign updateCampaign(Campaign campaign) {
-        return campaignRepository.save(campaign);
-    }
-
-    @Override
     public Campaign findBycId(Long cId) {
         return campaignRepository.findBycId(cId);
     }

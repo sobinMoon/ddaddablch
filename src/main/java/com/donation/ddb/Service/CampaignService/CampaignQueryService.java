@@ -21,13 +21,9 @@ public interface CampaignQueryService {
 
     List<CampaignWithUpdate> findRecentUpdates();
 
-    Campaign addCampaign(CampaignRequestDto.JoinDto joinDto, String email);
-
     Campaign findBycId(Long cId);
 
     Boolean existsBycId(Long cId);
-
-    Campaign updateCampaign(Campaign campaign);
 
     Campaign findBycName(String cName);
 

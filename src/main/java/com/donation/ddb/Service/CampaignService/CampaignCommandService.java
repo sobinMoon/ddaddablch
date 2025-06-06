@@ -2,7 +2,12 @@ package com.donation.ddb.Service.CampaignService;
 
 import com.donation.ddb.Domain.Campaign;
 import com.donation.ddb.Domain.CampaignStatusFlag;
+import com.donation.ddb.Domain.OrganizationUser;
+import com.donation.ddb.Dto.Request.CampaignRequestDto;
 import com.donation.ddb.Repository.CampaignRepository.CampaignRepository;
+import com.donation.ddb.Repository.OrganizationUserRepository;
+import com.donation.ddb.apiPayload.code.status.ErrorStatus;
+import com.donation.ddb.apiPayload.exception.handler.CampaignHandler;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -14,6 +19,19 @@ import java.util.List;
 @RequiredArgsConstructor
 public class CampaignCommandService {
     private final CampaignRepository campaignRepository;
+    private final OrganizationUserRepository organizationUserRepository;
+
+    public Campaign addCampaign(CampaignRequestDto.JoinDto joinDto, String email) {
+
+        OrganizationUser user = organizationUserRepository.findByoEmail(email).
+                orElseThrow(() -> new CampaignHandler(ErrorStatus.ORGANIZATION_USER_NOT_FOUND));
+
+        return campaignRepository.addCampaign(joinDto, user);
+    }
+
+    public Campaign updateCampaign(Campaign campaign) {
+        return campaignRepository.save(campaign);
+    }
 
     @Transactional
     public void updateStatusByDate() {

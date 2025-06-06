@@ -50,7 +50,10 @@ import java.util.Map;
 @Validated
 public class CampaignController {
     @Autowired
-    private CampaignQueryService campaignService;
+    private CampaignQueryService campaignQueryService;
+
+    @Autowired
+    private CampaignCommandService campaignCommandService;
 
     @Autowired
     private OrganizationUserQueryService organizationUserQueryService;
@@ -75,8 +78,6 @@ public class CampaignController {
     private CampaignUpdateCommandService campaignUpdateCommandService;
     @Autowired
     private CampaignSpendingCommandService campaignSpendingCommandService;
-    @Autowired
-    private CampaignCommandService campaignCommandService;
 
     @Autowired
     private DonationService donationService;
@@ -84,25 +85,25 @@ public class CampaignController {
 
     @GetMapping("home")
     public ApiResponse<?> campaignList() {
-        List<CampaignResponse.CampaignListDto> popular = campaignService.findAllCampaigns(
+        List<CampaignResponse.CampaignListDto> popular = campaignQueryService.findAllCampaigns(
                 null,
                 null,
                 "FUNDRAISING",
                 "POPULAR"
         );
-        List<CampaignResponse.CampaignListDto> latest = campaignService.findAllCampaigns(
+        List<CampaignResponse.CampaignListDto> latest = campaignQueryService.findAllCampaigns(
                 null,
                 null,
                 "FUNDRAISING",
                 "LATEST"
         );
-        List<CampaignResponse.CampaignListDto> endingSoon = campaignService.findAllCampaigns(
+        List<CampaignResponse.CampaignListDto> endingSoon = campaignQueryService.findAllCampaigns(
                 null,
                 null,
                 "FUNDRAISING",
                 "ENDING_SOON"
         );
-        List<CampaignWithUpdate> recentUpdates = campaignService.findRecentUpdates();
+        List<CampaignWithUpdate> recentUpdates = campaignQueryService.findRecentUpdates();
 
         // 🔥 총 기부금 조회 추가
         BigDecimal totalDonation = donationService.findAllAmount();
@@ -124,7 +125,7 @@ public class CampaignController {
             @RequestParam(value = "sortType", required = false) String sortType
     ) {
 
-        List<CampaignResponse.CampaignListDto> campaignResponseDtoList = campaignService.findAllCampaigns(
+        List<CampaignResponse.CampaignListDto> campaignResponseDtoList = campaignQueryService.findAllCampaigns(
                 null,
                 category,
                 "FUNDRAISING",
@@ -146,7 +147,7 @@ public class CampaignController {
             @RequestParam(value = "sortType", required = false) String sortType
     ) {
 
-        List<CampaignResponse.CampaignListDto> campaignResponseDtoList = campaignService.findAllCampaigns(
+        List<CampaignResponse.CampaignListDto> campaignResponseDtoList = campaignQueryService.findAllCampaigns(
                 null,
                 category,
                 "COMPLETED",
@@ -176,7 +177,7 @@ public class CampaignController {
 
         // CampaignSortType으로 변환
 
-        List<CampaignResponse.CampaignListDto> campaignResponseDtoList = campaignService.findAllCampaigns(
+        List<CampaignResponse.CampaignListDto> campaignResponseDtoList = campaignQueryService.findAllCampaigns(
                 keyword,
                 category,
                 statusFlag,
@@ -208,12 +209,12 @@ public class CampaignController {
         }
 
         request.setImageUrl("default.png");
-        Campaign campaign = campaignService.addCampaign(request, email);
+        Campaign campaign = campaignCommandService.addCampaign(request, email);
 
         String imagePath = ImageStore.storeImage(image, "\\campaigns\\" + campaign.getCId() + "\\detail\\");
         campaign.setCImageUrl(imagePath);
 
-        campaign = campaignService.updateCampaign(campaign);
+        campaign = campaignCommandService.updateCampaign(campaign);
 
         List<CampaignPlanRequestDto.JoinDto> campaignPlans = request.getPlans();
 
@@ -224,7 +225,7 @@ public class CampaignController {
 
     @GetMapping("{cId}")
     public ApiResponse<?> getCampaign(@PathVariable(value = "cId") Long cId) {
-        Campaign campaign = campaignService.findBycId(cId);
+        Campaign campaign = campaignQueryService.findBycId(cId);
         if (campaign == null) {
             throw new CampaignHandler(ErrorStatus.CAMPAIGN_NOT_FOUND);
         }
@@ -332,7 +333,7 @@ public class CampaignController {
             @RequestPart(value = "image") MultipartFile image,
             @AuthenticationPrincipal CustomUserDetails userDetails
     ) throws IOException {
-        Campaign campaign = campaignService.findBycId(cId);
+        Campaign campaign = campaignQueryService.findBycId(cId);
 
         if (userDetails == null) {
             throw new CampaignHandler(ErrorStatus._UNAUTHORIZED);
@@ -364,7 +365,7 @@ public class CampaignController {
             @RequestBody @Valid CampaignRequestDto.UpdateStatusDto request,
             @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
-        Campaign campaign = campaignService.findBycId(cId);
+        Campaign campaign = campaignQueryService.findBycId(cId);
 
         if (userDetails == null) {
             throw new CampaignHandler(ErrorStatus._UNAUTHORIZED);
