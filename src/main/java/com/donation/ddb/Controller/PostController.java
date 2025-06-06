@@ -199,10 +199,14 @@ public class PostController {
     ) {
         Boolean liked = false;
 
+        log.info("userNames: {}", userDetails != null ? userDetails.getUsername() : "No user authenticated");
         if (userDetails != null && userDetails.isStudent()) {
+            log.info("User is authenticated as student: {}", userDetails.getUsername());
             String email = userDetails.getUsername();
             liked = postLikeQueryService.existsByPostAndStudentUser(postId, email);
         }
+
+        log.info("liked status for post {}: {}", postId, liked);
 
         PostWithCount post = postQueryService.findPostWithCountByPId(postId);
 

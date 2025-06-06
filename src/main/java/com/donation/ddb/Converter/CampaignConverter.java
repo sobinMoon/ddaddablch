@@ -3,7 +3,10 @@ package com.donation.ddb.Converter;
 import com.donation.ddb.Domain.Campaign;
 import com.donation.ddb.Domain.OrganizationUser;
 import com.donation.ddb.Dto.Request.CampaignRequestDto;
+import com.donation.ddb.Dto.Response.CampaignPlanResponseDto;
 import com.donation.ddb.Dto.Response.CampaignResponse;
+import com.donation.ddb.Dto.Response.CampaignSpendingResponseDto;
+import com.donation.ddb.Dto.Response.OrganizationResponse;
 import com.donation.ddb.Repository.projection.CampaignWithUpdate;
 
 import java.util.List;
@@ -29,6 +32,37 @@ public class CampaignConverter {
         return CampaignResponse.JoinResultDto.builder()
                 .id(campaign.getCId())
                 .createdAt(campaign.getCreatedAt())
+                .build();
+    }
+
+    public static CampaignResponse.CampaignDetailDto toCampaignDetailDto(
+            Campaign campaign,
+            OrganizationResponse.OrganizationDetailDto organizationDto,
+            List<CampaignPlanResponseDto> campaignPlanResponseDtos,
+            List<CampaignSpendingResponseDto> campaignSpendingResponseDtos
+    ) {
+        return CampaignResponse.CampaignDetailDto.builder()
+                .id(campaign.getCId())
+                .name(campaign.getCName())
+                .imageUrl(campaign.getCImageUrl().replace("C:\\DDADDABLCH\\", "")
+                        .replace("\\", "/"))
+                .description(campaign.getCDescription())
+                .goal(campaign.getCGoal())
+                .currentAmount(campaign.getCCurrentAmount())
+                .category(campaign.getCCategory())
+                .donateCount(campaign.getDonateCount())
+                .donateStart(campaign.getDonateStart())
+                .donateEnd(campaign.getDonateEnd())
+                .businessStart(campaign.getBusinessStart())
+                .businessEnd(campaign.getBusinessEnd())
+                .statusFlag(campaign.getCStatusFlag())
+                .walletAddress(campaign.getCWalletAddress())
+                .createdAt(campaign.getCreatedAt())
+                .updatedAt(campaign.getUpdatedAt())
+                .organization(organizationDto)
+                .campaignUpdate(CampaignUpdateConverter.toCampaignUpdateDto(campaign.getCampaignUpdate()))
+                .campaignPlans(campaignPlanResponseDtos)
+                .campaignSpendings(campaignSpendingResponseDtos)
                 .build();
     }
 
