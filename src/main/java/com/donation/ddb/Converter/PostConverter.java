@@ -34,7 +34,8 @@ public class PostConverter {
                 .previewContent(post.getPreviewContent().length() > 100
                         ? post.getPreviewContent().substring(0, 100) + "..."
                         : post.getPreviewContent())
-                .nft(post.getNft())
+                .nft(post.getNft().replace("C:\\DDADDABLCH\\", "")
+                        .replace("\\", "/"))
                 .likeCount(post.getLikeCount())
                 .commentCount(post.getCommentCount())
                 .studentUser(StudentUserConverter.toCommentDto(post.getStudentUser()))
@@ -62,7 +63,8 @@ public class PostConverter {
                 .postId(post.getPostId())
                 .title(post.getTitle())
                 .content(post.getPreviewContent())
-                .nft(post.getNft())
+                .nft(post.getNft().replace("C:\\DDADDABLCH\\", "")
+                .replace("\\", "/"))
                 .likeCount(post.getLikeCount())
                 .commentCount(post.getCommentCount())
                 .liked(isLiked)

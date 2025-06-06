@@ -1,11 +1,11 @@
 package com.donation.ddb.Service.MyPageService;
 
 
+import com.donation.ddb.Domain.Enums.CampaignStatusFlag;
 import com.donation.ddb.Repository.CampaignRepository.CampaignRepository;
 import com.donation.ddb.Repository.OrganizationUserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import com.donation.ddb.Domain.CampaignStatusFlag;
 import com.donation.ddb.Domain.OrganizationUser;
 import com.donation.ddb.Dto.Response.OrgMyPageResponseDTO;
 import org.springframework.security.core.Authentication;

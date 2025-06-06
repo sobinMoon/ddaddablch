@@ -24,7 +24,7 @@ public class CampaignUpdateRequestDto {
         private String content;
 
         @JsonProperty("spendings")
-        @Valid // 내부 JoinDto의 유효성 검사를 위해 필요
+        @Valid
         @NotEmpty(message = "최소 한 개 이상의 기부금 사용 내역이 필요합니다.")
         List<CampaignSpendingRequestDto.JoinDto> spendings;
     }

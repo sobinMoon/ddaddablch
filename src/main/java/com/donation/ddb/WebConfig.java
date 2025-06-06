@@ -9,8 +9,8 @@ public class WebConfig implements WebMvcConfigurer {
 
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
-        registry.addResourceHandler("/images/**") // 클라이언트가 접근할 URL
-                .addResourceLocations("file:///C:/DDADDABLCH/") // 실제 파일 시스템 경로
-                .setCachePeriod(3600); // 캐시 설정 선택적
+        registry.addResourceHandler("/images/**")
+                .addResourceLocations("file:///C:/DDADDABLCH/")
+                .setCachePeriod(3600);
     }
 }

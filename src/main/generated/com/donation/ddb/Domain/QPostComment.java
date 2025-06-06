@@ -33,6 +33,8 @@ public class QPostComment extends EntityPathBase<PostComment> {
 
     public final QPost post;
 
+    public final ListPath<PostCommentLike, QPostCommentLike> postCommentLikeList = this.<PostCommentLike, QPostCommentLike>createList("postCommentLikeList", PostCommentLike.class, QPostCommentLike.class, PathInits.DIRECT2);
+
     public final QStudentUser studentUser;
 
     //inherited

@@ -10,9 +10,11 @@ import com.donation.ddb.apiPayload.code.status.ErrorStatus;
 import com.donation.ddb.apiPayload.exception.handler.PostHandler;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class PostCommandService {
     private final PostRepository postRepository;
     private final StudentUserRepository studentUserRepository;
@@ -28,5 +30,12 @@ public class PostCommandService {
 
     public Post updateCampaign(Post post) {
         return postRepository.save(post);
+    }
+
+    public void deletePost(Long postId) {
+        if (!postRepository.existsById(postId)) {
+            throw new PostHandler(ErrorStatus.POST_NOT_FOUND);
+        }
+        postRepository.deleteById(postId);
     }
 }

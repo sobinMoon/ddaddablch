@@ -1,6 +1,7 @@
 package com.donation.ddb.Dto.Response;
 
-import com.donation.ddb.Domain.CampaignStatusFlag;
+
+import com.donation.ddb.Domain.Enums.CampaignStatusFlag;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.*;
 

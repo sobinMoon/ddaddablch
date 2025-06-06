@@ -2,6 +2,9 @@ package com.donation.ddb.Repository.CampaignRepository;
 
 
 import com.donation.ddb.Domain.*;
+import com.donation.ddb.Domain.Enums.CampaignCategory;
+import com.donation.ddb.Domain.Enums.CampaignSortType;
+import com.donation.ddb.Domain.Enums.CampaignStatusFlag;
 import com.donation.ddb.Dto.Request.CampaignRequestDto;
 import com.donation.ddb.Dto.Response.CampaignResponse;
 import com.donation.ddb.Dto.Response.OrgMyPageResponseDTO;
@@ -19,8 +22,7 @@ public interface CampaignRepositoryCustom {
             String keyword,
             CampaignCategory category,
             CampaignStatusFlag statusFlag,
-            CampaignSortType sortType,
-            Pageable pageable
+            CampaignSortType sortType
     );
 
     // 조직의 총 모금액 조회
@@ -31,5 +33,5 @@ public interface CampaignRepositoryCustom {
             Long organizationId, List<CampaignStatusFlag> statuses);
 
     Campaign addCampaign(CampaignRequestDto.JoinDto joinDto, OrganizationUser organizationUser);
-
 }
+

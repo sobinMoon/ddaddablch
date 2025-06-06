@@ -1,7 +1,7 @@
 package com.donation.ddb.Dto.Request;
 
-import com.donation.ddb.Domain.CampaignCategory;
-import com.donation.ddb.Domain.CampaignSortType;
+import com.donation.ddb.Domain.Enums.CampaignCategory;
+import com.donation.ddb.Domain.Enums.CampaignSortType;
 import lombok.*;
 
 @Getter

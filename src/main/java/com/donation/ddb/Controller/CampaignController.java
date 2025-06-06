@@ -4,13 +4,15 @@ import com.donation.ddb.Converter.CampaignCommentLikeConverter;
 import com.donation.ddb.Converter.CampaignConverter;
 import com.donation.ddb.Converter.CampaignUpdateConverter;
 import com.donation.ddb.Domain.*;
+import com.donation.ddb.Domain.Enums.CampaignStatusFlag;
 import com.donation.ddb.Dto.Request.*;
 import com.donation.ddb.Dto.Response.CampaignResponse;
 import com.donation.ddb.Dto.Response.OrganizationResponse;
 import com.donation.ddb.ImageStore;
 import com.donation.ddb.Repository.projection.CampaignWithUpdate;
 import com.donation.ddb.Service.CampaignCommentLikeService.CampaignCommentLikeService;
-import com.donation.ddb.Service.CampaignCommentQueryService.CampaignCommentQueryService;
+import com.donation.ddb.Service.CampaignCommentService.CampaignCommentCommandService;
+import com.donation.ddb.Service.CampaignCommentService.CampaignCommentQueryService;
 import com.donation.ddb.Service.CampaignPlansService.CampaignPlanCommandService;
 import com.donation.ddb.Service.CampaignPlansService.CampaignPlansQueryService;
 import com.donation.ddb.Service.CampaignService.CampaignCommandService;
@@ -42,19 +44,17 @@ import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 
-import static com.querydsl.core.types.Projections.constructor;
-
 @RestController
 @NoArgsConstructor
 @RequestMapping("/api/v1/campaigns")
 @Slf4j
 @Validated
 public class CampaignController {
-
-
+    @Autowired
+    private CampaignQueryService campaignQueryService;
 
     @Autowired
-    private CampaignQueryService campaignService;
+    private CampaignCommandService campaignCommandService;
 
     @Autowired
     private OrganizationUserQueryService organizationUserQueryService;
@@ -69,19 +69,16 @@ public class CampaignController {
     private CampaignCommentQueryService campaignCommentQueryService;
 
     @Autowired
-    private CampaignCommentQueryService campaignCommentService;
+    private CampaignCommentCommandService campaignCommentCommandService;
 
     @Autowired
     private CampaignCommentLikeService campaignCommentLikeService;
-    ;
     @Autowired
     private CampaignPlanCommandService campaignPlanCommandService;
     @Autowired
     private CampaignUpdateCommandService campaignUpdateCommandService;
     @Autowired
     private CampaignSpendingCommandService campaignSpendingCommandService;
-    @Autowired
-    private CampaignCommandService campaignCommandService;
 
     @Autowired
     private DonationService donationService;
@@ -89,26 +86,25 @@ public class CampaignController {
 
     @GetMapping("home")
     public ApiResponse<?> campaignList() {
-        Pageable pageable = PageRequest.of(0, 3);
-        List<CampaignResponse.CampaignListDto> popular = campaignService.findAllCampaigns(
+        List<CampaignResponse.CampaignListDto> popular = campaignQueryService.findAllCampaigns(
                 null,
                 null,
                 "FUNDRAISING",
-                "POPULAR",
-                pageable);
-        List<CampaignResponse.CampaignListDto> latest = campaignService.findAllCampaigns(
+                "POPULAR"
+        );
+        List<CampaignResponse.CampaignListDto> latest = campaignQueryService.findAllCampaigns(
                 null,
                 null,
                 "FUNDRAISING",
-                "LATEST",
-                pageable);
-        List<CampaignResponse.CampaignListDto> endingSoon = campaignService.findAllCampaigns(
+                "LATEST"
+        );
+        List<CampaignResponse.CampaignListDto> endingSoon = campaignQueryService.findAllCampaigns(
                 null,
                 null,
                 "FUNDRAISING",
-                "ENDING_SOON",
-                pageable);
-        List<CampaignWithUpdate> recentUpdates = campaignService.findRecentUpdates();
+                "ENDING_SOON"
+        );
+        List<CampaignWithUpdate> recentUpdates = campaignQueryService.findRecentUpdates();
 
         // 🔥 총 기부금 조회 추가
         BigDecimal totalDonation = donationService.findAllAmount();
@@ -127,23 +123,18 @@ public class CampaignController {
     @GetMapping("fundraising")
     public ResponseEntity<?> inProgressCampaignList(
             @RequestParam(value = "category", required = false) String category,
-            @RequestParam(value = "sortType", required = false) String sortType,
-            @RequestParam(value = "page", defaultValue = "0") int page,
-            @RequestParam(value = "size", defaultValue = "10") int size
+            @RequestParam(value = "sortType", required = false) String sortType
     ) {
-        Pageable pageable = PageRequest.of(page, size);
 
-        List<CampaignResponse.CampaignListDto> campaignResponseDtoList = campaignService.findAllCampaigns(
+        List<CampaignResponse.CampaignListDto> campaignResponseDtoList = campaignQueryService.findAllCampaigns(
                 null,
                 category,
                 "FUNDRAISING",
-                sortType,
-                pageable
+                sortType
         );
 
         Map<String, Object> resMap = Map.of(
                 "campaigns", campaignResponseDtoList,
-                "pageable", pageable,
                 "totalElements", campaignResponseDtoList.size()
         );
 
@@ -154,23 +145,18 @@ public class CampaignController {
     @GetMapping("completed")
     public ResponseEntity<?> endedCampaignList(
             @RequestParam(value = "category", required = false) String category,
-            @RequestParam(value = "sortType", required = false) String sortType,
-            @RequestParam(value = "page", defaultValue = "0") int page,
-            @RequestParam(value = "size", defaultValue = "10") int size
+            @RequestParam(value = "sortType", required = false) String sortType
     ) {
-        Pageable pageable = PageRequest.of(page, size);
 
-        List<CampaignResponse.CampaignListDto> campaignResponseDtoList = campaignService.findAllCampaigns(
+        List<CampaignResponse.CampaignListDto> campaignResponseDtoList = campaignQueryService.findAllCampaigns(
                 null,
                 category,
                 "COMPLETED",
-                sortType,
-                pageable
+                sortType
         );
 
         Map<String, Object> resMap = Map.of(
                 "campaigns", campaignResponseDtoList,
-                "pageable", pageable,
                 "totalElements", campaignResponseDtoList.size()
         );
 
@@ -183,11 +169,8 @@ public class CampaignController {
             @RequestParam(value = "category", required = false) String category,
             @RequestParam(value = "keyword", required = false) String keyword,
             @RequestParam(value = "statusFlag", required = false) String statusFlag,
-            @RequestParam(value = "sortType", required = false) String sortType,
-            @RequestParam(value = "page", defaultValue = "0") int page,
-            @RequestParam(value = "size", defaultValue = "10") int size
+            @RequestParam(value = "sortType", required = false) String sortType
     ) {
-        Pageable pageable = PageRequest.of(page, size);
         // CampaignCategory로 변환
         if (category == null || category.isEmpty()) {
             category = "ALL"; // 기본값 설정
@@ -195,17 +178,15 @@ public class CampaignController {
 
         // CampaignSortType으로 변환
 
-        List<CampaignResponse.CampaignListDto> campaignResponseDtoList = campaignService.findAllCampaigns(
+        List<CampaignResponse.CampaignListDto> campaignResponseDtoList = campaignQueryService.findAllCampaigns(
                 keyword,
                 category,
                 statusFlag,
-                sortType,
-                pageable
+                sortType
         );
 
         Map<String, Object> resMap = Map.of(
                 "campaigns", campaignResponseDtoList,
-                "pageable", pageable,
                 "totalElements", campaignResponseDtoList.size()
         );
 
@@ -229,12 +210,12 @@ public class CampaignController {
         }
 
         request.setImageUrl("default.png");
-        Campaign campaign = campaignService.addCampaign(request, email);
+        Campaign campaign = campaignCommandService.addCampaign(request, email);
 
         String imagePath = ImageStore.storeImage(image, "\\campaigns\\" + campaign.getCId() + "\\detail\\");
         campaign.setCImageUrl(imagePath);
 
-        campaign = campaignService.updateCampaign(campaign);
+        campaign = campaignCommandService.updateCampaign(campaign);
 
         List<CampaignPlanRequestDto.JoinDto> campaignPlans = request.getPlans();
 
@@ -245,7 +226,7 @@ public class CampaignController {
 
     @GetMapping("{cId}")
     public ApiResponse<?> getCampaign(@PathVariable(value = "cId") Long cId) {
-        Campaign campaign = campaignService.findBycId(cId);
+        Campaign campaign = campaignQueryService.findBycId(cId);
         if (campaign == null) {
             throw new CampaignHandler(ErrorStatus.CAMPAIGN_NOT_FOUND);
         }
@@ -310,7 +291,7 @@ public class CampaignController {
 
         String email = userDetails.getUsername();
 
-        CampaignComment newComment = campaignCommentService.addComment(
+        CampaignComment newComment = campaignCommentCommandService.addComment(
                 campaignCommentRequestDto.getContent(),
                 cId,
                 email
@@ -353,7 +334,7 @@ public class CampaignController {
             @RequestPart(value = "image") MultipartFile image,
             @AuthenticationPrincipal CustomUserDetails userDetails
     ) throws IOException {
-        Campaign campaign = campaignService.findBycId(cId);
+        Campaign campaign = campaignQueryService.findBycId(cId);
 
         if (userDetails == null) {
             throw new CampaignHandler(ErrorStatus._UNAUTHORIZED);
@@ -385,7 +366,7 @@ public class CampaignController {
             @RequestBody @Valid CampaignRequestDto.UpdateStatusDto request,
             @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
-        Campaign campaign = campaignService.findBycId(cId);
+        Campaign campaign = campaignQueryService.findBycId(cId);
 
         if (userDetails == null) {
             throw new CampaignHandler(ErrorStatus._UNAUTHORIZED);

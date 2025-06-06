@@ -2,6 +2,9 @@ package com.donation.ddb.Repository.CampaignRepository;
 
 import com.donation.ddb.Converter.CampaignConverter;
 import com.donation.ddb.Domain.*;
+import com.donation.ddb.Domain.Enums.CampaignCategory;
+import com.donation.ddb.Domain.Enums.CampaignSortType;
+import com.donation.ddb.Domain.Enums.CampaignStatusFlag;
 import com.donation.ddb.Dto.Request.CampaignRequestDto;
 import com.donation.ddb.Dto.Response.CampaignResponse;
 import com.donation.ddb.Dto.Response.OrgMyPageResponseDTO;
@@ -10,7 +13,6 @@ import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.impl.JPAQuery;
 import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 
@@ -33,8 +35,7 @@ public class CampaignRepositoryImpl implements CampaignRepositoryCustom {
             String keyword,
             CampaignCategory category,
             CampaignStatusFlag statusFlag,
-            CampaignSortType sortType,
-            Pageable pageable
+            CampaignSortType sortType
     ) {
 
         System.out.println("dynamicQueryWithBooleanBuilder called with keyword: " + keyword + ", sortType: " + sortType);
@@ -105,12 +106,6 @@ public class CampaignRepositoryImpl implements CampaignRepositoryCustom {
         query.orderBy(qCampaign.cId.desc()); // Default sorting by ID in descending order
 
         System.out.println("Executing query with predicate: " + predicate);
-
-        // Apply pagination
-        if (pageable != null) {
-            query.offset(pageable.getOffset());
-            query.limit(pageable.getPageSize());
-        }
 
         return query.fetch();
     }

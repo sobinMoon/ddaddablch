@@ -16,7 +16,10 @@ public enum ErrorStatus implements BaseErrorCode {
     _UNAUTHORIZED(HttpStatus.UNAUTHORIZED,"COMMON401","인증이 필요합니다."),
     _FORBIDDEN(HttpStatus.FORBIDDEN, "COMMON403", "금지된 요청입니다."),
 
-    PAGE_SIZE_INVALID(HttpStatus.BAD_REQUEST, "PAGE4001", "페이지 사이즈는 0보다 커야합니다."),
+    _FORBIDDEN_ORGANIZATION(HttpStatus.FORBIDDEN, "COMMON4031", "단체 계정으로 접근할 수 없습니다."),
+    _FORBIDDEN_STUDENT(HttpStatus.FORBIDDEN, "COMMON4032", "학생 계정으로 접근할 수 없습니다."),
+
+    PAGE_SIZE_INVALID(HttpStatus.BAD_REQUEST, "PAGE4001", "페이지 사이즈는 0 이상이어야 합니다."),
     PAGE_NUMBER_INVALID(HttpStatus.BAD_REQUEST, "PAGE4002", "페이지 번호가 유효하지 않습니다."),
 
     CAMPAIGN_NOT_FOUND(HttpStatus.NOT_FOUND, "CAMPAIGN4001", "캠페인이 없습니다."),
@@ -24,7 +27,7 @@ public enum ErrorStatus implements BaseErrorCode {
     CAMPAIGN_INVALID_STATUS_FLAG(HttpStatus.BAD_REQUEST, "CAMPAIGN4003", "유효하지 않은 캠페인 상태입니다."),
     CAMPAIGN_INVALID_SORT_TYPE(HttpStatus.BAD_REQUEST, "CAMPAIGN4004", "유효하지 않은 캠페인 정렬 타입입니다."),
     CAMPAIGN_NOT_COMPLETED(HttpStatus.BAD_REQUEST, "CAMPAIGN4005", "캠페인이 완료되지 않았습니다."),
-
+    CAMPAIGN_INVALID_STATUS_UPDATE(HttpStatus.BAD_REQUEST, "CAMPAIGN4006", "캠페인 상태가 올바른 순서로 변경되지 않았습니다."),
     CAMPAIGN_PLAN_NOT_FOUND(HttpStatus.NOT_FOUND, "CAMPAIGN_PLAN4001", "캠페인 플랜이 없습니다."),
 
     CAMPAIGN_COMMENT_NOT_FOUND(HttpStatus.NOT_FOUND, "CAMPAIGN_COMMENT4001", "캠페인 댓글이 없습니다."),
@@ -32,6 +35,7 @@ public enum ErrorStatus implements BaseErrorCode {
 
     POST_NOT_FOUND(HttpStatus.NOT_FOUND, "POST4001", "게시글이 없습니다."),
     POST_LIKE_SELF(HttpStatus.BAD_REQUEST, "POST4002", "본인 게시글에는 좋아요할 수 없습니다."),
+    POST_DELETE_FORBIDDEN(HttpStatus.FORBIDDEN, "POST4003", "타인의 게시글을 삭제할 수 없습니다."),
 
     POST_COMMENT_NOT_FOUND(HttpStatus.NOT_FOUND, "POST_COMMENT4001", "게시글 댓글이 없습니다."),
     POST_COMMENT_LIKE_SELF(HttpStatus.BAD_REQUEST, "POST_COMMENT4002", "본인 댓글에는 좋아요할 수 없습니다."),

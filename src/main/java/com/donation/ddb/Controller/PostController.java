@@ -71,7 +71,7 @@ public class PostController {
     @PostMapping(value = "")
     public ApiResponse<?> addPost(
             @RequestPart(name="request", value = "request") @Valid PostRequestDto.JoinDto request,
-            @RequestPart(value = "image", required = false) MultipartFile image,
+            @RequestPart(value = "image") MultipartFile image,
             @AuthenticationPrincipal CustomUserDetails userDetails
     ) throws IOException {
 
@@ -226,5 +226,33 @@ public class PostController {
         List<PostCommentResponseDto.ListDto> postCommentList = postCommentQueryService.getPostCommentList(email, postId);
 
         return ApiResponse.onSuccess(postCommentList);
+    }
+
+    @DeleteMapping("/{postId}")
+    public ApiResponse<?> deletePost(
+            @PathVariable(value="postId") @ExistPost Long postId,
+            @AuthenticationPrincipal CustomUserDetails userDetails
+    ) {
+        Post post = postQueryService.findPostByPId(postId);
+
+        if (userDetails == null) {
+            throw new CampaignHandler(ErrorStatus._UNAUTHORIZED);
+        } else if (!userDetails.isStudent()) {
+            throw new CampaignHandler(ErrorStatus._FORBIDDEN_ORGANIZATION);
+        } else if (!userDetails.getUsername().equals(post.getStudentUser().getSEmail())) {
+            throw new CampaignHandler(ErrorStatus.POST_DELETE_FORBIDDEN);
+        }
+
+        String email = userDetails.getUsername();
+
+        postCommandService.deletePost(postId);
+
+        // postId 가 삭제되었습니다
+        Map<String, Object> response = Map.of(
+                "message", "게시글이 삭제되었습니다.",
+                "postId", postId
+        );
+
+        return ApiResponse.onSuccess(response);
     }
 }
