@@ -14,6 +14,7 @@ import java.util.List;
 @AllArgsConstructor
 @Builder
 public class OrgMyPageResponseDTO {
+
     // 기본 프로필 정보
     private Long oId;
     private String oName;
@@ -21,31 +22,31 @@ public class OrgMyPageResponseDTO {
     private String oBusinessNumber;
     private String oDescription;
     private String oProfileImage;
-    private List<String> walletAddresses; // JSON으로 저장된 지갑 목록
-    private WalletAuthStatus oWalletAuthStatus;
-    private Boolean oIsActive;
 
     @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss")
     private LocalDateTime createdAt;
 
     // 캠페인 관련 정보
-    private Integer totalCampaignCount; // 총 캠페인 수
-    private Integer activeCampaignCount; // 진행 중인 캠페인 수
-    private Integer completedCampaignCount; // 완료된 캠페인 수
+//    private Integer totalCampaignCount; // 총 캠페인 수
+//    private Integer activeCampaignCount; // 진행 중인 캠페인 수
+//    private Integer completedCampaignCount; // 완료된 캠페인 수
     private BigDecimal totalRaisedAmount; // 총 모금액
     private List<CampaignSummaryDTO> recentCampaigns; // 최근 캠페인 목록
+    //기부중이랑 완료는 나눠서 보여주기
+    //캠페인 -> 이름 단체명 설명 현재기부금액 목표금액 이미지.
+
 
     // 기부 관련 통계
-    private Integer totalDonorCount; // 총 기부자 수
-    private BigDecimal averageDonationAmount; // 평균 기부액
-    private List<DonationReceivedDTO> recentDonations; // 최근 받은 기부 내역
+    //private Integer totalDonorCount; // 총 기부자 수
+   // private BigDecimal averageDonationAmount; // 평균 기부액
+    //private List<DonationReceivedDTO> recentDonations; // 최근 받은 기부 내역
 
     // 활동 정보
-    private List<CampaignUpdateDTO> recentUpdates; // 최근 캠페인 업데이트
-    private List<CampaignCommentDTO> recentComments; // 최근 댓글
+    //private List<CampaignUpdateDTO> recentUpdates; // 최근 캠페인 업데이트
+    //private List<CampaignCommentDTO> recentComments; // 최근 댓글
 
     // 알림 정보
-    private List<Notification> unreadNotifications; // 읽지 않은 알림
+    //private List<Notification> unreadNotifications; // 읽지 않은 알림
 
     // 내부 DTO 클래스들
     @Getter
@@ -134,13 +135,13 @@ public class OrgMyPageResponseDTO {
         private Boolean isReported; // 신고된 댓글 여부
     }
 
-    // 편의 메소드들
-    public BigDecimal getCampaignSuccessRate() {
-        if (totalCampaignCount == null || totalCampaignCount == 0) {
-            return BigDecimal.ZERO;
-        }
-        return BigDecimal.valueOf(completedCampaignCount)
-                .divide(BigDecimal.valueOf(totalCampaignCount), 4, BigDecimal.ROUND_HALF_UP)
-                .multiply(BigDecimal.valueOf(100));
-    }
+//    // 편의 메소드들
+//    public BigDecimal getCampaignSuccessRate() {
+//        if (totalCampaignCount == null || totalCampaignCount == 0) {
+//            return BigDecimal.ZERO;
+//        }
+//        return BigDecimal.valueOf(completedCampaignCount)
+//                .divide(BigDecimal.valueOf(totalCampaignCount), 4, BigDecimal.ROUND_HALF_UP)
+//                .multiply(BigDecimal.valueOf(100));
+//    }
 }

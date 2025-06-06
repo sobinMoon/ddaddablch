@@ -47,14 +47,13 @@ public class StudentMyPageResponseDTO {
     public static class DonationSummaryDTO {
         private Long donationId;
         private String campaignName;
+        private Long campaignId;
         private BigDecimal donationAmount;
-
         @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
         private LocalDateTime donationDate;
-
         private String transactionHash;
         private String donationStatus;
-        private String campaignImageUrl;
+
     }
 
     @Getter
