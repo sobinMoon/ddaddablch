@@ -62,10 +62,15 @@ public class CampaignQueryServiceImpl implements CampaignQueryService {
         }
         List<CampaignResponse.CampaignListDto> campaigns = campaignRepository.dynamicQueryWithBooleanBuilder(keyword, campaignCategory, status, sort, pageable);
 
-        campaigns.forEach(campaign -> {
-            System.out.println("Campaign " + campaign);
+        // imageUrl을 수정해야됨
+        campaigns.stream().forEach(campaign -> {
+            String imageUrl = campaign.getImageUrl();
+            if (imageUrl != null && !imageUrl.isEmpty()) {
+                // 파일 경로에서 C:\\DDADDABLCH\\ 부분을 제거하고, 역슬래시를 슬래시로 변경
+                imageUrl = imageUrl.replace("C:\\DDADDABLCH\\", "").replace("\\", "/");
+                campaign.setImageUrl(imageUrl);
+            }
         });
-
         return campaigns;
     }
 

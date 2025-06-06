@@ -241,7 +241,19 @@ public class CampaignController {
         if (campaign == null) {
             throw new CampaignHandler(ErrorStatus.CAMPAIGN_NOT_FOUND);
         }
-        return ApiResponse.onSuccess(convertToDetailDto(campaign));
+
+        OrganizationResponse.OrganizationDetailDto organizationDto = null;
+
+        if (campaign.getOrganizationUser() != null) {
+            organizationDto = organizationUserQueryService.convertToDetailDto(campaign.getOrganizationUser());
+        }
+
+        return ApiResponse.onSuccess(CampaignConverter.toCampaignDetailDto(
+                campaign,
+                organizationDto,
+                campaignPlansQueryService.getCampaignPlanDetails(cId),
+                campaignSpendingQueryService.getCampaignSpending(cId)
+        ));
     }
 
     @GetMapping("{cId}/comments")
@@ -377,38 +389,5 @@ public class CampaignController {
         campaignCommandService.updateStatusByUser(campaign, request.getStatus());
 
         return ApiResponse.onSuccess(CampaignConverter.toJoinResult(campaign));
-    }
-
-    public CampaignResponse.CampaignDetailDto convertToDetailDto(Campaign campaign) {
-        // 변경된 부분: 올바른 타입 사용
-        OrganizationResponse.OrganizationDetailDto organizationDto = null;
-
-        // null 체크 유지
-        if (campaign.getOrganizationUser() != null) {
-            organizationDto = organizationUserQueryService.convertToDetailDto(campaign.getOrganizationUser());
-        }
-
-        return CampaignResponse.CampaignDetailDto.builder()
-                .id(campaign.getCId())
-                .name(campaign.getCName())
-                .imageUrl(campaign.getCImageUrl())
-                .description(campaign.getCDescription())
-                .goal(campaign.getCGoal())
-                .currentAmount(campaign.getCCurrentAmount())
-                .category(campaign.getCCategory())
-                .donateCount(campaign.getDonateCount())
-                .donateStart(campaign.getDonateStart())
-                .donateEnd(campaign.getDonateEnd())
-                .businessStart(campaign.getBusinessStart())
-                .businessEnd(campaign.getBusinessEnd())
-                .statusFlag(campaign.getCStatusFlag())
-                .walletAddress(campaign.getCWalletAddress())
-                .createdAt(campaign.getCreatedAt())
-                .updatedAt(campaign.getUpdatedAt())
-                .organization(organizationDto)
-                .campaignUpdate(CampaignUpdateConverter.toCampaignUpdateDto(campaign.getCampaignUpdate()))
-                .campaignPlans(campaignPlansQueryService.getCampaignPlanDetails(campaign.getCId()))
-                .campaignSpendings(campaignSpendingQueryService.getCampaignSpending(campaign.getCId()))
-                .build();
     }
 }
