@@ -59,6 +59,11 @@ public class CampaignCommandService {
 
     @Transactional
     public Campaign updateStatusByUser(Campaign campaign, CampaignStatusFlag statusFlag) {
+
+        if (!CampaignStatusFlag.isForwardTransition(campaign.getCStatusFlag(), statusFlag)) {
+            throw new CampaignHandler(ErrorStatus.CAMPAIGN_INVALID_STATUS_UPDATE);
+        }
+
         campaign.setCStatusFlag(statusFlag);
         if (statusFlag == CampaignStatusFlag.FUNDED) {
             campaign.setDonateEnd(LocalDate.now());
