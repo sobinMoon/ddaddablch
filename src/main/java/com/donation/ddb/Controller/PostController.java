@@ -9,6 +9,7 @@ import com.donation.ddb.Dto.Request.PostCommentRequestDto;
 import com.donation.ddb.Dto.Request.PostRequestDto;
 import com.donation.ddb.Dto.Response.PostCommentResponseDto;
 import com.donation.ddb.Dto.Response.PostResponseDto;
+import com.donation.ddb.ImageStore;
 import com.donation.ddb.Repository.projection.PostCommentWithUser;
 import com.donation.ddb.Repository.projection.PostWithCount;
 import com.donation.ddb.Service.NotificationService;
@@ -33,7 +34,9 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
@@ -65,25 +68,27 @@ public class PostController {
     @Autowired
     private NotificationService notificationService;
 
-    @PostMapping("")
+    @PostMapping(value = "")
     public ApiResponse<?> addPost(
-            @RequestBody @Valid PostRequestDto.JoinDto joinDto,
+            @RequestPart(name="request", value = "request") @Valid PostRequestDto.JoinDto request,
+            @RequestPart(value = "image", required = false) MultipartFile image,
             @AuthenticationPrincipal CustomUserDetails userDetails
-    ) {
+    ) throws IOException {
 
         if (userDetails == null) {
             throw new CampaignHandler(ErrorStatus._UNAUTHORIZED);
-        }
-
-        if (userDetails.isOrganization()) {
+        } else if (userDetails.isOrganization()) {
             throw new CampaignHandler(ErrorStatus._FORBIDDEN);
         }
-
         String email = userDetails.getUsername();
 
-        Post newPost = postCommandService.addCampaign(joinDto, email);
+        Post newPost = postCommandService.addCampaign(request, email);
 
-        return ApiResponse.onSuccess(PostConverter.toJoinResultDto(newPost));
+        request.setImagePath("default.png");
+        String imagePath = ImageStore.storeImage(image, "\\posts\\" + newPost.getPId() + "\\");
+        newPost.setPNft(imagePath);
+
+        return ApiResponse.onSuccess(PostConverter.toJoinResultDto(postCommandService.updateCampaign(newPost)));
     }
 
     @PostMapping("/{postId}/likes")

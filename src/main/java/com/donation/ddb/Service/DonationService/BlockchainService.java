@@ -251,9 +251,9 @@ public class BlockchainService {
         return balance;
     }
 
-    // 트랜잭션 검증
+    // 트랜잭션 검증 (수정된 버전)
     public boolean verifyTransaction(String transactionHash, String expectedFromAddress,
-                                     String expectedToAddress, BigDecimal expectedAmount) {
+                                     String expectedBeneficiaryAddress, BigDecimal expectedAmount) {
         // 테스트 모드일 때는 간단한 검증만 수행
         if (testMode) {
             log.info("테스트 모드: 트랜잭션 검증 우회 - Hash: {}", transactionHash);
@@ -264,20 +264,32 @@ public class BlockchainService {
             }
             return false;
         }
+
         try {
+            log.info("🔍 스마트 컨트랙트 기부 트랜잭션 검증 시작");
+            log.info("📋 검증 정보:");
+            log.info("  - 트랜잭션 해시: {}", transactionHash);
+            log.info("  - 기부자 주소: {}", expectedFromAddress);
+            log.info("  - 수혜자 주소: {} (참고용)", expectedBeneficiaryAddress);
+            log.info("  - 기부 금액: {} ETH", expectedAmount);
+            log.info("  - 컨트랙트 주소: {}", contractAddress);
+
             // 1. 트랜잭션 영수증 조회
             EthGetTransactionReceipt transactionReceipt = web3j.ethGetTransactionReceipt(transactionHash).send();
 
             if (!transactionReceipt.getTransactionReceipt().isPresent()) {
-                log.warn("트랜잭션을 찾을 수 없습니다: {}", transactionHash);
+                log.warn("❌ 트랜잭션을 찾을 수 없습니다: {}", transactionHash);
                 return false;
             }
 
             TransactionReceipt receipt = transactionReceipt.getTransactionReceipt().get();
+            log.info("✅ 트랜잭션 영수증 조회 성공");
+            log.info("  - Status: {}", receipt.getStatus());
+            log.info("  - Gas Used: {}", receipt.getGasUsed());
 
             // 2. 트랜잭션 성공 여부 확인
             if (!"0x1".equals(receipt.getStatus())) {
-                log.warn("실패한 트랜잭션입니다: {}", transactionHash);
+                log.warn("❌ 실패한 트랜잭션입니다: {}", transactionHash);
                 return false;
             }
 
@@ -285,24 +297,29 @@ public class BlockchainService {
             EthTransaction ethTransaction = web3j.ethGetTransactionByHash(transactionHash).send();
 
             if (!ethTransaction.getTransaction().isPresent()) {
-                log.warn("트랜잭션 정보를 찾을 수 없습니다: {}", transactionHash);
+                log.warn("❌ 트랜잭션 정보를 찾을 수 없습니다: {}", transactionHash);
                 return false;
             }
 
             org.web3j.protocol.core.methods.response.Transaction transaction =
                     ethTransaction.getTransaction().get();
 
+            log.info("✅ 트랜잭션 조회 성공");
+            log.info("  - From: {}", transaction.getFrom());
+            log.info("  - To: {}", transaction.getTo());
+            log.info("  - Value: {} Wei", transaction.getValue());
+
             // 4. 송신자 주소 검증
             if (!expectedFromAddress.equalsIgnoreCase(transaction.getFrom())) {
-                log.warn("송신자 주소가 일치하지 않습니다. 예상: {}, 실제: {}",
+                log.warn("❌ 송신자 주소가 일치하지 않습니다. 예상: {}, 실제: {}",
                         expectedFromAddress, transaction.getFrom());
                 return false;
             }
 
-            // 5. 수신자 주소 검증 (컨트랙트 주소여야 함)
-            if (!expectedToAddress.equalsIgnoreCase(transaction.getTo())) {
-                log.warn("수신자 주소가 일치하지 않습니다. 예상: {}, 실제: {}",
-                        expectedToAddress, transaction.getTo());
+            // 🔧 5. 수신자 주소 검증 (스마트 컨트랙트 주소여야 함)
+            if (!contractAddress.equalsIgnoreCase(transaction.getTo())) {
+                log.warn("❌ 트랜잭션이 올바른 스마트 컨트랙트로 전송되지 않았습니다. 예상: {}, 실제: {}",
+                        contractAddress, transaction.getTo());
                 return false;
             }
 
@@ -310,17 +327,22 @@ public class BlockchainService {
             BigInteger actualAmount = transaction.getValue();
             BigInteger expectedWeiAmount = Convert.toWei(expectedAmount, Convert.Unit.ETHER).toBigIntegerExact();
 
+            log.info("💰 금액 검증:");
+            log.info("  - 예상 금액: {} Wei ({} ETH)", expectedWeiAmount, expectedAmount);
+            log.info("  - 실제 금액: {} Wei ({} ETH)", actualAmount,
+                    Convert.fromWei(new BigDecimal(actualAmount), Convert.Unit.ETHER));
+
             if (actualAmount.compareTo(expectedWeiAmount) != 0) {
-                log.warn("전송 금액이 일치하지 않습니다. 예상: {} wei, 실제: {} wei",
+                log.warn("❌ 전송 금액이 일치하지 않습니다. 예상: {} wei, 실제: {} wei",
                         expectedWeiAmount, actualAmount);
                 return false;
             }
 
-            log.info("스마트 컨트랙트 기부 트랜잭션 검증 완료: {}", transactionHash);
+            log.info("✅ 스마트 컨트랙트 기부 트랜잭션 검증 완료: {}", transactionHash);
             return true;
 
         } catch (Exception e) {
-            log.error("트랜잭션 검증 중 오류 발생: {}", e.getMessage(), e);
+            log.error("❌ 트랜잭션 검증 중 오류 발생: {}", e.getMessage(), e);
             return false;
         }
     }

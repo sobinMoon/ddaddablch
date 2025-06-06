@@ -15,7 +15,7 @@ public class PostConverter {
         return Post.builder()
                 .pTitle(joinDto.getTitle())
                 .pContent(joinDto.getContent())
-                .pNft(joinDto.getNft())
+                .pNft(joinDto.getImagePath())
                 .studentUser(user)
                 .build();
     }

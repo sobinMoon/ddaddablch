@@ -97,7 +97,16 @@ public class CampaignQueryServiceImpl implements CampaignQueryService {
 
     @Override
     public List<CampaignWithUpdate> findRecentUpdates() {
-        return campaignUpdateRepository.findLatestUpdates();
+        List<CampaignWithUpdate> campaignUpdates = campaignUpdateRepository.findLatestUpdates();
+        List<CampaignWithUpdate> previewUpdates = campaignUpdates.stream().map(campaignUpdate -> {
+            String previewContent = campaignUpdate.getPreviewContent();
+            if (previewContent != null && previewContent.length() > 200) {
+                previewContent = previewContent.substring(0, 200) + "...";
+            }
+            campaignUpdate.setPreviewContent(previewContent);
+            return campaignUpdate;
+        }).toList();
+        return previewUpdates;
     }
 
     @Override
