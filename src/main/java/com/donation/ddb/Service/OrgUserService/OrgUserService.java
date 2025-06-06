@@ -4,8 +4,12 @@ package com.donation.ddb.Service.OrgUserService;
 import com.donation.ddb.Domain.*;
 import com.donation.ddb.Domain.Exception.DataNotFoundException;
 import com.donation.ddb.Domain.Exception.EmailAlreadyExistsException;
+import com.donation.ddb.Dto.Request.OrgSignUpForm;
 import com.donation.ddb.Repository.OrganizationUserRepository;
 import com.donation.ddb.Repository.VerificationTokenRepository;
+import com.donation.ddb.apiPayload.code.status.ErrorStatus;
+import com.donation.ddb.apiPayload.exception.GeneralException;
+import com.donation.ddb.apiPayload.exception.handler.CampaignHandler;
 import io.micrometer.common.util.StringUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -57,6 +61,14 @@ public class OrgUserService {
         return id;
     }
 
+    @Transactional
+    public OrganizationUser updateOrgUser(OrgSignUpForm orgSignUpForm, Long orgId) {
+        OrganizationUser orgUser = organizationUserRepository.findById(orgId)
+                .orElseThrow(() -> new GeneralException(ErrorStatus.ORGANIZATION_USER_NOT_FOUND));
 
+        orgUser.setOProfileImage(orgSignUpForm.getProfileImage());
+
+        return orgUser;
+    }
 
 }

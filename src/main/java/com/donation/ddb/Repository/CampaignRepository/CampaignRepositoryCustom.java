@@ -22,7 +22,8 @@ public interface CampaignRepositoryCustom {
             String keyword,
             CampaignCategory category,
             CampaignStatusFlag statusFlag,
-            CampaignSortType sortType
+            CampaignSortType sortType,
+            Integer size
     );
 
     // 조직의 총 모금액 조회
