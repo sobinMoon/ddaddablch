@@ -100,7 +100,7 @@ public class OrgUserController {
     public ResponseEntity<?> signup(
             @RequestPart(name = "request") @Valid OrgSignUpForm orgSignUpForm,
             BindingResult bindingResult,
-            @RequestPart(name = "image") MultipartFile profileImage
+            @RequestPart(name = "image", required = false) MultipartFile profileImage
     ) {
 
         //로깅

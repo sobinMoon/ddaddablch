@@ -65,7 +65,6 @@ public class OrganizationUser extends BaseEntity {
     @OneToMany(mappedBy = "organizationUser", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Campaign> campaigns = new ArrayList<>();
 
-
     //지갑 관리 메소드
     //지갑 주소 목록 반환
     public List<String> getWalletList(){
