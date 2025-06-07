@@ -34,8 +34,7 @@ public class PostConverter {
                 .previewContent(post.getPreviewContent().length() > 100
                         ? post.getPreviewContent().substring(0, 100) + "..."
                         : post.getPreviewContent())
-                .nft(post.getNft().replace("C:\\DDADDABLCH\\", "")
-                        .replace("\\", "/"))
+                .nft(post.getNft())
                 .likeCount(post.getLikeCount())
                 .commentCount(post.getCommentCount())
                 .studentUser(StudentUserConverter.toCommentDto(post.getStudentUser()))
