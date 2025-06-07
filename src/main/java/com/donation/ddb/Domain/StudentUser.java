@@ -56,7 +56,7 @@ public class StudentUser {
     @Builder.Default
     private Boolean sIsActive=true; //기본값 설정
 
-    @Column(length=255)
+    @Column(length=500)
     private String sProfileImage;
 
     @CreatedDate

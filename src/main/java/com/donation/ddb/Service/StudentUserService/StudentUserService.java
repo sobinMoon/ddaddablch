@@ -21,7 +21,6 @@ import static com.donation.ddb.Domain.Role.ROLE_STUDENT;
 @RequiredArgsConstructor
 public class StudentUserService {
 
-    @Autowired
     private final StudentUserRepository studentUserRepository;
     private final PasswordEncoder passwordEncoder;
     private final VerificationTokenRepository tokenRepository;
@@ -67,7 +66,20 @@ public class StudentUserService {
         if(s.getSNickname()==null||s.getSNickname().isEmpty()){
             s.setSNickname("guest"+sid);
         }
+
+        s.setSProfileImage("/profiles/default_profile.png");
+        studentUserRepository.save(s);  // 다시 저장 필요
         return sid;
+    }
+
+    // 프로필 이미지 업데이트
+    @Transactional
+    public void updateProfileImage(Long userId, String imagePath) {
+        StudentUser user = studentUserRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
+
+        user.setSProfileImage(imagePath);
+        studentUserRepository.save(user);
     }
 
 }

@@ -1,16 +1,15 @@
 package com.donation.ddb.Service.MyPageService;
 
-import com.donation.ddb.Domain.PostComment;
 import com.donation.ddb.Domain.StudentUser;
-import com.donation.ddb.Dto.Request.StudentInfoUpdateResponseDTO;
+import com.donation.ddb.Dto.Request.StudentInfoUpdateRequestDTO;
 import com.donation.ddb.Dto.Response.DonationStatusDTO;
 import com.donation.ddb.Dto.Response.StudentMyPageResponseDTO;
 //import com.donation.ddb.ImageStore;
+import com.donation.ddb.ImageStore;
 import com.donation.ddb.Repository.DonationRepository.DonationRepository;
 import com.donation.ddb.Repository.PostCommentRepository.PostCommentRepository;
 import com.donation.ddb.Repository.PostRepository.PostRepository;
 import com.donation.ddb.Repository.StudentUserRepository;
-import com.donation.ddb.Repository.projection.PostWithCount;
 import com.donation.ddb.Service.NotificationService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -19,6 +18,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.ArrayList;
@@ -120,30 +120,40 @@ public class StudentMyPageService {
         }
 
 
-    //  종합 프로필 수정 (닉네임, 비밀번호, 이미지)
+    //종합 프로필 수정 (닉네임, 비밀번호, 이미지)
     @Transactional
-    public String updateProfile(StudentInfoUpdateResponseDTO updateDto, MultipartFile profileImage) {
+    public String updateProfile(StudentInfoUpdateRequestDTO updateDto, MultipartFile profileImage) {
         StudentUser student = getCurrentStudent();
         boolean hasChanges = false;
 
-        // 닉네임 수정
-        if (updateDto != null && updateDto.getSNickname() != null && !updateDto.getSNickname().trim().isEmpty()) {
-            student.setSNickname(updateDto.getSNickname().trim());
-            hasChanges = true;
-            log.info("닉네임 업데이트: 사용자ID={}, 새 닉네임={}", student.getSId(), updateDto.getSNickname());
+        // 닉네임 수정 (중복 체크 포함,null공백 아닌지 확인)
+        if (updateDto != null && StringUtils.hasText(updateDto.getSNickname())) {
+            String newNickname = updateDto.getSNickname().trim();
+
+            // 현재 닉네임과 다른 경우에만 중복 체크
+            if (!newNickname.equals(student.getSNickname())) {
+                if (studentUserRepository.findBysNickname(newNickname).isPresent()) {
+                    throw new IllegalArgumentException("이미 사용 중인 닉네임입니다.");
+                }
+                student.setSNickname(newNickname);
+                hasChanges = true;
+                log.info("닉네임 업데이트: 사용자ID={}, 새 닉네임={}", student.getSId(), newNickname);
+            }
         }
 
         // 비밀번호 수정
-        if (updateDto != null && updateDto.getCurrentPassword() != null && updateDto.getNewPassword() != null) {
-            updatePasswordInternal(student, updateDto.getCurrentPassword(), updateDto.getNewPassword(), updateDto.getConfirmNewPassword());
+        if (updateDto != null && StringUtils.hasText(updateDto.getCurrentPassword()) &&
+                StringUtils.hasText(updateDto.getNewPassword())) {
+            updatePasswordInternal(student, updateDto.getCurrentPassword(),
+                    updateDto.getNewPassword(), updateDto.getConfirmNewPassword());
             hasChanges = true;
         }
 
-//        // 프로필 이미지 수정
-//        if (profileImage != null && !profileImage.isEmpty()) {
-//            updateProfileImageInternal(student, profileImage);
-//            hasChanges = true;
-//        }
+        // 프로필 이미지 수정
+        if (profileImage != null && !profileImage.isEmpty()) {
+            updateProfileImageInternal(student, profileImage);
+            hasChanges = true;
+        }
 
         if (hasChanges) {
             studentUserRepository.save(student);
@@ -152,24 +162,31 @@ public class StudentMyPageService {
             return "변경사항이 없습니다.";
         }
     }
-    // === 내부 헬퍼 메서드들 ===
+
+
+    //현재 로그인한 학생 정보 조회
     private StudentUser getCurrentStudent() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String currentUserEmail = authentication.getName();
+        if (authentication == null || authentication.getName() == null) {
+            throw new IllegalStateException("인증 정보가 없습니다.");
+        }
 
+        String currentUserEmail = authentication.getName();
         return studentUserRepository.findBysEmail(currentUserEmail)
-                .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
+                .orElseThrow(() -> new IllegalStateException("로그인된 사용자를 찾을 수 없습니다."));
     }
 
-    private void updatePasswordInternal(StudentUser student, String currentPassword, String newPassword, String confirmNewPassword) {
+    //비밀번호 업데이트 (내부 로직)
+    private void updatePasswordInternal(StudentUser student, String currentPassword,
+                                        String newPassword, String confirmNewPassword) {
         // 입력값 검증
-        if (currentPassword == null || currentPassword.trim().isEmpty()) {
+        if (!StringUtils.hasText(currentPassword)) {
             throw new IllegalArgumentException("현재 비밀번호를 입력해주세요.");
         }
-        if (newPassword == null || newPassword.trim().isEmpty()) {
+        if (!StringUtils.hasText(newPassword)) {
             throw new IllegalArgumentException("새 비밀번호를 입력해주세요.");
         }
-        if (confirmNewPassword == null || confirmNewPassword.trim().isEmpty()) {
+        if (!StringUtils.hasText(confirmNewPassword)) {
             throw new IllegalArgumentException("새 비밀번호 확인을 입력해주세요.");
         }
 
@@ -191,25 +208,44 @@ public class StudentMyPageService {
         // 비밀번호 암호화 후 저장
         String encodedNewPassword = passwordEncoder.encode(newPassword);
         student.setSPassword(encodedNewPassword);
+
+        log.info("비밀번호 업데이트 완료: 사용자ID={}", student.getSId());
     }
 
-//    private void updateProfileImageInternal(StudentUser student, MultipartFile profileImage) {
-//        try {
-//            // 기존 이미지 삭제 (있다면)
-//            if (student.getSProfileImage() != null) {
-//                ImageStore.deleteImage(student.getSProfileImage());
-//            }
-//
-//            // 새 이미지 저장
-//            String imagePath = ImageStore.storeImage(profileImage,
-//                    "\\users\\" + student.getSId() + "\\");
-//            student.setSProfileImage(imagePath);
-//
-//            log.info("프로필 이미지 업데이트 완료: 사용자ID={}, 이미지경로={}",
-//                    student.getSId(), imagePath);
-//
-//        } catch (Exception e) {
-//            log.error("프로필 이미지 업데이트 실패", e);
-//            throw new RuntimeException("프로필 이미지 업데이트에 실패했습니다.", e);
-//        }
+    /**
+     * 프로필 이미지 업데이트 (내부 로직)
+     */
+    private void updateProfileImageInternal(StudentUser student, MultipartFile profileImage) {
+        try {
+            // 이미지 파일 검증
+            if (profileImage.getSize() > 5 * 1024 * 1024) { // 5MB 제한
+                throw new IllegalArgumentException("이미지 파일 크기는 5MB를 초과할 수 없습니다.");
+            }
+
+            String contentType = profileImage.getContentType();
+            if (contentType == null || !contentType.startsWith("image/")) {
+                throw new IllegalArgumentException("이미지 파일만 업로드 가능합니다.");
+            }
+
+            // 기존 이미지 삭제 (기본 이미지가 아닌 경우에만)
+            String currentImage = student.getSProfileImage();
+            if (currentImage != null && !currentImage.contains("default_profile.png")) {
+                ImageStore.deleteImage(currentImage);
+            }
+
+            // 새 이미지 저장 (플랫폼 독립적 경로)
+            String imagePath = ImageStore.storeImage(profileImage,
+                    "/users/" + student.getSId() + "/");
+            student.setSProfileImage(imagePath);
+
+            log.info("프로필 이미지 업데이트 완료: 사용자ID={}, 이미지경로={}",
+                    student.getSId(), imagePath);
+
+        } catch (IllegalArgumentException e) {
+            throw e; // 검증 오류는 그대로 전달
+        } catch (Exception e) {
+            log.error("프로필 이미지 업데이트 실패", e);
+            throw new RuntimeException("프로필 이미지 업데이트에 실패했습니다.", e);
+        }
+    }
 }
