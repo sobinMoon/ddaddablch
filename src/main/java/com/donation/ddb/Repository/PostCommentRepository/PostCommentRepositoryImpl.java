@@ -46,6 +46,7 @@ public class PostCommentRepositoryImpl implements PostCommentRepositoryCustom {
                                 .where(postCommentLike.postComment.eq(postComment))
                 ))
                 .from(postComment)
+                .where(postComment.post.pId.eq(postId))
                 .orderBy(postComment.createdAt.desc())
                 .fetch();
 
