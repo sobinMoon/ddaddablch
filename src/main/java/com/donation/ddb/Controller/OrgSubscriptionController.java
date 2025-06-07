@@ -1,5 +1,6 @@
 package com.donation.ddb.Controller;
 
+import com.donation.ddb.Domain.Exception.DataNotFoundException;
 import com.donation.ddb.Domain.StudentUser;
 import com.donation.ddb.Dto.Request.NotificationSettingUpdateDTO;
 import com.donation.ddb.Dto.Request.OrgSubscriptionRequestDTO;
@@ -70,8 +71,9 @@ public class OrgSubscriptionController {
             @PathVariable(value="studentId") Long studentId,
             @PathVariable(value="organizationId") Long organizationId) {
 
-        boolean isSubscribed = orgSubscriptionService.isSubscribed(studentId, organizationId);
-        return ResponseEntity.ok(Map.of("isSubscribed", isSubscribed));
+            boolean isSubscribed = orgSubscriptionService.isSubscribed(studentId, organizationId);
+            return ResponseEntity.ok(Map.of("isSubscribed", isSubscribed));
+
     }
 
     // 단체 구독자 수 조회
