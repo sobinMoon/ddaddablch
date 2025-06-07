@@ -44,6 +44,9 @@ public class Donation extends BaseEntity {
     @Column(nullable = false)
     private String campaignWalletAddress;
 
+    @Column
+    private Long nftTokenId; //받은 NFT 토큰 ID
+
     // 블록 번호 -> 필요하면 넣기
     //private Long blockNumber;
 

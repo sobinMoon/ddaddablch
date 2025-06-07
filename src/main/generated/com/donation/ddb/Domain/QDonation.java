@@ -39,6 +39,8 @@ public class QDonation extends EntityPathBase<Donation> {
 
     public final StringPath message = createString("message");
 
+    public final NumberPath<Long> nftTokenId = createNumber("nftTokenId", Long.class);
+
     public final EnumPath<DonationStatus> status = createEnum("status", DonationStatus.class);
 
     public final QStudentUser studentUser;

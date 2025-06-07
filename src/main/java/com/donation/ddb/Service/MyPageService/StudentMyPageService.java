@@ -1,6 +1,7 @@
 package com.donation.ddb.Service.MyPageService;
 
 import com.donation.ddb.Domain.StudentUser;
+import com.donation.ddb.Dto.Request.StudentInfoUpdatePwdDTO;
 import com.donation.ddb.Dto.Request.StudentInfoUpdateRequestDTO;
 import com.donation.ddb.Dto.Response.DonationStatusDTO;
 import com.donation.ddb.Dto.Response.StudentMyPageResponseDTO;
@@ -38,18 +39,18 @@ public class StudentMyPageService {
     private final NotificationService notificationService;
     private final PasswordEncoder passwordEncoder;
 
-    public StudentMyPageResponseDTO getMyPageInfo(){
+    public StudentMyPageResponseDTO getMyPageInfo() {
 
         try {
             // 현재 로그인한 사용자 정보 가져오기
-            Authentication authentication= SecurityContextHolder.getContext().getAuthentication();
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
             String currentUserEmail = authentication.getName(); //이메일 찾기
 
-            StudentUser student=studentUserRepository.findBysEmail(currentUserEmail)
-                .orElseThrow(()-> new RuntimeException("사용자를 찾을 수 없습니다."));
+            StudentUser student = studentUserRepository.findBysEmail(currentUserEmail)
+                    .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
 
             // 기부 통계 조회 - 쿼리 한개로 조회 -> total amount, total count
-            DonationStatusDTO donationStatus=
+            DonationStatusDTO donationStatus =
                     donationRepository.getDonationStatsByStudentId(student.getSId());
 
             // 최근 기부 내역 조회
@@ -58,7 +59,7 @@ public class StudentMyPageService {
 
             //활동 정보 조회 -> 글이랑 댓글 리스트
             List<StudentMyPageResponseDTO.RecentPostDTO> posts = postRepository.findRecentPostsByStudentId(student.getSId());
-            List<StudentMyPageResponseDTO.PostCommentDTO> comments=postCommentRepository.findRecentCommentsByStudentId(student.getSId());
+            List<StudentMyPageResponseDTO.PostCommentDTO> comments = postCommentRepository.findRecentCommentsByStudentId(student.getSId());
 
             //알림,통계 정보 조회 추후 구현하기
 
@@ -71,7 +72,7 @@ public class StudentMyPageService {
                     .sProfileImage(student.getSProfileImage())
                     .walletAddresses(student.getWalletList()) // JSON으로 저장된 지갑 목록
                     .createdAt(student.getCreatedAt())
-                   // .campaignId()
+                    // .campaignId()
                     // 기부 관련 정보
                     .totalDonationAmount(donationStatus.getTotalAmount())
                     .totalDonationCount(donationStatus.getTotalCount())
@@ -96,10 +97,10 @@ public class StudentMyPageService {
             throw new RuntimeException("마이페이지 정보를 불러오는데 실패했습니다.", e);
         }
 
-        }
+    }
 
-        //QueryDSL DTO를 Response DTO로 변환
-        private List<StudentMyPageResponseDTO.DonationSummaryDTO> convertToResponseDTOs(
+    //QueryDSL DTO를 Response DTO로 변환
+    private List<StudentMyPageResponseDTO.DonationSummaryDTO> convertToResponseDTOs(
             List<StudentMyPageResponseDTO.DonationSummaryDTO> queryDslDTOs) {
 
         if (queryDslDTOs == null || queryDslDTOs.isEmpty()) {
@@ -117,18 +118,29 @@ public class StudentMyPageService {
                         .campaignId(dto.getCampaignId())
                         .build())
                 .collect(Collectors.toList());
-        }
+    }
 
-
-    //종합 프로필 수정 (닉네임, 비밀번호, 이미지)
+    // 닉네임 + 이미지 업데이트 (비밀번호 확인 필요)
     @Transactional
     public String updateProfile(StudentInfoUpdateRequestDTO updateDto, MultipartFile profileImage) {
         StudentUser student = getCurrentStudent();
         boolean hasChanges = false;
+        log.info("프로필 업데이트 시작: 사용자ID={}", student.getSId());
 
-        // 닉네임 수정 (중복 체크 포함,null공백 아닌지 확인)
-        if (updateDto != null && StringUtils.hasText(updateDto.getSNickname())) {
-            String newNickname = updateDto.getSNickname().trim();
+        // 현재 비밀번호 확인 (닉네임 변경시 필수)
+        if (updateDto != null && StringUtils.hasText(updateDto.getCurrentPassword())) {
+            if (!passwordEncoder.matches(updateDto.getCurrentPassword(), student.getSPassword())) {
+                throw new IllegalArgumentException("현재 비밀번호가 일치하지 않습니다.");
+            }
+            log.info("비밀번호 확인 완료: 사용자ID={}", student.getSId());
+        } else if (updateDto != null && StringUtils.hasText(updateDto.getNickname())) {
+            throw new IllegalArgumentException("닉네임 변경을 위해 현재 비밀번호를 입력해주세요.");
+        }
+
+        // 닉네임 수정
+        if (updateDto != null && StringUtils.hasText(updateDto.getNickname())) {
+            String newNickname = updateDto.getNickname().trim();
+            log.info("닉네임 업데이트 시도: 기존={}, 새로운={}", student.getSNickname(), newNickname);
 
             // 현재 닉네임과 다른 경우에만 중복 체크
             if (!newNickname.equals(student.getSNickname())) {
@@ -137,9 +149,32 @@ public class StudentMyPageService {
                 }
                 student.setSNickname(newNickname);
                 hasChanges = true;
-                log.info("닉네임 업데이트: 사용자ID={}, 새 닉네임={}", student.getSId(), newNickname);
+                log.info("닉네임 업데이트 완료: 사용자ID={}, 새 닉네임={}", student.getSId(), newNickname);
+            } else {
+                log.info("닉네임이 기존과 동일함: {}", newNickname);
             }
         }
+
+        // 프로필 이미지 수정
+        if (profileImage != null && !profileImage.isEmpty()) {
+            updateProfileImageInternal(student, profileImage);
+            hasChanges = true;
+        }
+
+        if (hasChanges) {
+            studentUserRepository.save(student);
+            return "프로필이 성공적으로 업데이트되었습니다.";
+        } else {
+            return "변경사항이 없습니다.";
+        }
+    }
+
+    // 비밀번호 변경 전용 메서드
+    @Transactional
+    public String updateProfilepwd(StudentInfoUpdatePwdDTO updateDto, MultipartFile profileImage) {
+        StudentUser student = getCurrentStudent();
+        boolean hasChanges = false;
+        log.info("비밀번호 업데이트 시작: 사용자ID={}", student.getSId());
 
         // 비밀번호 수정
         if (updateDto != null && StringUtils.hasText(updateDto.getCurrentPassword()) &&
@@ -163,8 +198,7 @@ public class StudentMyPageService {
         }
     }
 
-
-    //현재 로그인한 학생 정보 조회
+    // 현재 로그인한 학생 정보 조회
     private StudentUser getCurrentStudent() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication == null || authentication.getName() == null) {
@@ -176,7 +210,7 @@ public class StudentMyPageService {
                 .orElseThrow(() -> new IllegalStateException("로그인된 사용자를 찾을 수 없습니다."));
     }
 
-    //비밀번호 업데이트 (내부 로직)
+    // 비밀번호 업데이트 (내부 로직)
     private void updatePasswordInternal(StudentUser student, String currentPassword,
                                         String newPassword, String confirmNewPassword) {
         // 입력값 검증
@@ -212,9 +246,7 @@ public class StudentMyPageService {
         log.info("비밀번호 업데이트 완료: 사용자ID={}", student.getSId());
     }
 
-    /**
-     * 프로필 이미지 업데이트 (내부 로직)
-     */
+    // 프로필 이미지 업데이트 (내부 로직)
     private void updateProfileImageInternal(StudentUser student, MultipartFile profileImage) {
         try {
             // 이미지 파일 검증
