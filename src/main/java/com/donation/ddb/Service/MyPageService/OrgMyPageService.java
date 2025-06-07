@@ -98,6 +98,7 @@ public class OrgMyPageService {
                 .oProfileImage(organization.getOProfileImage())
                 .createdAt(organization.getCreatedAt())
                 .totalRaisedAmount(totalRaisedAmount)
+                .oBusinessNumber(organization.getOBusinessNumber())
                 .completedCampaigns(completedCampaigns)
                 .activeCampaigns(activeCampaigns)
                 .fundraisingCampaigns(fundraisingCampaigns)

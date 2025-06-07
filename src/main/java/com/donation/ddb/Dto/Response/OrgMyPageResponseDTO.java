@@ -22,6 +22,7 @@ public class OrgMyPageResponseDTO {
     private String oEmail;
     private String oDescription;
     private String oProfileImage;
+    private String oBusinessNumber;
 
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime createdAt;
