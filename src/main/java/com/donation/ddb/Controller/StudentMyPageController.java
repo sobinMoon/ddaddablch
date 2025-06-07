@@ -2,6 +2,7 @@ package com.donation.ddb.Controller;
 
 
 import com.donation.ddb.Domain.Exception.DataNotFoundException;
+import com.donation.ddb.Dto.Request.StudentInfoUpdatePwdDTO;
 import com.donation.ddb.Dto.Request.StudentInfoUpdateRequestDTO;
 import com.donation.ddb.Dto.Response.StudentMyPageResponseDTO;
 import com.donation.ddb.Service.MyPageService.StudentMyPageService;
@@ -63,6 +64,23 @@ public class StudentMyPageController {
         log.info("컨트롤러에서 받은 닉네임: {}", updateDto != null ? updateDto.getNickname(): "null");
         try {
             String result = studentMyPageService.updateProfile(updateDto, profileImage);
+            return ResponseEntity.ok(result);
+        } catch (IllegalArgumentException e) {
+            log.error("프로필 업데이트 실패: {}", e.getMessage());
+            return ResponseEntity.badRequest().body(e.getMessage());
+        } catch (Exception e) {
+            log.error("프로필 업데이트 중 오류 발생", e);
+            return ResponseEntity.internalServerError().body("프로필 업데이트에 실패했습니다.");
+        }
+    }
+
+    @PutMapping("/update/pwd")
+    public ResponseEntity<String> updatePwd(
+            @Valid @RequestPart(value = "updateInfo", required = false) StudentInfoUpdatePwdDTO updateDto,
+            @RequestPart(value = "profileImage", required = false) MultipartFile profileImage) {
+
+        try {
+            String result = studentMyPageService.updateProfilepwd(updateDto, profileImage);
             return ResponseEntity.ok(result);
         } catch (IllegalArgumentException e) {
             log.error("프로필 업데이트 실패: {}", e.getMessage());
