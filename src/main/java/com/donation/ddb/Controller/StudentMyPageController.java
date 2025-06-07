@@ -59,7 +59,8 @@ public class StudentMyPageController {
     public ResponseEntity<String> updateProfile(
             @Valid @RequestPart(value = "updateInfo", required = false) StudentInfoUpdateRequestDTO updateDto,
             @RequestPart(value = "profileImage", required = false) MultipartFile profileImage) {
-
+        log.info("컨트롤러에서 받은 updateDto: {}", updateDto);
+        log.info("컨트롤러에서 받은 닉네임: {}", updateDto != null ? updateDto.getNickname(): "null");
         try {
             String result = studentMyPageService.updateProfile(updateDto, profileImage);
             return ResponseEntity.ok(result);

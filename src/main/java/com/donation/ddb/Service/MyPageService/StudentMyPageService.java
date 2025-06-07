@@ -125,11 +125,18 @@ public class StudentMyPageService {
     public String updateProfile(StudentInfoUpdateRequestDTO updateDto, MultipartFile profileImage) {
         StudentUser student = getCurrentStudent();
         boolean hasChanges = false;
+        log.info("닉네임 업데이트: 사용자ID={}, 기존 닉네임={}", student.getSId(),student.getSNickname());
 
+        // 🔥 디버깅 로그 추가
+        log.info("updateDto is null? {}", updateDto == null);
+        if (updateDto != null) {
+            log.info("updateDto.getSNickname(): '{}'", updateDto.getNickname());
+            log.info("StringUtils.hasText result: {}", StringUtils.hasText(updateDto.getNickname()));
+        }
         // 닉네임 수정 (중복 체크 포함,null공백 아닌지 확인)
-        if (updateDto != null && StringUtils.hasText(updateDto.getSNickname())) {
-            String newNickname = updateDto.getSNickname().trim();
-
+        if (updateDto != null && StringUtils.hasText(updateDto.getNickname())) {
+            String newNickname = updateDto.getNickname().trim();
+            log.info("닉네임 업데이트:여기옴");
             // 현재 닉네임과 다른 경우에만 중복 체크
             if (!newNickname.equals(student.getSNickname())) {
                 if (studentUserRepository.findBysNickname(newNickname).isPresent()) {
