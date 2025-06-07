@@ -39,6 +39,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/v1/posts")
@@ -70,7 +71,7 @@ public class PostController {
 
     @PostMapping(value = "")
     public ApiResponse<?> addPost(
-            @RequestPart(name="request", value = "request") @Valid PostRequestDto.JoinDto request,
+            @RequestPart(name = "request", value = "request") @Valid PostRequestDto.JoinDto request,
             @RequestPart(value = "image") MultipartFile image,
             @AuthenticationPrincipal CustomUserDetails userDetails
     ) throws IOException {
@@ -93,7 +94,7 @@ public class PostController {
 
     @PostMapping("/{postId}/likes")
     public ApiResponse<?> addPostLike(
-            @PathVariable(value="postId") @ExistPost Long postId,
+            @PathVariable(value = "postId") @ExistPost Long postId,
             @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
         if (userDetails == null) {
@@ -113,7 +114,7 @@ public class PostController {
 
     @PostMapping("/{postId}/comments")
     public ApiResponse<?> addPostComment(
-            @PathVariable(value="postId") @ExistPost Long postId,
+            @PathVariable(value = "postId") @ExistPost Long postId,
             @RequestBody @Valid PostCommentRequestDto.JoinDto request,
             @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
@@ -126,7 +127,6 @@ public class PostController {
         }
 
         String email = userDetails.getUsername();
-
 
         PostComment postComment = postCommentCommandService.addPostComment(request, postId, email);
         // 알림 생성 코드 추가
@@ -159,8 +159,8 @@ public class PostController {
 
     @PostMapping("/{postId}/comments/{commentId}/likes")
     public ApiResponse<?> addPostCommentLike(
-            @PathVariable(value="postId") @ExistPost Long postId,
-            @PathVariable(value="commentId") Long commentId,
+            @PathVariable(value = "postId") @ExistPost Long postId,
+            @PathVariable(value = "commentId") Long commentId,
             @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
         if (userDetails == null) {
@@ -195,16 +195,13 @@ public class PostController {
     @GetMapping("/{postId}")
     public ApiResponse<PostResponseDto.DetailDto> getPostDetail(
             @AuthenticationPrincipal CustomUserDetails userDetails,
-            @PathVariable(value="postId") @ExistPost Long postId
+            @PathVariable(value = "postId") @ExistPost Long postId
     ) {
-        Boolean liked = false;
-
-        log.info("userNames: {}", userDetails != null ? userDetails.getUsername() : "No user authenticated");
-        if (userDetails != null && userDetails.isStudent()) {
-            log.info("User is authenticated as student: {}", userDetails.getUsername());
-            String email = userDetails.getUsername();
-            liked = postLikeQueryService.existsByPostAndStudentUser(postId, email);
-        }
+        Boolean liked = Optional.ofNullable(userDetails)
+                .filter(CustomUserDetails::isStudent)
+                .map(CustomUserDetails::getUsername)
+                .map(email -> postLikeQueryService.existsByPostAndStudentUser(postId, email))
+                .orElse(false);
 
         log.info("liked status for post {}: {}", postId, liked);
 
@@ -215,13 +212,13 @@ public class PostController {
 
     @GetMapping("/{postId}/comments")
     public ApiResponse<List<PostCommentResponseDto.ListDto>> getPostCommentList(
-            @PathVariable(value="postId") @ExistPost Long postId,
+            @PathVariable(value = "postId") @ExistPost Long postId,
             @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
-        String email = null;
-        if (userDetails != null && userDetails.isStudent()) {
-            email = userDetails.getUsername();
-        }
+        String email = Optional.ofNullable(userDetails)
+                .filter(CustomUserDetails::isStudent)
+                .map(CustomUserDetails::getUsername)
+                .orElse(null);
 
         List<PostCommentResponseDto.ListDto> postCommentList = postCommentQueryService.getPostCommentList(email, postId);
 
@@ -230,7 +227,7 @@ public class PostController {
 
     @DeleteMapping("/{postId}")
     public ApiResponse<?> deletePost(
-            @PathVariable(value="postId") @ExistPost Long postId,
+            @PathVariable(value = "postId") @ExistPost Long postId,
             @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
         Post post = postQueryService.findPostByPId(postId);
@@ -242,8 +239,6 @@ public class PostController {
         } else if (!userDetails.getUsername().equals(post.getStudentUser().getSEmail())) {
             throw new CampaignHandler(ErrorStatus.POST_DELETE_FORBIDDEN);
         }
-
-        String email = userDetails.getUsername();
 
         postCommandService.deletePost(postId);
 

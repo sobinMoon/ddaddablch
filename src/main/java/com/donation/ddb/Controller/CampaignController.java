@@ -201,19 +201,17 @@ public class CampaignController {
 
     @PostMapping(value = "")
     public ApiResponse<?> addCampaign(
-            @RequestPart(value="request", name="request") @Valid CampaignRequestDto.JoinDto request,
+            @RequestPart(value = "request", name = "request") @Valid CampaignRequestDto.JoinDto request,
             @RequestPart(value = "image") MultipartFile image,
             @AuthenticationPrincipal CustomUserDetails userDetails
     ) throws IOException {
-        String email = null;
 
         if (userDetails == null) {
             throw new CampaignHandler(ErrorStatus._UNAUTHORIZED);
         } else if (!userDetails.isOrganization()) {
             throw new CampaignHandler(ErrorStatus._FORBIDDEN);
-        } else {
-            email = userDetails.getUsername();
         }
+        String email = userDetails.getUsername();
 
         request.setImageUrl("default.png");
         Campaign campaign = campaignCommandService.addCampaign(request, email);
@@ -292,9 +290,6 @@ public class CampaignController {
             throw new CampaignHandler(ErrorStatus._FORBIDDEN);
         }
 
-        log.info("userDetails: {}", userDetails);
-        log.info("email: {}", userDetails.getUsername());
-
         String email = userDetails.getUsername();
 
         CampaignComment newComment = campaignCommentCommandService.addComment(
@@ -336,7 +331,7 @@ public class CampaignController {
     @PostMapping(value = "/{cId}/updates", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ApiResponse<?> addCampaignUpdate(
             @ExistCampaign @PathVariable(value = "cId") Long cId,
-            @RequestPart(value="request", name="request") @Valid CampaignUpdateRequestDto.JoinDto request,
+            @RequestPart(value = "request", name = "request") @Valid CampaignUpdateRequestDto.JoinDto request,
             @RequestPart(value = "image") MultipartFile image,
             @AuthenticationPrincipal CustomUserDetails userDetails
     ) throws IOException {
@@ -346,8 +341,6 @@ public class CampaignController {
             throw new CampaignHandler(ErrorStatus._UNAUTHORIZED);
         } else if (!userDetails.isOrganization() ||
                 !campaign.getOrganizationUser().getOEmail().equals(userDetails.getUsername())) {
-            log.info("User email: {}", userDetails.getUsername());
-            log.info("Campaign organization email: {}", campaign.getOrganizationUser().getOEmail());
             throw new CampaignHandler(ErrorStatus._FORBIDDEN);
         }
 
