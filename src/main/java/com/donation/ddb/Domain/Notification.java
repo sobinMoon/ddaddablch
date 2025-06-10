@@ -35,6 +35,6 @@ public class Notification extends BaseEntity{
     private Boolean isRead = false;
 
     // 클릭시 이동할 URL
-    private String redirectUrl;     // "/post/123", "/donation/456"
+    private Long redirectUrl;     // "/post/123", "/donation/456"
 }
 

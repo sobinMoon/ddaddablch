@@ -32,7 +32,7 @@ public class QNotification extends EntityPathBase<Notification> {
 
     public final EnumPath<com.donation.ddb.Domain.Enums.NotificationType> notificationType = createEnum("notificationType", com.donation.ddb.Domain.Enums.NotificationType.class);
 
-    public final StringPath redirectUrl = createString("redirectUrl");
+    public final NumberPath<Long> redirectUrl = createNumber("redirectUrl", Long.class);
 
     public final NumberPath<Long> relatedDonationId = createNumber("relatedDonationId", Long.class);
 

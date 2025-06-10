@@ -215,7 +215,7 @@ public class OrgSubscriptionService {
                 .notificationEnabled(subscription.getNotificationEnabled())
                 .totalCampaignCount(totalCampaigns)
                 .activeCampaignCount(activeCampaigns)
-                .subscribedAt(subscription.getCreatedAt())
+                .subscribedAt(subscription.getUpdatedAt())
                 .build();
     }
 }

@@ -46,14 +46,12 @@ public class DonationService {
 
         log.info("기부 기록 저장 시작 - Hash: {} Amount: {} ETH ",hash,amount);
         try{
-            // 중복 트랜잭션인거 확인 필요하나? -> 컨트롤러 앞에서 isduplicate함수 호출되면 굳이
-
             // 기부자 조회하기
             StudentUser studentUser=studentUserRepository.findById(userId)
-                 .orElseThrow(() -> {
-                     log.error("캠페인을 찾을 수 없습니다. ID: {}", campaignId);
-                     return new IllegalArgumentException("존재하지 않는 캠페인입니다: " + campaignId);
-                 });
+                    .orElseThrow(() -> {
+                        log.error("학생을 찾을 수 없습니다. ID: {}", userId); // 🔥 로그 메시지 수정
+                        return new IllegalArgumentException("존재하지 않는 학생입니다: " + userId);
+                    });
 
             // 캠페인 조회하기
             Campaign campaign = campaignRepository.findById(campaignId)
@@ -71,34 +69,27 @@ public class DonationService {
                     .message(message)
                     .studentUser(studentUser)
                     .campaign(campaign)
-                    .status(DonationStatus.SUCCESS) // 초기 상태는 PENDING -> 그니까 기부하기 전에 메타마스크 인증하고 해야되나
+                    .status(DonationStatus.SUCCESS)
                     .build();
+
             //DB 에 저장하기
             Donation savedDonation=donationRepository.save(newDonation);
 
-            //db에 저장되고 나서 c_current_amount랑 donate_count 추가하기
-            // 🔥 캠페인 정보 업데이트 (기부 횟수와 현재 모금액)
+            //캠페인 정보 업데이트 (기부 횟수와 현재 모금액)
             campaign.addDonateCount();
             campaign.addCurrentAmount(amount);
-            campaignRepository.save(campaign); // 캠페인 업데이트 저장
+            campaignRepository.save(campaign);
 
-            // 기부 완료 알림 생성
+            // 🔥 기부 완료 알림 생성 (새로운 방식으로 한 번만!)
             notificationService.createDonationCompleteNotification(
-                    studentUser.getSId(),
-                    campaign.getCName(),
-                    savedDonation.getDId()
-            );
-
-            // 기부 완료 알림 생성
-            notificationService.createDonationCompleteNotification(
-                    studentUser.getSId(),        // 기부한 학생 ID
-                    campaign.getCName(),        // 캠페인 이름
-                    savedDonation.getDId()      // 기부 ID
+                    studentUser.getSId(),       // studentId
+                    campaign.getCId(),          // campaignId (🎯 추가!)
+                    campaign.getCName(),        // campaignName
+                    savedDonation.getDId()      // donationId
             );
 
             log.info("기부 기록 저장 완료 - ID: {}, Hash: {}", savedDonation.getDId(), hash);
             return savedDonation;
-
 
         } catch (Exception e) {
             log.error("기부 기록 저장 중 오류 발생: {}", e.getMessage(), e);

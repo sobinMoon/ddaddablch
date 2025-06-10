@@ -64,7 +64,7 @@ public class NotificationService {
                 .content(commenterName + "님이 회원님의 게시글에 댓글을 달았습니다")
                 .notificationType(NotificationType.POST_COMMENT)
                 .relatedPostId(postId)
-                .redirectUrl("api/v1/posts/" + postId)
+                .redirectUrl(postId)
                 .isRead(false)
                 .build();
 
@@ -72,19 +72,45 @@ public class NotificationService {
         log.info("댓글 알림 생성: 사용자 {} -> 게시글 {}", postAuthorId, postId);
     }
 
-    // 기부 완료 알림 생성
-    public void createDonationCompleteNotification(Long studentId, String campaignName, Long donationId) {
+    // 🔥 새로운 메서드 - 캠페인 ID를 직접 받음 (권장)
+    public void createDonationCompleteNotification(Long studentId, Long campaignId, String campaignName, Long donationId) {
         Notification notification = Notification.builder()
                 .studentId(studentId)
                 .title("기부가 완료되었습니다")
                 .content(campaignName + " 캠페인에 기부가 성공적으로 완료되었습니다")
                 .notificationType(NotificationType.DONATION_COMPLETE)
                 .relatedDonationId(donationId)
-                .redirectUrl("/api/v1/campaigns/"+campaignQueryService.findBycName(campaignName).getCId())
+                .redirectUrl(campaignId) // 🎯 ID 직접 사용!
                 .isRead(false)
                 .build();
 
         notificationRepository.save(notification);
-        log.info("기부 완료 알림 생성: 사용자 {} -> 기부 {}", studentId, donationId);
+        log.info("기부 완료 알림 생성: 사용자 {} -> 캠페인 {} -> 기부 {}", studentId, campaignId, donationId);
     }
-}
+
+    // 기존 메서드 호환성 유지 (deprecated)
+    @Deprecated
+    public void createDonationCompleteNotification(Long studentId, String campaignName, Long donationId) {
+        Long campaignId = null; // 🔥 미리 선언
+
+        try {
+            campaignId = campaignQueryService.findBycName(campaignName).getCId();
+            createDonationCompleteNotification(studentId, campaignId, campaignName, donationId);
+        } catch (Exception e) {
+            log.warn("캠페인 조회 실패로 기본 알림 생성: {}", campaignName, e);
+
+            Notification notification = Notification.builder()
+                    .studentId(studentId)
+                    .title("기부가 완료되었습니다")
+                    .content(campaignName + " 캠페인에 기부가 성공적으로 완료되었습니다")
+                    .notificationType(NotificationType.DONATION_COMPLETE)
+                    .relatedDonationId(donationId)
+                    .redirectUrl(campaignId) // 🔥 이제 campaignId 사용 가능! (null일 수 있음)
+                    .isRead(false)
+                    .build();
+
+            notificationRepository.save(notification);
+            log.info("기부 완료 알림 생성 (폴백): 사용자 {} -> 기부 {}", studentId, donationId);
+        }
+    }
+    }

@@ -32,7 +32,6 @@ public class OrgMyPageService {
     private final CampaignRepository campaignRepository;
     private final PasswordEncoder passwordEncoder;
 
-
     // 토큰으로 현재 로그인한 조직의 마이페이지 조회
     public OrgMyPageResponseDTO getMyPageInfo() {
         try {

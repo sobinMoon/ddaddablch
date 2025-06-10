@@ -64,7 +64,7 @@ public class OrgMyPageController {
         }
     }
 
-    // 🔥 조직 비밀번호 업데이트
+    // 조직 비밀번호 업데이트
     @PutMapping("/api/v1/org/update/pwd")
     public ResponseEntity<String> updateOrganizationPassword(
             @Valid @RequestPart(value = "updateInfo", required = false) OrgInfoUpdatePwdDTO updateDto
