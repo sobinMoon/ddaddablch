@@ -9,6 +9,7 @@ import com.donation.ddb.Dto.Request.*;
 import com.donation.ddb.Dto.Response.CampaignResponse;
 import com.donation.ddb.Dto.Response.OrganizationResponse;
 import com.donation.ddb.ImageStore;
+import com.donation.ddb.Repository.NotificationRepository;
 import com.donation.ddb.Repository.projection.CampaignWithUpdate;
 import com.donation.ddb.Service.CampaignCommentLikeService.CampaignCommentLikeService;
 import com.donation.ddb.Service.CampaignCommentService.CampaignCommentCommandService;
@@ -21,6 +22,7 @@ import com.donation.ddb.Service.CampaignSpendingService.CampaignSpendingCommandS
 import com.donation.ddb.Service.CampaignSpendingService.CampaignSpendingQueryService;
 import com.donation.ddb.Service.CampaignUpdateService.CampaignUpdateCommandService;
 import com.donation.ddb.Service.DonationService.DonationService;
+import com.donation.ddb.Service.NotificationService;
 import com.donation.ddb.Service.OrganizationUserService.OrganizationUserQueryService;
 import com.donation.ddb.apiPayload.ApiResponse;
 import com.donation.ddb.apiPayload.code.status.ErrorStatus;
@@ -83,6 +85,8 @@ public class CampaignController {
     @Autowired
     private DonationService donationService;
 
+    @Autowired
+    private NotificationService notificationService;
 
     @GetMapping("home")
     public ApiResponse<?> campaignList() {
@@ -224,6 +228,36 @@ public class CampaignController {
         List<CampaignPlanRequestDto.JoinDto> campaignPlans = request.getPlans();
 
         campaignPlanCommandService.addCampaignPlan(campaignPlans, campaign);
+
+        // 새 캠페인 알림 전송
+        try {
+            OrganizationUser organizationUser = campaign.getOrganizationUser();
+            if (organizationUser != null) {
+
+                // 🔥 이 줄들을 추가
+                log.info("=== 디버깅 시작 ===");
+                log.info("단체명: " + organizationUser.getOName());
+                log.info("캠페인명: " + campaign.getCName());
+                log.info("=================");
+
+
+                notificationService.sendNewCampaignNotifications(
+                        organizationUser.getOId(),          // 단체 ID
+                        campaign.getCId(),                 // 캠페인 ID
+                        campaign.getCName(),               // 캠페인 이름
+                        organizationUser.getOName()        // 단체 이름
+                );
+
+                log.info("알림 전송 완료!"); // 🔥 추가
+                log.info("새 캠페인 알림 전송 완료: {} ({})", campaign.getCName(), campaign.getCId());
+            } else{
+                log.info("organizationUser가 null입니다!"); // 🔥 추가
+            }
+        } catch (Exception e) {
+            log.error("새 캠페인 알림 전송 실패: {}", campaign.getCName(), e);
+            System.out.println("알림 전송 실패: " + e.getMessage()); // 🔥 추가
+            // 알림 실패해도 캠페인 생성은 성공으로 처리
+        }
 
         return ApiResponse.onSuccess(CampaignConverter.toJoinResult(campaign));
     }
@@ -374,7 +408,31 @@ public class CampaignController {
             throw new CampaignHandler(ErrorStatus._FORBIDDEN);
         }
 
+        // 🔥 기존 상태 저장
+        CampaignStatusFlag oldStatus = campaign.getCStatusFlag();
+
         campaignCommandService.updateStatusByUser(campaign, request.getStatus());
+
+        // 🔥 캠페인 완료 시 알림 전송
+        try {
+            if (oldStatus != CampaignStatusFlag.COMPLETED &&
+                    campaign.getCStatusFlag() == CampaignStatusFlag.COMPLETED) {
+
+                OrganizationUser organizationUser = campaign.getOrganizationUser();
+                if (organizationUser != null) {
+                    notificationService.sendCampaignCompletedNotifications(
+                            organizationUser.getOId(),
+                            campaign.getCId(),
+                            campaign.getCName(),
+                            organizationUser.getOName()
+                    );
+                    log.info("캠페인 완료 알림 전송 완료: {} ({})", campaign.getCName(), campaign.getCId());
+                }
+            }
+        } catch (Exception e) {
+            log.error("캠페인 완료 알림 전송 실패: {}", campaign.getCName(), e);
+            // 알림 실패해도 상태 업데이트는 성공으로 처리
+        }
 
         return ApiResponse.onSuccess(CampaignConverter.toJoinResult(campaign));
     }
