@@ -71,6 +71,11 @@ public class StudentUser {
     @Column(nullable=false)
     private Role role; //ROLE_STUDENT
 
+
+    @OneToMany(mappedBy = "studentUser", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
+    private List<StudentNFT> nftList;
+
     //여러 지갑 주소 (JSON 배열로 저장)
     @Column(columnDefinition="TEXT")
     private String walletAddresses; // JSON: ["0x123...", "0x456..."]

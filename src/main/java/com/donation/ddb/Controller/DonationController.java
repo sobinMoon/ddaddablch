@@ -275,12 +275,14 @@
 package com.donation.ddb.Controller;
 
 import com.donation.ddb.Domain.Campaign;
+import com.donation.ddb.Domain.CustomUserDetails;
 import com.donation.ddb.Domain.Donation;
 import com.donation.ddb.Domain.DonationStatus;
 import com.donation.ddb.Domain.Exception.DataNotFoundException;
 import com.donation.ddb.Dto.Request.DonationRecordRequestDTO;
 import com.donation.ddb.Dto.Request.DonationRequestDTO;
 import com.donation.ddb.Dto.Request.DonationStatusUpdateDTO;
+import com.donation.ddb.Dto.Request.NftStoreRequestDTO;
 import com.donation.ddb.Dto.Response.DonationResponseDTO;
 import com.donation.ddb.Repository.OrganizationUserRepository;
 import com.donation.ddb.Service.DonationService.BlockchainService;
@@ -295,11 +297,14 @@ import org.springframework.cglib.core.Block;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.web3j.utils.Convert;
 
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.Collections;
@@ -321,11 +326,11 @@ public class DonationController {
     //프론트에서 메타마스크 지갑 인증 완료 하면 호출하도록
     @PostMapping("/record")
     //@PreAuthorize("hasRole('STUDENT')")
-    public ResponseEntity<?> recordDonation(@Valid @RequestBody DonationRecordRequestDTO request, BindingResult bindingResult){
+    public ResponseEntity<?> recordDonation(@Valid @RequestBody DonationRecordRequestDTO request, BindingResult bindingResult) {
         log.info("🚀 기부 기록 API 호출 시작");
         log.info("📝 요청 데이터: {}", request);
 
-        try{
+        try {
             if (bindingResult.hasErrors()) {
                 log.warn("❌ 유효성 검증 실패");
                 Map<String, String> errorMap = new HashMap<>();
@@ -344,7 +349,7 @@ public class DonationController {
             String transactionHash = request.getTransactionHash();
             log.info("🔍 트랜잭션 해시 검증: {}", transactionHash);
 
-            if(transactionHash == null || transactionHash.trim().isEmpty()){
+            if (transactionHash == null || transactionHash.trim().isEmpty()) {
                 log.error("❌ 트랜잭션 해시가 없음");
                 return ResponseEntity.status(ErrorStatus.DONATION_MISSING_TRANSACTION_HASH.getHttpStatus())
                         .body(ApiResponse.onFailure(
@@ -440,7 +445,7 @@ public class DonationController {
         }
     }
 
-    // 🔍 기부 기록 조회 엔드포인트 추가 (디버깅용)
+    // 기부 기록 조회 엔드포인트 추가 (디버깅용)
     @GetMapping("/list")
     public ResponseEntity<?> getDonationList() {
         try {
@@ -455,11 +460,11 @@ public class DonationController {
         }
     }
 
-    // 🔍 특정 트랜잭션 해시로 기부 기록 조회 (디버깅용)
+    // 특정 트랜잭션 해시로 기부 기록 조회 (디버깅용)
     @GetMapping("/transaction/{hash}")
     public ResponseEntity<?> getDonationByHash(@PathVariable("hash") String transactionHash) {
         try {
-            log.info("🔍 트랜잭션 해시로 기부 기록 조회: {}", transactionHash);
+            log.info("트랜잭션 해시로 기부 기록 조회: {}", transactionHash);
             boolean exists = donationService.isDuplicateTransaction(transactionHash);
 
             Map<String, Object> result = new HashMap<>();
@@ -479,8 +484,8 @@ public class DonationController {
     @PatchMapping("/status")
     public ResponseEntity<?> updateDonationStatus(
             @RequestBody @Valid DonationStatusUpdateDTO request
-    ){
-        try{
+    ) {
+        try {
             String txHash = request.getTransactionHash();
             String newStatus = request.getStatus();
 
@@ -495,7 +500,7 @@ public class DonationController {
 
             try {
                 statusEnum = DonationStatus.valueOf(newStatus.toUpperCase()); // 문자열 -> enum
-            }catch (IllegalArgumentException e) {
+            } catch (IllegalArgumentException e) {
                 return ResponseEntity.status(ErrorStatus.DONATION_INVALID_STATUS.getHttpStatus())
                         .body(ApiResponse.onFailure(
                                 ErrorStatus.DONATION_INVALID_STATUS.getCode(),
@@ -507,7 +512,7 @@ public class DonationController {
             Donation updated = donationService.updatedDonationStatus(txHash, statusEnum);
 
             return ResponseEntity.ok(ApiResponse.of(SuccessStatus.DONATION_STATUS_UPDATED, null));
-        }catch (DataNotFoundException e) {
+        } catch (DataNotFoundException e) {
             log.error("기부 기록을 찾을 수 없음: ", e);
             return ResponseEntity.status(ErrorStatus.DONATION_NOT_FOUND.getHttpStatus())
                     .body(ApiResponse.onFailure(
@@ -526,7 +531,7 @@ public class DonationController {
 
     //수혜자 잔액 조회
     @GetMapping("/balance/{address}")
-    public ResponseEntity<Map<String,String>> getBalance(@PathVariable("address") String address) {
+    public ResponseEntity<Map<String, String>> getBalance(@PathVariable("address") String address) {
         try {
             BigInteger balance = blockchainService.getBalance(address);
             BigDecimal ethbalance = new BigDecimal(balance).divide(BigDecimal.TEN.pow(18));
@@ -542,4 +547,8 @@ public class DonationController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
         }
     }
+
+    // 토큰으로 기부 nft 저장
+
+
 }

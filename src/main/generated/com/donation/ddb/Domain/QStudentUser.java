@@ -26,6 +26,8 @@ public class QStudentUser extends EntityPathBase<StudentUser> {
 
     public final ListPath<Donation, QDonation> donationList = this.<Donation, QDonation>createList("donationList", Donation.class, QDonation.class, PathInits.DIRECT2);
 
+    public final ListPath<StudentNFT, QStudentNFT> nftList = this.<StudentNFT, QStudentNFT>createList("nftList", StudentNFT.class, QStudentNFT.class, PathInits.DIRECT2);
+
     public final ListPath<PostCommentLike, QPostCommentLike> postCommentLikeList = this.<PostCommentLike, QPostCommentLike>createList("postCommentLikeList", PostCommentLike.class, QPostCommentLike.class, PathInits.DIRECT2);
 
     public final ListPath<PostComment, QPostComment> postCommentList = this.<PostComment, QPostComment>createList("postCommentList", PostComment.class, QPostComment.class, PathInits.DIRECT2);

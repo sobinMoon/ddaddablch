@@ -1,5 +1,7 @@
 package com.donation.ddb.Service.MyPageService;
 
+import com.donation.ddb.Domain.Exception.DataNotFoundException;
+import com.donation.ddb.Domain.StudentNFT;
 import com.donation.ddb.Domain.StudentUser;
 import com.donation.ddb.Dto.Request.StudentInfoUpdatePwdDTO;
 import com.donation.ddb.Dto.Request.StudentInfoUpdateRequestDTO;
@@ -10,6 +12,7 @@ import com.donation.ddb.ImageStore;
 import com.donation.ddb.Repository.DonationRepository.DonationRepository;
 import com.donation.ddb.Repository.PostCommentRepository.PostCommentRepository;
 import com.donation.ddb.Repository.PostRepository.PostRepository;
+import com.donation.ddb.Repository.StudentNFTRepository;
 import com.donation.ddb.Repository.StudentUserRepository;
 import com.donation.ddb.Service.NotificationService;
 import lombok.RequiredArgsConstructor;
@@ -22,6 +25,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -38,6 +42,7 @@ public class StudentMyPageService {
     private final PostCommentRepository postCommentRepository;
     private final NotificationService notificationService;
     private final PasswordEncoder passwordEncoder;
+    private final StudentNFTRepository studentNFTRepository;
 
     public StudentMyPageResponseDTO getMyPageInfo() {
 
@@ -280,4 +285,51 @@ public class StudentMyPageService {
             throw new RuntimeException("프로필 이미지 업데이트에 실패했습니다.", e);
         }
     }
+
+    // storeNFTImage
+
+    /**
+     * NFT 이미지 저장
+     */
+    public String storeNFTImage(Long studentId, MultipartFile image) throws IOException {
+        // 학생 존재 확인
+        StudentUser student = studentUserRepository.findById(studentId)
+                .orElseThrow(() -> new DataNotFoundException("학생을 찾을 수 없습니다."));
+
+        // ImageStore를 사용하여 이미지 저장
+        String imageUrl = ImageStore.storeImage(image, "nft/" + studentId + "/");
+
+        // 중복 이미지 URL 체크 (선택사항)
+        if (studentNFTRepository.existsByImageUrl(imageUrl)) {
+            throw new IllegalArgumentException("이미 존재하는 이미지입니다.");
+        }
+
+        // StudentNFT 엔티티 생성 및 저장
+        StudentNFT studentNFT = StudentNFT.builder()
+                .studentUser(student)
+                .imageUrl(imageUrl)
+                .build();
+
+        studentNFTRepository.save(studentNFT);
+
+        log.info("NFT 이미지 저장 완료 - 학생 ID: {}, 파일: {}", studentId, imageUrl);
+        return "NFT 이미지가 성공적으로 저장되었습니다.";
+    }
+
+    /**
+     * 학생의 NFT 이미지 URL 목록 조회
+     */
+    public List<String> getNFTImages(Long studentId) {
+        // 학생 존재 확인 및 조회
+        StudentUser student = studentUserRepository.findById(studentId)
+                .orElseThrow(() -> new DataNotFoundException("학생을 찾을 수 없습니다."));
+
+        // 바뀐 메서드 사용
+        List<StudentNFT> nftList = studentNFTRepository.findByStudentUserOrderByCreatedAtDesc(student);
+
+        return nftList.stream()
+                .map(StudentNFT::getImageUrl)
+                .collect(Collectors.toList());
+    }
+
 }

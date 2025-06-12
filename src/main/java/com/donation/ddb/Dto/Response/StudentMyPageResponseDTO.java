@@ -39,6 +39,9 @@ public class StudentMyPageResponseDTO {
     // 알림 정보
     private List<Notification> unreadNotifications; // 읽지 않은 알림 수
 
+    // nft 내역
+    private List<String> nftImageUrls;          // 단순 URL 리스트
+
     // 내부 DTO 클래스들
     @Getter
     @Builder
