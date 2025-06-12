@@ -4,6 +4,7 @@ package com.donation.ddb.Domain;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import org.springframework.data.annotation.CreatedDate;
 
 import java.time.LocalDateTime;
 
@@ -31,6 +32,7 @@ public class AuthEvent {
     private String signature;
 
     //검증 성공 시간
+    @CreatedDate
     private LocalDateTime createdAt;
 
     private String message;
@@ -41,6 +43,7 @@ public class AuthEvent {
         String message="Wallet verification for ddb\n"+
                 "Nonce: "+this.nonce+"\n"
                 +"Timestamp"+this.createdAt;
+        //String prefix = "\u0019Ethereum Signed Message:\n" + message.length();
         this.setMessage(message);
         return message;
     }
